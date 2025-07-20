@@ -9,7 +9,7 @@ We consider transactions during the following events:
 4. *Wages and taxes payment*: Firms pay wages. Households, banks and firms pay taxes.
 6. *Profit distribution*: Firms and banks pay dividends. Central bank transfer profit.
 5. *Public expenditures*: Government pay wages and doles.
-6. *Goods markets matching*: Firms produce goods. Households consume goods.
+6. *Goods markets matching*: Firms produce and export goods. Households consume and import goods.
 6. *Financial debt repayments*: Government repay bonds. Firms repay loans. Banks pay deposit's interests and repay advances.
 6. *Bonds market matching*: Government issue bonds. Banks buy bonds. Central Bank buy residuals bonds.
 6. *Deposits market matching*: Firms and Households place deposits.
@@ -30,28 +30,20 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Entrepreunarial Profits}
-            & & &  
-            & & & 
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & & & -\Delta M_{Ft}
-            & & +\Delta M_{Bt} & 
-            & & & 0 \\
+            & & & & & & & 0 \\
+        \text{Var. of Cash Money} 
+            & & -\Delta H_{Ft} & +\Delta H_{Bt} & & & & 0 \\
         \text{Var. of deposits (formal)} 
-            & & & +\Delta D_{F1t}
-            & & -\Delta D_{B1t} & 
-            & & & 0 \\
+            & & +\Delta D_{F1t} & -\Delta D_{B1t} & & & & 0 \\
         \text{Var. of deposits (informal)} 
-            & & & +\Delta D_{F2t}
-            & & -\Delta D_{B2t} & 
-            & & & 0 \\
+            & & +\Delta D_{F2t} & -\Delta D_{B2t} & & & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -64,28 +56,20 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Entrepreunarial Profits}
-            & & &  
-            & & & 
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & -\Delta M_{Ht} & &
-            & & +\Delta M_{Bt} & 
-            & & & 0 \\
+            & & & & & & & 0 \\
+        \text{Var. of Cash Money} 
+            & -\Delta H_{Ht} & & +\Delta H_{Bt} & & & & 0 \\
         \text{Var. of deposits (formal)} 
-            & +\Delta D_{H1t} & &
-            & & -\Delta D_{B1t} & 
-            & & & 0 \\
+            & +\Delta D_{H1t} & & -\Delta D_{B1t} & & & & 0 \\
         \text{Var. of deposits (informal)} 
-            & +\Delta D_{H2t} & &
-            & & -\Delta D_{B2t} & 
-            & & & 0 \\
+            & +\Delta D_{H2t} & & -\Delta D_{B2t} & & & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -101,28 +85,20 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Var. of advances} 
-            & & & 
-            & & & 
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & & & 
-            & & & 
-            & & & 0 \\
+            & & & & & & & 0 \\
+        \text{Var. of Cash Money} 
+            & & & & & & & 0 \\
         \text{Var. of loans (formal)} 
-            & & & +\Delta L_{F1t}
-            & & -\Delta L_{B1t} & 
-            & & & 0 \\
+            & & +\Delta L_{F1t} & -\Delta L_{B1t} & & & & 0 \\
         \text{Var. of deposits (formal)} 
-            & & & -\Delta D_{F1t}
-            & & +\Delta D_{B1t} & 
-            & & & 0 \\
+            & & -\Delta D_{F1t} & +\Delta D_{B1t} & & & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -134,28 +110,20 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Var. of advances} 
-            & & & 
-            & & & 
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & & & -\Delta M_{Ft}
-            & & +\Delta M_{Bt} & 
-            & & & 0 \\
+            & & & & & & & 0 \\
+        \text{Var. of Cash Money} 
+            & & -\Delta H_{Ft} & +\Delta H_{Bt} & & & & 0 \\
         \text{Var. of loans (informal)} 
-            & & & +\Delta L_{F2t}
-            & & -\Delta L_{B2t} & 
-            & & & 0 \\
+            & & +\Delta L_{F2t} & -\Delta L_{B2t} & & & & 0 \\
         \text{Var. of deposits (informal)} 
-            & & & 
-            & & & 
-            & & & 0 \\
+            & & & & & & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -167,28 +135,20 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Var. of advances} 
-            & & & 
-            & & +\Delta A_{Bt} & 
-            & & -\Delta A_{cbt} & 0 \\
-        \text{Var. of HP money} 
-            & & & 
-            & & -\Delta M_{Bt} & 
-            & & +\Delta M_{cbt} & 0 \\
+            & & & +\Delta A_{Bt} & & -\Delta A_{CBt} & & 0 \\
+        \text{Var. of Cash Money} 
+            & & & -\Delta H_{Bt} & & +\Delta H_{CBt} & & 0 \\
         \text{Var. of loans (formal)} 
-            & & & 
-            & & & 
-            & & & 0 \\
+            & & & & & & & 0 \\
         \text{Var. of deposits (formal)} 
-            & & & 
-            & & & 
-            & & & 0 \\
+            & & & & & & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -202,28 +162,20 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Wages (formal)} 
-            & +W_{H1t} & -W_{F1t} & 
-            & & & 
-            & & & 0 \\
+            & +W_{H1t} & -W_{F1t} & & & & & 0 \\
         \text{Entrepreunarial Profits}
-            & & +F_{Ft} & -F_{Ft}
-            & & & 
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & -\Delta M_{Ht} & & +\Delta M_{Ft} 
-            & & & 
-            & & & 0 \\
+            & & & & & & & 0 \\
+        \text{Var. of Cash Money} 
+            & -\Delta H_{Ht} & +\Delta H_{Ft} & & & & & 0 \\
         \text{Var. of deposits (formal)} 
-            & & & 
-            & & & 
-            & & & 0 \\
+            & & & & & & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -235,28 +187,20 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Wages (informal)} 
-            & +W_{H2t} & -W_{F2t} & 
-            & & & 
-            & & & 0 \\
+            & +W_{H2t} & -W_{F2t} & & & & & 0 \\
         \text{Entrepreunarial Profits}
-            & & +F_{Ft} & -F_{Ft}
-            & & & 
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & -\Delta M_{Ht} & & +\Delta M_{Ft}
-            & & & 
-            & & & 0 \\
+            & & & & & & & 0 \\
+        \text{Var. of Cash Money} 
+            & -\Delta H_{Ht} & +\Delta H_{Ft} & & & & & 0 \\
         \text{Var. of deposits (informal)} 
-            & & & 
-            & & & 
-            & & & 0 \\
+            & & & & & & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -268,28 +212,20 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Taxes} 
-            & -T_{Ht} & & 
-            & & & +T_{gt}
-            & & & 0 \\
+            & -T_{Ht} & & & +T_{Gt} & & & 0 \\
         \text{Entrepreunarial Profits}
-            & & & 
-            & & & 
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & +\Delta M_{Ht} & & 
-            & & & -\Delta M_{gt}
-            & & & 0 \\
+            & & & & & & & 0 \\
+        \text{Var. of Cash Money} 
+            & +\Delta H_{Ht} & & & -\Delta H_{Gt} & & & 0 \\
         \text{Var. of deposits (formal)} 
-            & & & 
-            & & & 
-            & & & 0 \\
+            & & & & & & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -301,28 +237,20 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Taxes} 
-            & & -T_{Ft} & 
-            & & & +T_{gt} 
-            & & & 0 \\
+            & & -T_{Ft} & & +T_{Gt} & & & 0 \\
         \text{Entrepreunarial Profits}
-            & & +T_{Ft} & -T_{Ft}
-            & & & 
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & & & + \Delta M_{Ft}
-            & & & -\Delta M_{gt}
-            & & & 0 \\
+            & & & & & & & 0 \\
+        \text{Var. of Cash Money} 
+            & & +\Delta H_{Ft} & & -\Delta H_{Gt} & & & 0 \\
         \text{Var. of deposits (formal)} 
-            & & & 
-            & & & 
-            & & & 0 \\
+            & & & & & & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -334,28 +262,20 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Taxes} 
-            & & & 
-            & -T_{Bt} & & +T_{gt}
-            & & & 0 \\
+            & & & -T_{Bt} & +T_{Gt} & & & 0 \\
         \text{Entrepreunarial Profits}
-            & & & 
-            & +T_{Bt} & -T_{Bt} & 
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & & & 
-            & & +\Delta M_{Bt} & - \Delta M_{gt}
-            & & & 0 \\
+            & & & & & & & 0 \\
+        \text{Var. of Cash Money} 
+            & & & +\Delta H_{Bt} & -\Delta H_{Gt} & & & 0 \\
         \text{Var. of deposits (formal)} 
-            & & & 
-            & & & 
-            & & & 0 \\
+            & & & & & & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -370,28 +290,20 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Entrepreunarial Profits}
-            & +F_{Ht}^d & & -F_{Ft}^d 
-            & & & 
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & -\Delta M_{Ht} & & +\Delta M_{Ft}
-            & & & 
-            & & & 0 \\
+            & +F_{Ht}^d & -F_{Ft}^d & & & & & 0 \\
+        \text{Var. of Cash Money} 
+            & -\Delta H_{Ht} & +\Delta H_{Ft} & & & & & 0 \\
         \text{Var. of deposits (formal)} 
-            & & & 
-            & & & 
-            & & & 0 \\
+            & & & & & & & 0 \\
         \text{Var. of deposits (informal)} 
-            & & & 
-            & & & 
-            & & & 0 \\
+            & & & & & & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -403,28 +315,20 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Entrepreunarial Profits}
-            & +F_{Ht}^d & & 
-            & & -F_{Bt}^d & 
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & -\Delta M_{Ht} & & 
-            & & +\Delta M_{Bt} & 
-            & & & 0 \\
+            & +F_{Ht}^d & & -F_{Bt}^d & & & & 0 \\
+        \text{Var. of Cash Money} 
+            & -\Delta H_{Ht} & & +\Delta H_{Bt} & & & & 0 \\
         \text{Var. of deposits (formal)} 
-            & & & 
-            & & & 
-            & & & 0 \\
+            & & & & & & & 0 \\
         \text{Var. of deposits (informal)} 
-            & & & 
-            & & & 
-            & & & 0 \\
+            & & & & & & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -436,28 +340,20 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Central Bank Profit}
-            & & & 
-            & & & +F_{gt}
-            & & -F_{cbt}^d & 0 \\
+            & & & & +F_{Gt} & -F_{CBt}^d & & 0 \\
         \text{Var. of advances} 
-            & & & 
-            & & & 
-            & & & 0 \\
+            & & & & & & & 0 \\
         \text{Var. of bonds} 
-            & & & 
-            & & & 
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & & & 
-            & & & -\Delta M_{gt}
-            & & +\Delta M_{cbt} & 0 \\
+            & & & & & & & 0 \\
+        \text{Var. of Cash Money} 
+            & & & & -\Delta H_{Gt} & +\Delta H_{CBt} & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -471,28 +367,20 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Wages (formal)} 
-            & +W_{Ht} & & 
-            & & & -W_{gt}
-            & & & 0 \\
+            & +W_{Ht} & & & -W_{Gt} & & & 0 \\
         \text{Entrepreunarial Profits}
-            & & & 
-            & & & 
-            & & & 0 \\
+            & & & & & & & 0 \\
         \text{Var. of bonds} 
-            & -\Delta M_{Ht} & & 
-            & & & +\Delta M_{gt}
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & & & 
-            & & & 
-            & & & 0 \\
+            & & & & & & & 0 \\
+        \text{Var. of Cash Money} 
+            & -\Delta H_{Ht} & & & +\Delta H_{Gt} & & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -504,28 +392,20 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Doles} 
-            & +G_{Ht}^D & & 
-            & & & -G_{gt}^D
-            & & & 0 \\
+            & +G_{Ht}^D & & & -G_{Gt}^D & & & 0 \\
         \text{Entrepreunarial Profits}
-            & & & 
-            & & & 
-            & & & 0 \\
+            & & & & & & & 0 \\
         \text{Var. of bonds} 
-            & & & 
-            & & & 
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & -\Delta M_{Ht} & & 
-            & & & +\Delta M_{gt}
-            & & & 0 \\
+            & & & & & & & 0 \\
+        \text{Var. of Cash Money} 
+            & -\Delta H_{Ht} & & & +\Delta H_{Gt} & & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -533,63 +413,75 @@ $$
 
 ## Goods markets matching
 
-Firms produce goods. 
-
-$$
-\begin{aligned}
-& \begin{array}{lcccccccc}
-    \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
-    \hline
-        \text{Consumption} 
-            & & & 
-            & & & 
-            & & & 0 \\
-        \text{Var. of inventories} 
-            & & +\Delta V_{Ft} & -\Delta V_{Ft}
-            & & & 
-            & & & 0 \\
-        \text{Entrepreunarial Profits}
-            & & -F_{Ft} & + F_{Ft}
-            & & & 
-            & & & 0 \\
-    \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-    \hline
-\end{array}
-\end{aligned}
-$$
-
 Households consume goods.
 
 $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Consumption} 
-            & -C_{Ht} & + Q_{Ft} & 
-            & & & 
-            & & & 0 \\
-        \text{Var. of inventories} 
-            & & -\Delta V_{Ft} & +\Delta V_{Ft}
-            & & & 
-            & & & 0 \\
+            & -C_{Ht} & + C_{Ft} & & & & & 0 \\
         \text{Entrepreunarial Profits}
-            & & -F_{Ft} & +F_{Ft}
-            & & & 
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & +\Delta M_{Ht} & & -\Delta M_{Ft}
-            & & & 
-            & & & 0 \\
+            & & & & & & & 0 \\
+        \text{Var. of Cash Money} 
+            & +\Delta H_{Ht} & -\Delta H_{Ft} & & & & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+    \hline
+\end{array}
+\end{aligned}
+$$
+
+
+Households import goods.
+
+$$
+\begin{aligned}
+& \begin{array}{lcccccccc}
+    \hline
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
+    \hline
+        \text{Imports} 
+            & -M_{Ht} & & & & & + M_{Wt} & 0 \\
+        \text{Entrepreunarial Profits}
+            & & & & & & & 0 \\
+        \text{Var. of Cash Money} 
+            & +\Delta H_{Ht} & & & & -\Delta H_{CBt} & & 0 \\
+        \text{Var. of Foreign Reserves} 
+            & & & & & +\Delta R_{CBt}^f & -\Delta R_{Wt}^f & 0 \\
+    \hline
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+    \hline
+\end{array}
+\end{aligned}
+$$
+
+Firms export goods.
+
+$$
+\begin{aligned}
+& \begin{array}{lcccccccc}
+    \hline
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
+    \hline
+        \text{Exports} 
+            & & +X_{Ht} & & & & -X_{Wt} & 0 \\
+        \text{Entrepreunarial Profits}
+            & & & & & & & 0 \\
+        \text{Var. of Cash Money} 
+            & & -\Delta H_{Ht} & & & +\Delta H_{CBt} & & 0 \\
+        \text{Var. of Foreign Reserves} 
+            & & & & & -\Delta R_{CBt}^f & +\Delta R_{Wt}^f & 0 \\
+    \hline
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -603,28 +495,20 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Int. on bonds} 
-            & & & 
-            & +r_{t-1}^B B_{Bt-1} & & -r_{t-1}^B B_{gt-1}
-            & & & 0 \\
+            & & & +r_{t-1}^B B_{Bt-1} & -r_{t-1}^B B_{Gt-1} & & & 0 \\
         \text{Entrepreneurial Profit}
-            & & & 
-            & -F_{Bt} & +F_{Bt} & 
-            & & & 0 \\
+            & & & & & & & 0 \\
         \text{Var. of bonds} 
-            & & & 
-            & & +\Delta B_{Bt} & -\Delta B_{gt}
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & & & 
-            & & -\Delta M_{Bt} & +\Delta M_{gt}
-            & & & 0 \\
+            & & & +\Delta B_{Bt} & -\Delta B_{Gt} & & & 0 \\
+        \text{Var. of Cash Money} 
+            & & & -\Delta H_{Bt} & +\Delta H_{Gt} & & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -636,28 +520,20 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Int. on bonds} 
-            & & & 
-            & & & -r_{t-1}^B B_{gt-1}
-            & +r_{t-1}^B B_{cbt-1} & & 0 \\
+            & & & & -r_{t-1}^B B_{Gt-1} & +r_{t-1}^B B_{CBt-1} & & 0 \\
         \text{Central Bank Profit}
-            & & & 
-            & & & 
-            & -F_{cbt} & +F_{cbt} & 0 \\
+            & & & & & & & 0 \\
         \text{Var. of bonds} 
-            & & & 
-            & & & -\Delta B_{gt}
-            & & +\Delta B_{cbt} & 0 \\
-        \text{Var. of HP money} 
-            & & & 
-            & & & +\Delta M_{gt}
-            & & -\Delta M_{Bt} & 0 \\
+            & & & & -\Delta B_{Gt} & +\Delta B_{CBt} & & 0 \\
+        \text{Var. of Cash Money} 
+            & & & & +\Delta H_{Gt} & -\Delta H_{CBt} & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -669,32 +545,22 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Int. on loans (formal)} 
-            & & -r_{t-1}^L L_{F1t-1} & 
-            & +r_{t-1}^L L_{B1t-1} & & 
-            & & & 0 \\
+            & & -r_{t-1}^L L_{F1t-1} & +r_{t-1}^L L_{B1t-1} & & & & 0 \\
         \text{Entrepreunarial Profits}
-            & & +F_{Ft} & -F_{Ft}
-            & -F_{Bt} & +F_{Bt} & 
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & & & +\Delta M_{Ft}
-            & & -\Delta M_{Bt} & 
-            & & & 0 \\
+            & & & & & & & 0 \\
+        \text{Var. of Cash Money} 
+            & & +\Delta H_{Ft} & -\Delta H_{Bt} & & & & 0 \\
         \text{Var. of loans (formal)} 
-            & & & -\Delta L_{F1t}
-            & & +\Delta L_{B1t} & 
-            & & & 0 \\
+            & & -\Delta L_{F1t} & +\Delta L_{B1t} & & & & 0 \\
         \text{Var. of deposits (formal)} 
-            & & & 
-            & & & 
-            & & & 0 \\
+            & & & & & & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -706,32 +572,22 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Int. on loans (informal)} 
-            & & -r_{t-1}^L L_{F2t-1} & 
-            & +r_{t-1}^L L_{B2t-1} & & 
-            & & & 0 \\
+            & & -r_{t-1}^L L_{F2t-1} & +r_{t-1}^L L_{B2t-1} & & & & 0 \\
         \text{Entrepreunarial Profits}
-            & & +F_{Ft} & -F_{Ft}
-            & -F_{Bt} & +F_{Bt} & 
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & & & +\Delta M_{Ft}
-            & & -\Delta M_{Bt} & 
-            & & & 0 \\
+            & & & & & & & 0 \\
+        \text{Var. of Cash Money} 
+            & & +\Delta H_{Ft} & -\Delta H_{Bt} & & & & 0 \\
         \text{Var. of loans (informal)} 
-            & & & -\Delta L_{F2t}
-            & & +\Delta L_{B2t} & 
-            & & & 0 \\
+            & & -\Delta L_{F2t} & +\Delta L_{B2t} & & & & 0 \\
         \text{Var. of deposits (informal)} 
-            & & & 
-            & & & 
-            & & & 0 \\
+            & & & & & & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -743,28 +599,20 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Int. on deposits (formal)} 
-            & +r_{t-1}^D D_{H1t-1} & & 
-            & -r_{t-1}^D D_{B1t-1} & & 
-            & & & 0 \\
+            & +r_{t-1}^D D_{H1t-1} & & -r_{t-1}^D D_{B1t-1} & & & & 0 \\
         \text{Entrepreunarial Profits}
-            & & & 
-            & +F_{Bt} & -F_{Bt} & 
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & & & 
-            & & & 
-            & & & 0 \\
+            & & & & & & & 0 \\
+        \text{Var. of Cash Money} 
+            & & & & & & & 0 \\
         \text{Var. of deposits (formal)} 
-            & -\Delta D_{H1t} & & 
-            & & +\Delta D_{B1t} & 
-            & & & 0 \\
+            & -\Delta D_{H1t} & & +\Delta D_{B1t} & & & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -776,28 +624,20 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Int. on deposits (informal)} 
-            & +r_{t-1}^D D_{H2t-1} & & 
-            & -r_{t-1}^D D_{B2t-1} & & 
-            & & & 0 \\
+            & +r_{t-1}^D D_{H2t-1} & & -r_{t-1}^D D_{B2t-1} & & & & 0 \\
         \text{Entrepreunarial Profits}
-            & & & 
-            & +F_{Bt} & -F_{Bt} & 
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & & & 
-            & & & 
-            & & & 0 \\
+            & & & & & & & 0 \\
+        \text{Var. of Cash Money} 
+            & & & & & & & 0 \\
         \text{Var. of deposits (informal)} 
-            & -\Delta D_{H2t} & & 
-            & & +\Delta D_{B2t} & 
-            & & & 0 \\
+            & -\Delta D_{H2t} & & +\Delta D_{B2t} & & & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -809,28 +649,20 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Int. on deposits (formal)} 
-            & & +r_{t-1}^D D_{F1t-1} & 
-            & -r_{t-1}^D D_{B1t-1} & & 
-            & & & 0 \\
+            & & +r_{t-1}^D D_{F1t-1} & -r_{t-1}^D D_{B1t-1} & & & & 0 \\
         \text{Entrepreunarial Profits}
-            & & -F_{Ft} & +F_{Ft} 
-            & +F_{Bt} & -F_{Bt} & 
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & & & 
-            & & & 
-            & & & 0 \\
+            & & & & & & & 0 \\
+        \text{Var. of Cash Money} 
+            & & & & & & & 0 \\
         \text{Var. of deposits (formal)} 
-            & & & -\Delta D_{F1t} 
-            & & +\Delta D_{B1t} & 
-            & & & 0 \\
+            & & -\Delta D_{F1t} & +\Delta D_{B1t} & & & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -842,28 +674,20 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Int. on deposits (informal)} 
-            & & +r_{t-1}^D D_{F2t-1} & 
-            & -r_{t-1}^D D_{B2t-1} & & 
-            & & & 0 \\
+            & & +r_{t-1}^D D_{F2t-1} & -r_{t-1}^D D_{B2t-1} & & & & 0 \\
         \text{Entrepreunarial Profits}
-            & & -F_{Ft} & +F_{Ft} 
-            & +F_{Bt} & -F_{Bt} & 
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & & & 
-            & & & 
-            & & & 0 \\
+            & & & & & & & 0 \\
+        \text{Var. of Cash Money} 
+            & & & & & & & 0 \\
         \text{Var. of deposits (informal)} 
-            & & & -\Delta D_{F2t} 
-            & & +\Delta D_{B2t} & 
-            & & & 0 \\
+            & & -\Delta D_{F2t} & +\Delta D_{B2t} & & & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -876,32 +700,22 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Int. on advances} 
-            & & & 
-            & -r_{t-1}^A A_{Bt-1} & & 
-            & +r_{t-1}^A A_{cbt-1} & & 0 \\
+            & & & -r_{t-1}^A A_{Bt-1} & & +r_{t-1}^A A_{CBt-1} & & 0 \\
         \text{Entrepreunarial Profits}
-            & & & 
-            & +F_{Bt} & -F_{Bt} & 
-            & & & 0 \\
+            & & & & & & & 0 \\
         \text{Central Bank Profit}
-            & & & 
-            & & & 
-            & -F_{cbt} & +F_{cbt} & 0 \\
+            & & & & & & & 0 \\
         \text{Var. of advances} 
-            & & & 
-            & & -\Delta A_{Bt} & 
-            & & +\Delta A_{cbt} & 0 \\
-        \text{Var. of HP money} 
-            & & & 
-            & & +\Delta M_{Bt} & 
-            & & -\Delta M_{cbt} & 0 \\
+            & & & -\Delta A_{Bt} & & +\Delta A_{CBt} & & 0 \\
+        \text{Var. of Cash Money} 
+            & & & +\Delta H_{Bt} & & -\Delta H_{CBt} & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -915,24 +729,18 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Entrepreunarial Profits}
-            & & & 
-            & & & 
-            & & & 0 \\
+            & & & & & & & 0 \\
         \text{Var. of bonds} 
-            & & & 
-            & & -\Delta B_{Bt} & +\Delta B_{gt} 
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & & & 
-            & & +\Delta M_{Bt} & -\Delta M_{gt} 
-            & & & 0 \\
+            & & & -\Delta B_{Bt} & +\Delta B_{Gt} & & & 0 \\
+        \text{Var. of Cash Money} 
+            & & & +\Delta H_{Bt} & -\Delta H_{Gt} & & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -944,24 +752,18 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Central Bank Profit}
-            & & & 
-            & & & 
-            & & & 0 \\
+            & & & & & & & 0 \\
         \text{Var. of bonds} 
-            & & & 
-            & & -\Delta B_{Bt} & 
-            & & +\Delta B_{cbt} & 0 \\
-        \text{Var. of HP money} 
-            & & & 
-            & & +\Delta M_{Bt} & 
-            & & -\Delta M_{cbt} & 0 \\
+            & & & -\Delta B_{Bt} & & +\Delta B_{CBt} & & 0 \\
+        \text{Var. of Cash Money} 
+            & & & +\Delta H_{Bt} & & -\Delta H_{CBt} & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -976,28 +778,20 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Entrepreunarial Profits}
-            & & &  
-            & & & 
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & & & +\Delta M_{Ft}
-            & & -\Delta M_{Bt} & 
-            & & & 0 \\
+            & & & & & & & 0 \\
+        \text{Var. of Cash Money} 
+            & & +\Delta H_{Ft} & -\Delta H_{Bt} & & & & 0 \\
         \text{Var. of deposits (formal)} 
-            & & & -\Delta D_{F1t}
-            & & +\Delta D_{B1t} & 
-            & & & 0 \\
+            & & -\Delta D_{F1t} & +\Delta D_{B1t} & & & & 0 \\
         \text{Var. of deposits (informal)} 
-            & & & -\Delta D_{F2t}
-            & & +\Delta D_{B2t} & 
-            & & & 0 \\
+            & & -\Delta D_{F2t} & +\Delta D_{B2t} & & & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -1010,28 +804,20 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Entrepreunarial Profits}
-            & & &  
-            & & & 
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & +\Delta M_{Ht} & &
-            & & -\Delta M_{Bt} & 
-            & & & 0 \\
+            & & & & & & & 0 \\
+        \text{Var. of Cash Money} 
+            & +\Delta H_{Ht} & & -\Delta H_{Bt} & & & & 0 \\
         \text{Var. of deposits (formal)} 
-            & -\Delta D_{H1t} & &
-            & & +\Delta D_{B1t} & 
-            & & & 0 \\
+            & -\Delta D_{H1t} & & +\Delta D_{B1t} & & & & 0 \\
         \text{Var. of deposits (informal)} 
-            & -\Delta D_{H2t} & &
-            & & +\Delta D_{B2t} & 
-            & & & 0 \\
+            & -\Delta D_{H2t} & & +\Delta D_{B2t} & & & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -1040,36 +826,7 @@ $$
 ## Firms and banks entry-exit
 ### Firms exit process
 
-Defaulted firms destroy inventories (step 1 of exit)
-
-$$
-\begin{aligned}
-& \begin{array}{lcccccccc}
-    \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
-    \hline
-        \text{Var. of inventories} 
-            & & -\Delta V_{Ft} & +\Delta V_{Ft}
-            & & & 
-            & & & 0 \\
-        \text{Entrepreunarial Profits}
-            & & +F_{Ft} & -F_{Ft} 
-            & & & 
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & & & 
-            & & & 
-            & & & 0 \\
-    \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-    \hline
-\end{array}
-\end{aligned}
-$$
-
-Defaulted firms reimburse residual loans (step 2 of exit) by:
+Defaulted firms reimburse residual loans (step 1 of exit) by:
 1. using deposits
 2. using cash
 3. registering capital loss
@@ -1078,102 +835,74 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Entrepreunarial Profits}
-            & & & +F_{Ft}^d 
-            & & -F_{Bt}^d & 
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & & & +\Delta M_{Ft}
-            & & -\Delta M_{Bt} & 
-            & & & 0 \\
+            & & +F_{Ft}^d & -F_{Bt}^d & & & & 0 \\
+        \text{Var. of Cash Money} 
+            & & +\Delta H_{Ft} & -\Delta H_{Bt} & & & & 0 \\
         \text{Var. of loans (formal)} 
-            & & & -\Delta L_{F1t}
-            & & +\Delta L_{B1t} & 
-            & & & 0 \\
+            & & -\Delta L_{F1t} & +\Delta L_{B1t} & & & & 0 \\
         \text{Var. of loans (informal)} 
-            & & & -\Delta L_{F2t}
-            & & +\Delta L_{B2t} & 
-            & & & 0 \\
+            & & -\Delta L_{F2t} & +\Delta L_{B2t} & & & & 0 \\
         \text{Var. of deposits (formal)} 
-            & & & +\Delta D_{F1t}
-            & & -\Delta D_{B1t} & 
-            & & & 0 \\
+            & & +\Delta D_{F1t} & -\Delta D_{B1t} & & & & 0 \\
         \text{Var. of deposits (informal)} 
-            & & & +\Delta D_{F2t}
-            & & -\Delta D_{B2t} & 
-            & & & 0 \\
+            & & +\Delta D_{F2t} & -\Delta D_{B2t} & & & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
 $$
 
-Defaulted firms transfer residual deposit (step 3 of exit)
+Defaulted firms transfer residual deposit (step 2 of exit)
 
 $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Entrepreunarial Profits}
-            & & &  
-            & & & 
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & & & -\Delta M_{Ft}
-            & & +\Delta M_{Bt} & 
-            & & & 0 \\
+            & & & & & & & 0 \\
+        \text{Var. of Cash Money} 
+            & & -\Delta H_{Ft} & +\Delta H_{Bt} & & & & 0 \\
         \text{Var. of deposits (formal)} 
-            & & & +\Delta D_{F1t}
-            & & -\Delta D_{B1t} & 
-            & & & 0 \\
+            & & +\Delta D_{F1t} & -\Delta D_{B1t} & & & & 0 \\
         \text{Var. of deposits (informal)} 
-            & & & +\Delta D_{F2t}
-            & & -\Delta D_{B2t} & 
-            & & & 0 \\
+            & & +\Delta D_{F2t} & -\Delta D_{B2t} & & & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
 $$
 
-Defaulted firms transfer residual cash (step 4 of exit)
+Defaulted firms transfer residual cash (step 3 of exit)
 
 $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Entrepreunarial Profits}
-            & +F_{Ht}^d & & -F_{Ft}^d 
-            & & & 
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & -\Delta M_{Ht} & & +\Delta M_{Ft}
-            & & & 
-            & & & 0 \\
+            & +F_{Ht}^d & -F_{Ft}^d  & & & & & 0 \\
+        \text{Var. of Cash Money} 
+            & -\Delta H_{Ht} & +\Delta H_{Ft} & & & & & 0 \\
         \text{Var. of deposits (formal)} 
-            & & & 
-            & & & 
-            & & & 0 \\
+            & & & & & & & 0 \\
         \text{Var. of deposits (informal)} 
-            & & & 
-            & & & 
-            & & & 0 \\
+            & & & & & & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -1187,28 +916,20 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Entrepreunarial Profits}
-            & & & +F_{Ft}^d 
-            & & -F_{Bt}^d & 
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & & & +\Delta M_{Ft}
-            & & -\Delta M_{Bt} & 
-            & & & 0 \\
+            & & +F_{Ft}^d & -F_{Bt}^d & & & & 0 \\
+        \text{Var. of Cash Money} 
+            & & +\Delta H_{Ft} & -\Delta H_{Bt} & & & & 0 \\
         \text{Var. of loans (formal)} 
-            & & & -\Delta L_{F1t}
-            & & +\Delta L_{B1t} & 
-            & & & 0 \\
+            & & -\Delta L_{F1t} & +\Delta L_{B1t} & & & & 0 \\
         \text{Var. of deposits (formal)} 
-            & & & +\Delta D_{F1t}
-            & & -\Delta D_{B1t} & 
-            & & & 0 \\
+            & & +\Delta D_{F1t} & -\Delta D_{B1t} & & & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -1221,24 +942,18 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Entrepreunarial Profits}
-            & & & 
-            & & & 
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & -\Delta M_{Ht} & & -\Delta M_{Ft}
-            & & +\Delta M_{Bt} & 
-            & & & 0 \\
+            & & & & & & & 0 \\
+        \text{Var. of Cash Money} 
+            & -\Delta H_{Ht} & -\Delta H_{Ft} & +\Delta H_{Bt} & & & & 0 \\
         \text{Var. of deposits (formal)} 
-            & +\Delta D_{H1t} & & +\Delta D_{F1t} 
-            & & -\Delta D_{B1t} & 
-            & & & 0 \\
+            & +\Delta D_{H1t} & +\Delta D_{F1t} & -\Delta D_{B1t} & & & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -1250,24 +965,18 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Entrepreunarial Profits}
-            & & & 
-            & & & 
-            & & & 0 \\
+            & & & & & & & 0 \\
         \text{Var. of bonds} 
-            & & & 
-            & & +\Delta B_{Bt} & 
-            & & -\Delta B_{cbt} & 0 \\
-        \text{Var. of HP money} 
-            & & & 
-            & & -\Delta M_{Bt} & 
-            & & +\Delta M_{cbt} & 0 \\
+            & & & +\Delta B_{Bt} & & -\Delta B_{CBt} & & 0 \\
+        \text{Var. of Cash Money} 
+            & & & -\Delta H_{Bt} & & +\Delta H_{CBt} & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -1280,24 +989,18 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Entrepreunarial Profits}
-            & & & 
-            & & & 
-            & & & 0 \\
+            & & & & & & & 0 \\
         \text{Var. of advances} 
-            & & & 
-            & & -\Delta A_{Bt} & 
-            & & +\Delta A_{cbt} & 0 \\
-        \text{Var. of HP money} 
-            & & &
-            & & +\Delta M_{Bt} & 
-            & & -\Delta M_{cbt} & 0 \\
+            & & & -\Delta A_{Bt} & & +\Delta A_{CBt} & & 0 \\
+        \text{Var. of Cash Money} 
+            & & & +\Delta H_{Bt} & & -\Delta H_{CBt} & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -1310,24 +1013,18 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Entrepreunarial Profits}
-            & +F_{Ht}^d & &
-            & & -F_{Bt}^d & 
-            & & & 0 \\
+            & +F_{Ht}^d & & -F_{Bt}^d & & & & 0 \\
         \text{Central Bank Profits}
-            & & & 
-            & & & 
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & -\Delta M_{Ht} & &
-            & & +\Delta M_{Bt} & 
-            & & & 0 \\
+            & & & & & & & 0 \\
+        \text{Var. of Cash Money} 
+            & -\Delta H_{Ht} &  & +\Delta H_{Bt} & & & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -1342,28 +1039,20 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Entrepreunarial Profits}
-            & & & +F_{Ft}^d 
-            & & -F_{Bt}^d & 
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & & & +\Delta M_{Ft}
-            & & -\Delta M_{Bt} & 
-            & & & 0 \\
+            & & +F_{Ft}^d  & -F_{Bt}^d & & & & 0 \\
+        \text{Var. of Cash Money} 
+            & & +\Delta H_{Ft} & -\Delta H_{Bt} & & & & 0 \\
         \text{Var. of loans (informal)} 
-            & & & -\Delta L_{F2t}
-            & & +\Delta L_{B2t} & 
-            & & & 0 \\
+            & & -\Delta L_{F2t} & +\Delta L_{B2t} & & & & 0 \\
         \text{Var. of deposits (informal)} 
-            & & & +\Delta D_{F2t}
-            & & -\Delta D_{B2t} & 
-            & & & 0 \\
+            & & +\Delta D_{F2t} & -\Delta D_{B2t} & & & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -1376,24 +1065,18 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Entrepreunarial Profits}
-            & & & 
-            & & & 
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & -\Delta M_{Ht} & & -\Delta M_{Ft}
-            & & +\Delta M_{Bt} & 
-            & & & 0 \\
+            & & & & & & & 0 \\
+        \text{Var. of Cash Money} 
+            & -\Delta H_{Ht} & -\Delta H_{Ft} & +\Delta H_{Bt} & & & & 0 \\
         \text{Var. of deposits (informal)} 
-            & +\Delta D_{H2t} & & +\Delta D_{F2t} 
-            & & -\Delta D_{B2t} & 
-            & & & 0 \\
+            & +\Delta D_{H2t} & +\Delta D_{F2t} & -\Delta D_{B2t} & & & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -1406,24 +1089,18 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Entrepreunarial Profits}
-            & +F_{Ht}^d & &
-            & & -F_{Bt}^d & 
-            & & & 0 \\
+            & +F_{Ht}^d & & -F_{Bt}^d & & & & 0 \\
         \text{Central Bank Profits}
-            & & & 
-            & & & 
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & -\Delta M_{Ht} & &
-            & & +\Delta M_{Bt} & 
-            & & & 0 \\
+            & & & & & & & 0 \\
+        \text{Var. of Cash Money} 
+            & -\Delta H_{Ht} & & +\Delta H_{Bt} & & & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -1438,24 +1115,18 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Var. of inventories} 
-            & & & 
-            & & & 
-            & & & 0 \\
+            & & & & & & & 0 \\
         \text{Entrepreunarial Profits}
-            & +F_{Ht}^d & & -F_{Ft}^d 
-            & & & 
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & -\Delta M_{Ht} & & +\Delta M_{Ft}
-            & & & 
-            & & & 0 \\
+            & +F_{Ht}^d & -F_{Ft}^d & & & & & 0 \\
+        \text{Var. of Cash Money} 
+            & -\Delta H_{Ht} & +\Delta H_{Ft} & & & & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
@@ -1470,24 +1141,18 @@ $$
 \begin{aligned}
 & \begin{array}{lcccccccc}
     \hline
-        & \text{H.} & \text{F. (CA)} & \text{F. (KA)} 
-        & \text{B. (CA)} & \text{B. (KA)}  & \text{G.} 
-        & \text{C.B. (CA)} & \text{C.B. (KA)} & \Sigma \\
+        & \text{Households} & \text{Firms} & \text{Banks}  
+        & \text{Government} & \text{Central Bank} & \text{Rest of World}
+        & \Sigma \\
     \hline
         \text{Entrepreunarial Profits}
-            & +F_{Ht}^d & & 
-            & & -F_{Bt}^d & 
-            & & & 0 \\
+            & +F_{Ht}^d & & -F_{Bt}^d & & & & 0 \\
         \text{Var. of advances} 
-            & & & 
-            & & & 
-            & & & 0 \\
-        \text{Var. of HP money} 
-            & -\Delta M_{Ht}^d & & 
-            & & +\Delta M_{Bt}^d & 
-            & & & 0 \\
+            & & & & & & & 0 \\
+        \text{Var. of Cash Money} 
+            & -\Delta H_{Ht}^d & & +\Delta H_{Bt}^d & & & & 0 \\
     \hline
-        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \Sigma & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     \hline
 \end{array}
 \end{aligned}
