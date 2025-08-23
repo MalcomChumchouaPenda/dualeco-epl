@@ -1,0 +1,10 @@
+digraph FeedbackLoop {
+    node [shape=box];
+    A -> B;
+    B -> C;
+
+    // Optional: Highlight the loop with colors
+    A [color=blue, fontcolor=blue];
+    B [color=blue, fontcolor=blue];
+    C [color=blue, fontcolor=blue];
+}
