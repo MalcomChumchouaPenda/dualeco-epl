@@ -158,7 +158,7 @@ def test_create_public_sector(model_set1):
     for model in model_set1:
         model.create_public_sector()
         assert isinstance(model.government, Government)
-        assert isinstance(model.centralbank, CentralBank)
+        assert isinstance(model.central_bank, CentralBank)
 
 
 def test_share_household_stocks(model_set1):
@@ -254,10 +254,10 @@ def test_share_public_sector_stocks(model_set1):
         assert round(p['M_G'], 2) == round(government.M, 2)
         assert round(p['B_G'], 2) == round(government.B, 2)
         
-        centralbank = model.centralbank
-        assert round(p['M_CB'], 2) == round(centralbank.M, 2)
-        assert round(p['A_CB'], 2) == round(centralbank.A, 2)
-        assert round(p['B_CB'], 2) == round(centralbank.B, 2)
+        central_bank = model.central_bank
+        assert round(p['M_CB'], 2) == round(central_bank.M, 2)
+        assert round(p['A_CB'], 2) == round(central_bank.A, 2)
+        assert round(p['B_CB'], 2) == round(central_bank.B, 2)
 
 
 def test_share_public_sector_flows(model_set1):
@@ -272,10 +272,10 @@ def test_share_public_sector_flows(model_set1):
         assert round(p['iota_BG'], 2) == round(government.iota_B, 2)
         assert round(p['pi_G'], 2) == round(government.pi, 2)
         
-        centralbank = model.centralbank 
-        assert round(p['iota_ACB'], 2) == round(centralbank.iota_A, 2)
-        assert round(p['iota_BCB'], 2) == round(centralbank.iota_B, 2)
-        assert round(p['pi_CB'], 2) == round(centralbank.pi, 2)
+        central_bank = model.central_bank 
+        assert round(p['iota_ACB'], 2) == round(central_bank.iota_A, 2)
+        assert round(p['iota_BCB'], 2) == round(central_bank.iota_B, 2)
+        assert round(p['pi_CB'], 2) == round(central_bank.pi, 2)
 
 
 
@@ -336,7 +336,14 @@ def test_share_interest_rates(model_set2):
         gov = model.government
         assert gov.r_B == p['r_B']
 
-        cbank = model.centralbank
+        cbank = model.central_bank
         assert cbank.r_A == p['r_A']
         assert cbank.r_B == p['r_B']
 
+
+# def test_create_labor_networks(model_set2):
+#     for model in model_set2:
+#         model.create_labor_markets()
+        
+#         markets = model.labor_markets
+#         assert len(markets) == 3

@@ -48,10 +48,12 @@ class DualEcoModel(ap.Model):
 
     
     def calc_block_1(self):
+        # calculate steady state for firms
         p = self.p
         p['zeta_1'] = 1 / (1 + p['g_ss'])
         p['zeta_2'] = 1 - p['zeta_1']
         
+        # for each sector of production
         for s in self.sectors:
             N = p[f'N_E{s}'] + p[f'N_W{s}']
             p[f'y{s}'] = p[f'phi{s}'] * N
@@ -63,8 +65,8 @@ class DualEcoModel(ap.Model):
                 p[f'p{s}'] = (1 + p['m']) * p[f'w{s}']
                 p[f'Q{s}'] = 0
 
-            
             if s in [1, 3]:
+                # for unbanked sectors
                 p[f'L_F{s}'] = 0
                 p[f'D_F{s}'] = 0
                 p[f'T_F{s}'] = 0
@@ -73,6 +75,7 @@ class DualEcoModel(ap.Model):
                 p[f'M_F{s}'] = (p[f'pi_F{s}'] - p[f'pi_dF{s}'])/ p['zeta_2']
     
             else:
+                # for banked sectors
                 p['M_F2'] = 0
                 p['D_F2'] = p['theta_W'] * p['W_F2']
                 A = np.array([
@@ -93,6 +96,7 @@ class DualEcoModel(ap.Model):
                 p['pi_dF2'] = X[2]
                 p['L_F2'] = X[3]
             
+            # finalize interest and variation computation
             p[f'iota_LF{s}'] = p['zeta_1'] * p['r_L'] * p[f'L_F{s}']
             p[f'iota_DF{s}'] = p['zeta_1'] * p['r_D'] * p[f'D_F{s}']
             p[f'DeltaL_F{s}'] = p['zeta_2'] * p[f'L_F{s}']
@@ -101,9 +105,13 @@ class DualEcoModel(ap.Model):
 
     
     def calc_block_2(self):
+        # compute steady state for households
         p = self.p
+
+        # for each region
         for z in self.regions:
             if z == 'a':
+                # for rural households
                 p['D_Ha'] = 0
                 p['T_Ha'] = 0
                 p['Z_Ha'] = 0
@@ -115,6 +123,7 @@ class DualEcoModel(ap.Model):
                 p['M_Ha'] = (p['Y_da'] - p['Ca']) / p['zeta_2']
     
             else:
+                # for urban households
                 p['M_Hb'] = 0
                 p['Cb'] = p['alpha_b1'] * p['Q1'] + (1 - p['alpha_a2']) * p['Q2'] + p['Q3']
                 p['W_G'] = p['w_G'] * p['N_WG']
@@ -140,12 +149,14 @@ class DualEcoModel(ap.Model):
                 p['Y_db'] = X[2]
                 p['D_Hb'] = X[3]
                 
+            # finalize interest and variation computation
             p[f'iota_DH{z}'] = p['zeta_1'] * p['r_D'] * p[f'D_H{z}']
             p[f'DeltaD_H{z}'] = p['zeta_2'] * p[f'D_H{z}']
             p[f'DeltaM_H{z}'] = p['zeta_2'] * p[f'M_H{z}'] 
 
         
     def calc_block_3(self):
+        # compute steady state for bank sector
         p = self.p
         p['A_B'] = 0
         p['D_B'] = p['D_Hb'] + p['D_F2']
@@ -172,6 +183,7 @@ class DualEcoModel(ap.Model):
         p['M_B'] = X[4]
         print(p['zeta_2'] * p['M_B'])
         
+        # finalize interest and variation computation
         p['iota_LB'] = p['zeta_1'] * p['r_L'] * p['L_B']
         p['iota_DB'] = p['zeta_1'] * p['r_D'] * p['D_B']
         p['iota_BB'] = p['zeta_1'] * p['r_B'] * p['B_B']
@@ -182,6 +194,7 @@ class DualEcoModel(ap.Model):
 
     
     def calc_block_4(self):
+        # compute steady state for public sector
         p = self.p
         p['Z_G'] = p['Z_Ha'] + p['Z_Hb']
         p['A_CB'] = p['M_G'] = 0
@@ -209,6 +222,7 @@ class DualEcoModel(ap.Model):
         p['B_G'] = X[3]
         p['B_CB'] = X[4]
         
+        # finalize interest and variation computation
         p['iota_BG'] = p['zeta_1'] * p['r_B'] * p['B_G']
         p['iota_BCB'] = p['zeta_1'] * p['r_B'] * p['B_CB']
         p['DeltaB_G'] = p['zeta_2'] * p['B_G']
@@ -219,58 +233,58 @@ class DualEcoModel(ap.Model):
 
     def create_households(self):
         p = self.p
-        bankowners = ap.AgentList(self, 1, Household)
-        bankowners.s_EB = 1
-        bankowners.s_E = 1
+        bank_owners = ap.AgentList(self, 1, Household)
+        bank_owners.s_EB = 1
+        bank_owners.s_E = 1
         
-        firmowners1 = ap.AgentList(self, p['N_E1'], Household)
-        firmowners1.s_E = 1
-        firmowners1.s = 1
-        firmowners1.z = 'a'
-        firmowners1.w_D = p['w1']
+        firm_owners1 = ap.AgentList(self, p['N_E1'], Household)
+        firm_owners1.s_E = 1
+        firm_owners1.s = 1
+        firm_owners1.z = 'a'
+        firm_owners1.w_D = p['w1']
         
-        firmowners2 = ap.AgentList(self, p['N_E2'], Household)
-        firmowners2.s_E = 1
-        firmowners2.s = 2
-        firmowners2.z = 'b'
-        firmowners2.w_D = p['w2']
+        firm_owners2 = ap.AgentList(self, p['N_E2'], Household)
+        firm_owners2.s_E = 1
+        firm_owners2.s = 2
+        firm_owners2.z = 'b'
+        firm_owners2.w_D = p['w2']
         
-        firmowners3 = ap.AgentList(self, p['N_E3'], Household)
-        firmowners3.s_E = 1
-        firmowners3.s = 3
-        firmowners3.z = 'b'
-        firmowners3.w_D = p['w3']
+        firm_owners3 = ap.AgentList(self, p['N_E3'], Household)
+        firm_owners3.s_E = 1
+        firm_owners3.s = 3
+        firm_owners3.z = 'b'
+        firm_owners3.w_D = p['w3']
 
-        firmowners = firmowners1 + firmowners2 + firmowners3
-        owners = bankowners + firmowners
+        firm_owners = firm_owners1 + firm_owners2 + firm_owners3
+        owners = bank_owners + firm_owners
         self.households = owners
         
-        privateworkers1 = ap.AgentList(self, p['N_W1'], Household)
-        privateworkers1.s = 1
-        privateworkers1.s_W = 1
-        privateworkers1.z = 'a'
-        privateworkers1.w_D = p['w1']
+        private_workers1 = ap.AgentList(self, p['N_W1'], Household)
+        private_workers1.s = 1
+        private_workers1.s_W = 1
+        private_workers1.z = 'a'
+        private_workers1.w_D = p['w1']
         
-        privateworkers2 = ap.AgentList(self, p['N_W2'], Household)
-        privateworkers2.s = 2
-        privateworkers2.s_W = 1
-        privateworkers2.z = 'b'
-        privateworkers2.w_D = p['w2']
+        private_workers2 = ap.AgentList(self, p['N_W2'], Household)
+        private_workers2.s = 2
+        private_workers2.s_W = 1
+        private_workers2.z = 'b'
+        private_workers2.w_D = p['w2']
         
-        privateworkers3 = ap.AgentList(self, p['N_W3'], Household)
-        privateworkers3.s = 3
-        privateworkers3.s_W = 1
-        privateworkers3.z = 'b'
-        privateworkers3.w_D = p['w3']
+        private_workers3 = ap.AgentList(self, p['N_W3'], Household)
+        private_workers3.s = 3
+        private_workers3.s_W = 1
+        private_workers3.z = 'b'
+        private_workers3.w_D = p['w3']
         
-        publicworkers = ap.AgentList(self, p['N_WG'], Household)
-        publicworkers.s_W = 1
-        publicworkers.s_WG = 1
-        publicworkers.z = 'b'
-        publicworkers.w_D = p['w_G']
+        public_workers = ap.AgentList(self, p['N_WG'], Household)
+        public_workers.s_W = 1
+        public_workers.s_WG = 1
+        public_workers.z = 'b'
+        public_workers.w_D = p['w_G']
 
-        privateworkers = privateworkers1 + privateworkers2 + privateworkers3
-        workers = publicworkers + privateworkers
+        private_workers = private_workers1 + private_workers2 + private_workers3
+        workers = public_workers + private_workers
         self.households += workers
         
         unemployed = ap.AgentList(self, p['N_U'], Household)
@@ -279,6 +293,7 @@ class DualEcoModel(ap.Model):
         unemployed.w_D = p['w_min']
         self.households += unemployed
     
+        # share stocks, flows and prices
         households = self.households
         for z in self.regions:
             group = households.select(households.z == z)
@@ -310,6 +325,7 @@ class DualEcoModel(ap.Model):
         firms3.z = 'b'
         self.firms = firms1 + firms2 + firms3
 
+        # share stocks, flows and prices
         firms = self.firms
         for s in self.sectors:
             group = firms.select(firms.s == s)
@@ -364,16 +380,16 @@ class DualEcoModel(ap.Model):
         government.r_B = p['r_B']
         self.government = government
 
-        centralbank = CentralBank(self)
-        centralbank.M = p['M_CB']
-        centralbank.B = p['B_CB']
+        central_bank = CentralBank(self)
+        central_bank.M = p['M_CB']
+        central_bank.B = p['B_CB']
 
-        centralbank.iota_A = p['iota_ACB']
-        centralbank.iota_B = p['iota_BCB']
-        centralbank.pi = p['pi_CB']
+        central_bank.iota_A = p['iota_ACB']
+        central_bank.iota_B = p['iota_BCB']
+        central_bank.pi = p['pi_CB']
 
-        centralbank.r_A = p['r_A']
-        centralbank.r_B = p['r_B']
-        self.centralbank = centralbank
+        central_bank.r_A = p['r_A']
+        central_bank.r_B = p['r_B']
+        self.central_bank = central_bank
 
     
