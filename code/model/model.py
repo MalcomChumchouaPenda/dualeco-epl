@@ -3,6 +3,9 @@ import pandas as pd
 import numpy as np
 import agentpy as ap
 
+from .agents import Household, Firm, Bank
+from .agents import CentralBank, Government
+
 
 class DualEcoModel(ap.Model):
     
@@ -53,8 +56,13 @@ class DualEcoModel(ap.Model):
             N = p[f'N_E{s}'] + p[f'N_W{s}']
             p[f'y{s}'] = p[f'phi{s}'] * N
             p[f'W_F{s}'] = p[f'w{s}'] * N
-            p[f'p{s}'] = (1 + p['m']) * p[f'W_F{s}'] / p[f'y{s}']
-            p[f'Q{s}'] = p[f'p{s}'] * p[f'y{s}']
+            if N > 0:
+                p[f'p{s}'] = (1 + p['m']) * p[f'W_F{s}'] / p[f'y{s}']
+                p[f'Q{s}'] = p[f'p{s}'] * p[f'y{s}']
+            else:
+                p[f'p{s}'] = (1 + p['m']) * p[f'w{s}']
+                p[f'Q{s}'] = 0
+
             
             if s in [1, 3]:
                 p[f'L_F{s}'] = 0
@@ -209,4 +217,163 @@ class DualEcoModel(ap.Model):
         p['DeltaM_CB'] = p['zeta_2'] * p['M_CB']
 
 
+    def create_households(self):
+        p = self.p
+        bankowners = ap.AgentList(self, 1, Household)
+        bankowners.s_EB = 1
+        bankowners.s_E = 1
         
+        firmowners1 = ap.AgentList(self, p['N_E1'], Household)
+        firmowners1.s_E = 1
+        firmowners1.s = 1
+        firmowners1.z = 'a'
+        firmowners1.w_D = p['w1']
+        
+        firmowners2 = ap.AgentList(self, p['N_E2'], Household)
+        firmowners2.s_E = 1
+        firmowners2.s = 2
+        firmowners2.z = 'b'
+        firmowners2.w_D = p['w2']
+        
+        firmowners3 = ap.AgentList(self, p['N_E3'], Household)
+        firmowners3.s_E = 1
+        firmowners3.s = 3
+        firmowners3.z = 'b'
+        firmowners3.w_D = p['w3']
+
+        firmowners = firmowners1 + firmowners2 + firmowners3
+        owners = bankowners + firmowners
+        self.households = owners
+        
+        privateworkers1 = ap.AgentList(self, p['N_W1'], Household)
+        privateworkers1.s = 1
+        privateworkers1.s_W = 1
+        privateworkers1.z = 'a'
+        privateworkers1.w_D = p['w1']
+        
+        privateworkers2 = ap.AgentList(self, p['N_W2'], Household)
+        privateworkers2.s = 2
+        privateworkers2.s_W = 1
+        privateworkers2.z = 'b'
+        privateworkers2.w_D = p['w2']
+        
+        privateworkers3 = ap.AgentList(self, p['N_W3'], Household)
+        privateworkers3.s = 3
+        privateworkers3.s_W = 1
+        privateworkers3.z = 'b'
+        privateworkers3.w_D = p['w3']
+        
+        publicworkers = ap.AgentList(self, p['N_WG'], Household)
+        publicworkers.s_W = 1
+        publicworkers.s_WG = 1
+        publicworkers.z = 'b'
+        publicworkers.w_D = p['w_G']
+
+        privateworkers = privateworkers1 + privateworkers2 + privateworkers3
+        workers = publicworkers + privateworkers
+        self.households += workers
+        
+        unemployed = ap.AgentList(self, p['N_U'], Household)
+        unemployed.s_U = 1
+        unemployed.z = 'b'
+        unemployed.w_D = p['w_min']
+        self.households += unemployed
+    
+        households = self.households
+        for z in self.regions:
+            group = households.select(households.z == z)
+            group.M = p[f'M_H{z}'] / len(group)
+            group.D = p[f'D_H{z}'] / len(group)
+
+            group.C = p[f'C{z}'] / len(group)
+            group.W = p[f'W_H{z}'] / len(group)
+            group.Z = p[f'Z_H{z}'] / len(group)
+            group.T = p[f'T_H{z}'] / len(group)
+            group.iota_D = p[f'iota_DH{z}'] / len(group)
+            group.pi_d = p[f'pi_dH{z}'] / len(group)
+
+
+    def create_firms(self):
+        p = self.p
+        firms1 = ap.AgentList(self, p['N_E1'], Firm)
+        firms1.s = 1
+        firms1.z = 'a'
+
+        firms2 = ap.AgentList(self, p['N_E2'], Firm)
+        firms2.s = 2
+        firms2.z = 'b'
+        firms2.r_D = p['r_D']
+        firms2.r_L = p['r_L']
+        
+        firms3 = ap.AgentList(self, p['N_E3'], Firm)
+        firms3.s = 3
+        firms3.z = 'b'
+        self.firms = firms1 + firms2 + firms3
+
+        firms = self.firms
+        for s in self.sectors:
+            group = firms.select(firms.s == s)
+            group.M = p[f'M_F{s}'] / len(group)
+            group.D = p[f'D_F{s}'] / len(group)
+            group.L = p[f'L_F{s}'] / len(group)
+
+            group.Q = p[f'Q{s}'] / len(group)
+            group.W = p[f'W_F{s}'] / len(group)
+            group.T = p[f'T_F{s}'] / len(group)
+            group.iota_L = p[f'iota_LF{s}'] / len(group)
+            group.iota_D = p[f'iota_DF{s}'] / len(group)
+            group.pi_d = p[f'pi_dF{s}'] / len(group)
+
+            group.p_y = p[f'p{s}']
+
+
+    def create_bank(self):
+        p = self.p
+        bank = Bank(self)
+        bank.M = p['M_B']
+        bank.D = p['D_B']
+        bank.L = p['L_B']
+        bank.B = p['B_B']
+
+        bank.T = p['T_B']
+        bank.iota_A = p['iota_AB']
+        bank.iota_D = p['iota_DB']
+        bank.iota_L = p['iota_LB']
+        bank.iota_B = p['iota_BB']
+        bank.pi_d = p['pi_dB']
+
+        bank.r_D = p['r_D']
+        bank.r_L = p['r_L']
+        bank.r_A = p['r_A']
+        bank.r_B = p['r_B']
+        self.bank = bank
+    
+    def create_public_sector(self):
+        p = self.p
+        government = Government(self)
+        government.M = p['M_G']
+        government.B = p['B_G']
+
+        government.W = p['W_G']
+        government.Z = p['Z_G']
+        government.T = p['T_G']
+        government.iota_B = p['iota_BG']
+        government.pi = p['pi_G']
+
+        government.w = p['w_G']
+        government.r_B = p['r_B']
+        self.government = government
+
+        centralbank = CentralBank(self)
+        centralbank.M = p['M_CB']
+        centralbank.B = p['B_CB']
+
+        centralbank.iota_A = p['iota_ACB']
+        centralbank.iota_B = p['iota_BCB']
+        centralbank.pi = p['pi_CB']
+
+        centralbank.r_A = p['r_A']
+        centralbank.r_B = p['r_B']
+        self.centralbank = centralbank
+
+    
