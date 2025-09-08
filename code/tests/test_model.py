@@ -336,14 +336,134 @@ def test_share_interest_rates(model_set2):
         gov = model.government
         assert gov.r_B == p['r_B']
 
-        cbank = model.central_bank
-        assert cbank.r_A == p['r_A']
-        assert cbank.r_B == p['r_B']
+        central_bank = model.central_bank
+        assert central_bank.r_A == p['r_A']
+        assert central_bank.r_B == p['r_B']
 
 
-# def test_create_labor_networks(model_set2):
-#     for model in model_set2:
-#         model.create_labor_markets()
+def test_create_rural_labor_networks(model_set2):
+    for model in model_set2:
+        model.create_labor_markets()
         
-#         markets = model.labor_markets
-#         assert len(markets) == 3
+        market = model.labor_markets[1]
+        agents = market.agents.to_list()
+        households = model.households
+        households = households.select(households.z=='a')
+        firms = model.firms
+        firms = firms.select(firms.z=='a')
+        assert set(households).issubset(set(agents))
+        assert set(firms).issubset(set(agents))
+        assert len(agents) == len(households) + len(firms)
+
+        p = model.p
+        num_employers = p['N_E1']
+        num_employees = p['N_E1'] + p['N_W1']
+        min_ratio = num_employees // num_employers
+        max_ratio = min_ratio + 1
+        assert len(market.neighbors(firms[0]).to_list()) in [min_ratio, max_ratio]
+        assert len(market.neighbors(firms[-1]).to_list()) in [min_ratio, max_ratio]
+        
+
+def test_create_formal_urban_labor_networks(model_set2):
+    for model in model_set2:
+        model.create_labor_markets()
+
+        market = model.labor_markets[2]
+        agents = market.agents.to_list()
+        government = model.government
+        firms = model.firms
+        firms = firms.select(firms.s==2)
+        households = model.households
+        households = households.select(households.z=='b')
+        assert government in set(agents)
+        assert set(households).issubset(set(agents))
+        assert set(firms).issubset(set(agents))
+        assert len(agents) == len(households + firms) + 1
+
+        p = model.p
+        num_employers = p['N_E2']
+        num_employees = p['N_E2'] + p['N_W2']
+        min_ratio = num_employees // num_employers
+        max_ratio = min_ratio + 1
+        assert len(market.neighbors(firms[0]).to_list()) in [min_ratio, max_ratio]
+        assert len(market.neighbors(firms[-1]).to_list()) in [min_ratio, max_ratio]
+        assert len(market.neighbors(government).to_list()) == p['N_WG']
+
+
+def test_create_informal_urban_labor_networks(model_set2):
+    for model in model_set2:
+        model.create_labor_markets()
+
+        market = model.labor_markets[3]
+        agents = market.agents.to_list()
+        firms = model.firms
+        firms = firms.select(firms.s==3)
+        households = model.households
+        households = households.select(households.z=='b')
+        assert set(households).issubset(set(agents))
+        assert set(firms).issubset(set(agents))
+        assert len(agents) == len(households + firms)
+
+        p = model.p
+        num_employers = p['N_E3']
+        num_employees = p['N_E3'] + p['N_W3']
+        min_ratio = num_employees // num_employers
+        max_ratio = min_ratio + 1
+        assert len(market.neighbors(firms[0]).to_list()) in [min_ratio, max_ratio]
+        assert len(market.neighbors(firms[-1]).to_list()) in [min_ratio, max_ratio]
+
+
+def test_create_deposit_networks(model_set2):
+    for model in model_set2:
+        model.create_deposit_market()
+
+        market = model.deposit_market
+        agents = market.agents.to_list()
+        bank = model.bank
+        firms = model.firms
+        firms = firms.select(firms.s==2)
+        households = model.households
+        households = households.select(households.z=='b')
+        assert set(households).issubset(set(agents))
+        assert set(firms).issubset(set(agents))
+        assert bank in agents
+        assert len(agents) == len(households + firms) + 1
+        assert len(market.neighbors(bank).to_list()) == len(households + firms)
+
+
+def test_create_credit_networks(model_set2):
+    for model in model_set2:
+        model.create_credit_market()
+
+        market = model.credit_market
+        agents = market.agents.to_list()
+        bank = model.bank
+        firms = model.firms
+        firms = firms.select(firms.s==2)
+        assert set(firms).issubset(set(agents))
+        assert bank in agents
+        assert len(agents) == len(firms) + 1
+        assert len(market.neighbors(bank).to_list()) == len(firms)
+
+def test_create_regional_spaces(model_set2):
+    for model in model_set2:
+        model.create_region_spaces()
+
+        firms = model.firms
+        households = model.households
+        rural_households = households.select(households.z=='a')
+        rural_firms = firms.select(firms.z=='a')
+        rural_space = model.region_spaces['a']
+        rural_agents = rural_space.agents.to_list()
+        assert set(rural_households).issubset(set(rural_agents))
+        assert set(rural_firms).issubset(set(rural_agents))
+        assert len(rural_agents) == len(rural_firms + rural_households)
+
+        urban_households = households.select(households.z=='a')
+        urban_firms = firms.select(firms.z=='a')
+        urban_space = model.region_spaces['a']
+        urban_agents = urban_space.agents.to_list()
+        assert set(urban_households).issubset(set(urban_agents))
+        assert set(urban_firms).issubset(set(urban_agents))
+        assert len(urban_agents) == len(urban_firms + urban_households)
+

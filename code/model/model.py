@@ -392,4 +392,136 @@ class DualEcoModel(ap.Model):
         central_bank.r_B = p['r_B']
         self.central_bank = central_bank
 
-    
+
+    def create_labor_markets(self):
+        government = self.government
+        households = self.households
+        firms = self.firms
+
+        # populate rural labor markets
+        rural_households = households.select(households.z=='a')
+        rural_firms = firms.select(firms.s==1)
+        rural_market = ap.Network(self)
+        rural_market.add_agents(rural_firms)
+        rural_market.add_agents(rural_households)
+
+        # create rural labor network
+        j = len(rural_firms)
+        rural_workers = rural_households.select(rural_households.s==1)
+        for i, worker in enumerate(rural_workers):
+            employer = rural_firms[i % j]
+            employer_pos = rural_market.positions[employer]
+            worker_pos = rural_market.positions[worker]
+            rural_market.graph.add_edge(employer_pos, worker_pos)
+
+        # populate formal urban labor market        
+        urban_households = households.select(households.z=='b')
+        formal_firms = firms.select(firms.s==2)
+        formal_market = ap.Network(self)
+        formal_market.add_agents([government])
+        formal_market.add_agents(formal_firms)
+        formal_market.add_agents(urban_households)
+
+        # create formal labor network for private urban sector
+        j = len(formal_firms)
+        private_workers = urban_households.select(urban_households.s==2)
+        for i, worker in enumerate(private_workers):
+            employer = formal_firms[i % j]
+            employer_pos = formal_market.positions[employer]
+            worker_pos = formal_market.positions[worker]
+            formal_market.graph.add_edge(employer_pos, worker_pos)
+        
+        # create formal labor network for public sector
+        public_workers = urban_households.select(urban_households.s_WG==1)
+        employer_pos = formal_market.positions[government]
+        for i, worker in enumerate(public_workers):
+            worker_pos = formal_market.positions[worker]
+            formal_market.graph.add_edge(employer_pos, worker_pos)
+
+        # populate informal urban labor market
+        informal_firms = firms.select(firms.s==3)
+        informal_market = ap.Network(self)
+        informal_market.add_agents(informal_firms)
+        informal_market.add_agents(urban_households)
+
+        # create informal urban labor network
+        j = len(informal_firms)
+        private_workers = urban_households.select(urban_households.s==3)
+        for i, worker in enumerate(private_workers):
+            employer = informal_firms[i % j]
+            employer_pos = informal_market.positions[employer]
+            worker_pos = informal_market.positions[worker]
+            informal_market.graph.add_edge(employer_pos, worker_pos)
+
+        self.labor_markets = {1:rural_market,
+                              2:formal_market,
+                              3:informal_market}
+        
+    def create_deposit_market(self):
+        bank = self.bank
+        firms = self.firms
+        households = self.households
+        formal_firms = firms.select(firms.s==2)
+        urban_households = households.select(households.z=='b')
+
+        # populate deposit market
+        market = ap.Network(self)
+        market.add_agents([bank])
+        market.add_agents(formal_firms)
+        market.add_agents(urban_households)
+        self.deposit_market = market
+
+        # create firm deposit networks
+        bank_pos = market.positions[bank]
+        graph = market.graph
+        for firm in formal_firms:
+            firm_pos = market.positions[firm]
+            graph.add_edge(firm_pos, bank_pos)
+
+        # create household deposit networks
+        bank_pos = market.positions[bank]
+        graph = market.graph
+        for household in urban_households:
+            household_pos = market.positions[household]
+            graph.add_edge(household_pos, bank_pos)
+
+
+    def create_credit_market(self):
+        bank = self.bank
+        firms = self.firms
+        formal_firms = firms.select(firms.s==2)
+
+        # populate credit market
+        market = ap.Network(self)
+        market.add_agents([bank])
+        market.add_agents(formal_firms)
+        self.credit_market = market
+
+        # create credit networks
+        bank_pos = market.positions[bank]
+        graph = market.graph
+        for firm in formal_firms:
+            firm_pos = market.positions[firm]
+            graph.add_edge(firm_pos, bank_pos)
+
+
+    def create_region_spaces(self):
+        firms = self.firms
+        households = self.households
+
+        # create and populate rural area
+        rural_households = households.select(households.z=='a')
+        rural_firms = firms.select(firms.z=='a')
+        rural_space = ap.Space(self, (0, 1))
+        rural_space.add_agents(rural_firms)
+        rural_space.add_agents(rural_households)
+
+        # create and populate urban area
+        urban_households = households.select(households.z=='b')
+        urban_firms = firms.select(firms.z=='b')
+        urban_space = ap.Space(self, (0, 1))
+        urban_space.add_agents(urban_firms)
+        urban_space.add_agents(urban_households)
+        self.region_spaces = {'a': rural_space,
+                              'b': urban_space}
+
