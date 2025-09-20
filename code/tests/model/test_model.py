@@ -69,7 +69,7 @@ def test_initialize_empty_stocks_and_flows(model_set1):
 def test_calc_firms_stocks_and_flows(model_set1):
     for model in model_set1:
         model.calc_block_1()
-        stocks, flows = create_matrices_from_params(model.p)
+        stocks, flows = create_matrices_from_params(model.p, digits=2)
         print('stocks\n', stocks, '\nflows\n', flows)
 
         assert stocks.loc['sigma', 'F'] == 0.0
@@ -80,7 +80,7 @@ def test_calc_households_stocks_and_flows(model_set1):
     for model in model_set1:
         model.calc_block_1()
         model.calc_block_2()
-        stocks, flows = create_matrices_from_params(model.p)
+        stocks, flows = create_matrices_from_params(model.p, digits=2)
         print('stocks\n', stocks, '\nflows\n', flows)
 
         assert stocks.loc['sigma', 'H'] == 0
@@ -92,7 +92,7 @@ def test_calc_banks_stocks_and_flows(model_set1):
         model.calc_block_1()
         model.calc_block_2()
         model.calc_block_3()
-        stocks, flows = create_matrices_from_params(model.p)
+        stocks, flows = create_matrices_from_params(model.p, digits=2)
         print('stocks\n', stocks, '\nflows\n', flows)
 
         assert stocks.loc['sigma', 'B'] == 0
@@ -105,7 +105,7 @@ def test_calc_public_sector_stocks_and_flows(model_set1):
         model.calc_block_2()
         model.calc_block_3()
         model.calc_block_4()
-        stocks, flows = create_matrices_from_params(model.p)
+        stocks, flows = create_matrices_from_params(model.p, digits=2)
         print('stocks\n', stocks, '\nflows\n', flows)
 
         assert stocks.loc['sigma', 'G'] == 0
