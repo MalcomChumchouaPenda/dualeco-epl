@@ -32,7 +32,7 @@ def sum_params(params, prefix):
     return sum([v for k, v in params.items() if k.startswith(prefix)])
 
 
-def create_matrices_from_params(params):
+def create_matrices_from_params(params, digits=None):
     stock_matrix = pd.DataFrame(0.0, index=stock_keys, columns=account_keys)
     stock_matrix.loc['M', 'H'] = sum_params(params, 'M_H')
     stock_matrix.loc['D', 'H'] = sum_params(params, 'D_H')
@@ -97,12 +97,17 @@ def create_matrices_from_params(params):
     flow_matrix.loc['DeltaM', 'CB'] = params.get('DeltaM_CB', 0)
     flow_matrix.loc['sigma', :] = flow_matrix.sum()
     flow_matrix['sigma'] = flow_matrix.sum(axis=1)
+
+    if digits is not None:
+        f = lambda x: round(x, digits)
+        stock_matrix = stock_matrix.map(f)
+        flow_matrix = flow_matrix.map(f)
     return stock_matrix, flow_matrix
 
 
-def create_matrices_from_output(output, t, model_name='DualEcoModel'):
+def create_matrices_from_output(output, t, model_name='DualEcoModel', digits=None):
     variables = output.variables[model_name]
     variables = variables.loc[t].to_dict()
-    return create_matrices_from_params(variables)
+    return create_matrices_from_params(variables, digits=digits)
 
 

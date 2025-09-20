@@ -26,6 +26,16 @@ class Household(ap.Agent):
         self.w_D = 0        # reservation wage
         self.r_D = 0        # deposit interest rate
 
+        self.bank = None
+
+
+    def withdraw_deposits(self, amount):
+        self.M += amount
+        self.D -= amount
+        self.bank.M -= amount
+        self.bank.D -= amount
+
+
 
 class Firm(ap.Agent):
     
@@ -47,6 +57,16 @@ class Firm(ap.Agent):
         self.p_y = 0        # production price
         self.r_D = 0        # deposit interest rate
         self.r_L = 0        # loan interest rate
+
+        self.bank = None
+
+
+    def withdraw_deposits(self, amount):
+        self.M += amount
+        self.D -= amount
+        self.bank.M -= amount
+        self.bank.D -= amount
+
 
 
 class Bank(ap.Agent):
@@ -70,6 +90,15 @@ class Bank(ap.Agent):
         self.r_B = 0        # bonds interest rate
         self.r_L = 0        # loans interest rate
     
+
+    def ask_advances(self, amount):
+        central_bank = self.model.central_bank
+        central_bank.A += amount
+        central_bank.M += amount
+        self.A += amount
+        self.M += amount
+    
+
 
 class Government(ap.Agent):
     
