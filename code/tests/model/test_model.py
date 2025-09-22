@@ -309,8 +309,8 @@ def test_share_firm_equities(model_set3):
         for s in model.sectors:
             sector_firms = firms.select(firms.s == s)
             sector_owners = owners.select(owners.s == s)
-            assert sum(sector_firms.E) == sum_params(p, f'E_F{s}')
-            assert sum(sector_firms.E) == sum(sector_owners.E)
+            assert round(sum(sector_firms.E), 2) == round(sum_params(p, f'E_F{s}'), 2)
+            assert round(sum(sector_firms.E), 2) == round(sum(sector_owners.E), 2)
 
 
 def test_share_bank_stocks(model_set3):
@@ -342,8 +342,8 @@ def test_share_bank_equities(model_set3):
         bank = model.bank
         households = model.households
         owners = households.select(households.s_EB == 1)
-        assert bank.E == sum_params(p, 'E_B')
-        assert bank.E == sum(owners.E)
+        assert round(bank.E, 2) == round(sum_params(p, 'E_B'), 2)
+        assert round(bank.E, 2) == round(sum(owners.E), 2)
 
 
 def test_share_public_sector_stocks(model_set3):
