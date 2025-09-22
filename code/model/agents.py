@@ -15,6 +15,7 @@ class Household(ap.Agent):
 
         self.M = 0          # cash money
         self.D = 0          # deposits
+        self.E = 0          # equities
 
         self.C = 0          # consumption
         self.W = 0          # wages
@@ -46,6 +47,7 @@ class Firm(ap.Agent):
         self.M = 0          # cash money
         self.D = 0          # deposits
         self.L = 0          # loans
+        self.E = 0          # equities
 
         self.Q = 0          # sales
         self.W = 0          # wages
@@ -77,6 +79,7 @@ class Bank(ap.Agent):
         self.D = 0          # deposits
         self.B = 0          # bonds
         self.L = 0          # loans
+        self.E = 0          # equities
 
         self.T = 0          # taxes
         self.iota_A = 0     # reimbursement of advance interest

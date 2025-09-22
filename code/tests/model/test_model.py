@@ -36,7 +36,8 @@ def param_set():
         'alpha_a2':np.random.random(),        # propension a consommer le bien 2 en zone rurale
         'theta_W':np.random.random(),         # proportion desire de fonds de salaire
         'theta_E':np.random.random(),         # proportion desire de capitaux bancaire (rentabilite)
-        'theta_Ubar':np.random.random(),      # proportion reglementaire des allocations publics
+        'theta_M':np.random.random(),         # proportion desire de liquidite
+        'theta_Zbar':np.random.random(),      # proportion reglementaire des allocations publics
         'r_D': np.random.random(),            # taux d'interet sur les depots bancaires
         'r_L': np.random.random(),            # taux d'interet sur les credits bancaires
         'r_B': np.random.random(),            # taux d'interet sur les bons du tresors
@@ -76,18 +77,18 @@ def test_calc_firms_stocks_and_flows(model_set1):
         assert flows.loc['sigma', 'F'] == 0.0
 
 
-def test_calc_households_stocks_and_flows(model_set1):
+def test_calc_banks_stocks_and_flows(model_set1):
     for model in model_set1:
         model.calc_block_1()
         model.calc_block_2()
         stocks, flows = create_matrices_from_params(model.p, digits=2)
         print('stocks\n', stocks, '\nflows\n', flows)
 
-        assert stocks.loc['sigma', 'H'] == 0
-        assert flows.loc['sigma', 'H'] == 0
+        assert stocks.loc['sigma', 'B'] == 0
+        assert flows.loc['sigma', 'B'] == 0
 
 
-def test_calc_banks_stocks_and_flows(model_set1):
+def test_calc_households_stocks_and_flows(model_set1):
     for model in model_set1:
         model.calc_block_1()
         model.calc_block_2()
@@ -95,8 +96,8 @@ def test_calc_banks_stocks_and_flows(model_set1):
         stocks, flows = create_matrices_from_params(model.p, digits=2)
         print('stocks\n', stocks, '\nflows\n', flows)
 
-        assert stocks.loc['sigma', 'B'] == 0
-        assert flows.loc['sigma', 'B'] == 0
+        assert stocks.loc['sigma', 'H'] == 0
+        assert flows.loc['sigma', 'H'] == 0
 
 
 def test_calc_public_sector_stocks_and_flows(model_set1):
@@ -146,9 +147,9 @@ def test_create_sufficient_owners(model_set2):
         households = model.households
         owners = households.select(households.s_E == 1)
         assert 1 == len(owners.select(owners.s_EB == 1)), "abnormal number of bank owners"
-        assert sum_params(model.p, 'N_E') == len(owners.select(owners.s_EB==0)), "abnormal number of firm owners"
+        assert sum_params(model.p, 'N_E') == len(owners.select(owners.s_EB == 0)), "abnormal number of firm owners"
         for s in model.sectors:
-            assert sum_params(p, f'N_E{s}') == len(owners.select(owners.s==s)), f"abnormal number of firm owners type {s}"
+            assert sum_params(p, f'N_E{s}') == len(owners.select(owners.s == s)), f"abnormal number of owners type {s}"
 
 
 def test_create_sufficient_workers(model_set2):
@@ -188,6 +189,7 @@ def test_create_households_by_regions(model_set2):
 
 def test_create_firms(model_set2):
     for model in model_set2:
+        model.create_households()
         model.create_firms()
         N = sum_params(model.p, 'N_E')
         assert N == len(model.firms)
@@ -198,6 +200,7 @@ def test_create_firms(model_set2):
 
 def test_create_firms_by_sectors(model_set2):
     for model in model_set2:
+        model.create_households()
         model.create_firms()
 
         p = model.p
@@ -208,6 +211,7 @@ def test_create_firms_by_sectors(model_set2):
 
 def test_create_firms_by_regions(model_set2):
     for model in model_set2:
+        model.create_households()
         model.create_firms()
 
         p = model.p
@@ -220,21 +224,35 @@ def test_create_firms_by_regions(model_set2):
 
 def test_create_unique_bank(model_set2):
     for model in model_set2:
+        model.create_households()
+        model.create_firms()
         model.create_bank()
         assert isinstance(model.bank, Bank)
 
 
 def test_create_public_sector(model_set2):
     for model in model_set2:
+        model.create_households()
+        model.create_firms()
+        model.create_bank()
         model.create_public_sector()
         assert isinstance(model.government, Government)
         assert isinstance(model.central_bank, CentralBank)
 
 
-def test_share_household_stocks(model_set2):
+
+@pytest.fixture
+def model_set3(model_set2):
     for model in model_set2:
         model.create_households()
+        model.create_firms()
+        model.create_bank()
+        model.create_public_sector()
+    return model_set2
 
+
+def test_share_household_stocks(model_set3):
+    for model in model_set3:
         p = model.p
         households = model.households
         for z in model.regions:
@@ -243,10 +261,8 @@ def test_share_household_stocks(model_set2):
             assert round(p[f'D_H{z}'], 2) == round(sum(group.D), 2)
 
 
-def test_share_household_flows(model_set2):
-    for model in model_set2:
-        model.create_households()
-
+def test_share_household_flows(model_set3):
+    for model in model_set3:
         p = model.p
         households = model.households
         for z in model.regions:
@@ -259,10 +275,8 @@ def test_share_household_flows(model_set2):
             assert round(p[f'pi_dH{z}'], 2) == round(sum(group.pi_d), 2)
 
 
-def test_share_firm_stocks(model_set2):
-    for model in model_set2:
-        model.create_firms()
-
+def test_share_firm_stocks(model_set3):
+    for model in model_set3:
         p = model.p
         firms = model.firms
         for s in model.sectors:
@@ -272,10 +286,8 @@ def test_share_firm_stocks(model_set2):
             assert round(p[f'L_F{s}'], 2) == round(sum(group.L), 2)
 
 
-def test_share_firm_flows(model_set2):
-    for model in model_set2:
-        model.create_firms()
-
+def test_share_firm_flows(model_set3):
+    for model in model_set3:
         p = model.p
         firms = model.firms
         for s in model.sectors:
@@ -288,10 +300,21 @@ def test_share_firm_flows(model_set2):
             assert round(p[f'pi_dF{s}'], 2) == round(sum(group.pi_d), 2)
 
 
-def test_share_bank_stocks(model_set2):
-    for model in model_set2:
-        model.create_bank()
+def test_share_firm_equities(model_set3):
+    for model in model_set3:
+        p = model.p
+        firms = model.firms
+        households = model.households
+        owners = households.select(households.s_E == 1)
+        for s in model.sectors:
+            sector_firms = firms.select(firms.s == s)
+            sector_owners = owners.select(owners.s == s)
+            assert sum(sector_firms.E) == sum_params(p, f'E_F{s}')
+            assert sum(sector_firms.E) == sum(sector_owners.E)
 
+
+def test_share_bank_stocks(model_set3):
+    for model in model_set3:
         p = model.p
         bank = model.bank
         assert round(p['M_B'], 2) == round(bank.M, 2)
@@ -301,10 +324,8 @@ def test_share_bank_stocks(model_set2):
         assert round(p['L_B'], 2) == round(bank.L, 2)
 
 
-def test_share_bank_flows(model_set2):
-    for model in model_set2:
-        model.create_bank()
-
+def test_share_bank_flows(model_set3):
+    for model in model_set3:
         p = model.p
         bank = model.bank 
         assert round(p['T_B'], 2) == round(bank.T, 2)
@@ -315,10 +336,18 @@ def test_share_bank_flows(model_set2):
         assert round(p['pi_dB'], 2) == round(bank.pi_d, 2)
 
 
-def test_share_public_sector_stocks(model_set2):
-    for model in model_set2:
-        model.create_public_sector()
+def test_share_bank_equities(model_set3):
+    for model in model_set3:
+        p = model.p
+        bank = model.bank
+        households = model.households
+        owners = households.select(households.s_EB == 1)
+        assert bank.E == sum_params(p, 'E_B')
+        assert bank.E == sum(owners.E)
 
+
+def test_share_public_sector_stocks(model_set3):
+    for model in model_set3:
         p = model.p
         government = model.government
         assert round(p['M_G'], 2) == round(government.M, 2)
@@ -330,10 +359,8 @@ def test_share_public_sector_stocks(model_set2):
         assert round(p['B_CB'], 2) == round(central_bank.B, 2)
 
 
-def test_share_public_sector_flows(model_set2):
-    for model in model_set2:
-        model.create_public_sector()
-
+def test_share_public_sector_flows(model_set3):
+    for model in model_set3:
         p = model.p
         government = model.government 
         assert round(p['W_G'], 2) == round(government.W, 2)
@@ -346,17 +373,6 @@ def test_share_public_sector_flows(model_set2):
         assert round(p['iota_ACB'], 2) == round(central_bank.iota_A, 2)
         assert round(p['iota_BCB'], 2) == round(central_bank.iota_B, 2)
         assert round(p['pi_CB'], 2) == round(central_bank.pi, 2)
-
-
-
-@pytest.fixture
-def model_set3(model_set2):
-    for model in model_set2:
-        model.create_households()
-        model.create_firms()
-        model.create_bank()
-        model.create_public_sector()
-    return model_set2
 
 
 def test_share_consumption_prices(model_set3):

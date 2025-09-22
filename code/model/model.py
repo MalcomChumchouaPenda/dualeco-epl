@@ -23,13 +23,15 @@ class DualEcoModel(ap.Model):
 
     def init_params(self):
         # define SFC variables by agent types
-        h_vars = ['M_H', 'D_H', 'C', 'W_H', 'Z_H', 'T_H', 
-                  'iota_DH', 'pi_dH', 'DeltaM_H', 'DeltaD_H']
-        f_vars = ['M_F', 'D_F', 'L_F', 'Q', 'W_F', 'T_F', 'iota_LF', 
-                  'iota_DF', 'pi_dF', 'DeltaM_F', 'DeltaL_F', 'DeltaD_F']
-        b_vars = ['M_B', 'A_B', 'D_B', 'B_B', 'L_B', 'T_B', 'iota_AB', 
+        h_vars = ['M_H', 'D_H', 'E_H', 'C', 'W_H', 'Z_H', 'T_H', 
+                  'iota_DH', 'pi_dH', 'DeltaM_H', 'DeltaD_H', 'DeltaE_H']
+        f_vars = ['M_F', 'D_F', 'L_F', 'E_F', 'Q', 'W_F', 'T_F', 'iota_LF', 
+                  'iota_DF', 'pi_dF', 'DeltaM_F', 'DeltaL_F', 'DeltaD_F',
+                  'DeltaE_F', 'L_def_F']
+        b_vars = ['M_B', 'A_B', 'D_B', 'B_B', 'L_B', 'E_B', 'T_B', 'iota_AB', 
                   'iota_BB', 'iota_LB', 'iota_DB', 'pi_dB', 'DeltaA_B', 
-                  'DeltaB_B', 'DeltaM_B', 'DeltaL_B', 'DeltaD_B']
+                  'DeltaB_B', 'DeltaM_B', 'DeltaL_B', 'DeltaD_B',
+                  'DeltaE_B', 'L_def_B']
         g_vars = ['M_G', 'B_G', 'W_G', 'Z_G', 'T_G', 'iota_BG', 
                   'pi_G', 'DeltaB_G', 'DeltaM_G']
         cb_vars = ['M_CB', 'A_CB', 'B_CB', 'iota_ACB', 'iota_BCB', 
@@ -73,6 +75,7 @@ class DualEcoModel(ap.Model):
                 p[f'pi_F{s}'] = p[f'Q{s}'] - p[f'W_F{s}']
                 p[f'pi_dF{s}'] = p['rho'] - p[f'pi_F{s}']
                 p[f'M_F{s}'] = (p[f'pi_F{s}'] - p[f'pi_dF{s}'])/ p['zeta_2']
+                p[f'E_F{s}'] = p[f'M_F{s}']
     
             else:
                 # for banked sectors
@@ -95,6 +98,7 @@ class DualEcoModel(ap.Model):
                 p['T_F2'] = X[1]
                 p['pi_dF2'] = X[2]
                 p['L_F2'] = X[3]
+                p['E_F2'] = p['D_F2'] - p['L_F2']
             
             # finalize interest and variation computation
             p[f'iota_LF{s}'] = p['zeta_1'] * p['r_L'] * p[f'L_F{s}']
@@ -102,9 +106,59 @@ class DualEcoModel(ap.Model):
             p[f'DeltaL_F{s}'] = p['zeta_2'] * p[f'L_F{s}']
             p[f'DeltaD_F{s}'] = p['zeta_2'] * p[f'D_F{s}']
             p[f'DeltaM_F{s}'] = p['zeta_2'] * p[f'M_F{s}'] 
+            p[f'DeltaE_F{s}'] = 0 
+            p[f'L_def_F{s}'] = 0
+
+
+    def calc_block_2(self):
+        # compute steady state for bank sector
+        p = self.p
+        p['A_B'] = 0
+        p['L_B'] = p['L_F2']
+        A = np.array([
+            [0, 0, 0, 0, 0, 0, 1, -1],
+            [1, 0, 0, 0, -p['zeta_1'] * p['r_B'], 0, p['zeta_1'] * p['r_D'], 0],
+            [p['tau'], -1, 0, 0, 0, 0, 0, 0],
+            [p['rho'], -p['rho'], -1, 0, 0, 0, 0, 0],
+            [0, 0, 0, 1, -1, -1, 1, 0],
+            [1, -1, -1, 0, -p['zeta_2'], -p['zeta_2'], p['zeta_2'], 0],
+            [0, 0, 0, 1, -p['theta_E'], -p['theta_E'], 0, 0],
+            [0, 0, 0, 0, 0, 1, -p['theta_M'], 0]
+        ])
+        B = np.array([
+            p['D_F2'],
+            p['zeta_1'] * p['r_L'] * p['L_B'],
+            0,
+            0,
+            p['L_B'],
+            p['zeta_2'] * p['L_B'],
+            p['theta_E'] * p['L_B'],
+            0
+        ])
+        X = np.linalg.solve(A, B)
+        p['pi_B'] = X[0]
+        p['T_B'] = X[1]
+        p['pi_dB'] = X[2]
+        p['E_B'] = X[3]
+        p['B_B'] = X[4]
+        p['M_B'] = X[5]
+        p['D_B'] = X[6]
+        p['D_Hb'] = X[7]
+        print(p['zeta_2'] * p['M_B'])
+        
+        # finalize interest and variation computation
+        p['iota_LB'] = p['zeta_1'] * p['r_L'] * p['L_B']
+        p['iota_DB'] = p['zeta_1'] * p['r_D'] * p['D_B']
+        p['iota_BB'] = p['zeta_1'] * p['r_B'] * p['B_B']
+        p['DeltaB_B'] = p['zeta_2'] * p['B_B']
+        p['DeltaL_B'] = p['zeta_2'] * p['L_B'] 
+        p['DeltaD_B'] = p['zeta_2'] * p['D_B'] 
+        p['DeltaM_B'] = p['zeta_2'] * p['M_B']
+        p['DeltaE_B'] = 0 
+        p['L_def_B'] = 0
 
     
-    def calc_block_2(self):
+    def calc_block_3(self):
         # compute steady state for households
         p = self.p
 
@@ -124,30 +178,15 @@ class DualEcoModel(ap.Model):
     
             else:
                 # for urban households
-                p['M_Hb'] = 0
                 p['Cb'] = p['alpha_b1'] * p['Q1'] + (1 - p['alpha_a2']) * p['Q2'] + p['Q3']
                 p['W_G'] = p['w_G'] * p['N_WG']
                 p['W_Hb'] = p['W_F2'] + p['W_F3'] + p['W_G']
-                p['Z_Hb'] = p['theta_Ubar'] * p['w_min'] * p['N_U']
-                p['pi_dB'] = p['rho'] * p['zeta_1'] * p['r_L'] * p['L_F2']
+                p['Z_Hb'] = p['theta_Zbar'] * p['w_min'] * p['N_U']
                 p['pi_dHb'] = p['pi_dF2'] + p['pi_dF3'] + p['pi_dB']
-                A = np.array([
-                    [1, 0, 0, -p['zeta_1'] * p['r_D']],
-                    [p['tau'], -1, 0, 0],
-                    [1, -1, -1, 0],
-                    [0, 0, 1, -p['zeta_2']]
-                ])
-                B = np.array([
-                    p['W_Hb'] + p['pi_dHb'] + p['Z_Hb'],
-                    p['tau'] * p['Z_Hb'],
-                    0,
-                    p['Cb']
-                ])
-                X = np.linalg.solve(A, B)
-                p['Yb'] = X[0]
-                p['T_Hb'] = X[1]
-                p['Y_db'] = X[2]
-                p['D_Hb'] = X[3]
+                p['Yb'] = p['W_Hb'] + p['pi_dHb'] + p['Z_Hb'] + p['zeta_1'] * p['r_D'] * p['D_Hb']
+                p['T_Hb'] = p['tau'] * (p['Yb'] - p['Z_Hb'])
+                p['Y_db'] = p['Yb'] - p['T_Hb']                
+                p['M_Hb'] = ((p['Y_db'] - p['Cb']) / p['zeta_2']) - p['D_Hb']
                 
             # finalize interest and variation computation
             p[f'iota_DH{z}'] = p['zeta_1'] * p['r_D'] * p[f'D_H{z}']
@@ -155,43 +194,6 @@ class DualEcoModel(ap.Model):
             p[f'DeltaM_H{z}'] = p['zeta_2'] * p[f'M_H{z}'] 
 
         
-    def calc_block_3(self):
-        # compute steady state for bank sector
-        p = self.p
-        p['A_B'] = 0
-        p['D_B'] = p['D_Hb'] + p['D_F2']
-        p['L_B'] = p['L_F2']
-        A = np.array([
-            [1, 0, 0, -p['zeta_1'] * p['r_B'], 0],
-            [p['tau'], -1, 0, 0, 0],
-            [p['rho'], -p['rho'], 0, 0, 0],
-            [0, 0, 1, -1, -1],
-            [1, -1, 0, -p['zeta_2'], -p['zeta_2']]
-        ])
-        B = np.array([
-            p['zeta_1'] * p['r_L'] * p['L_B'] - p['zeta_1'] * p['r_D'] * p['D_B'],
-            0,
-            p['pi_dB'],
-            p['L_B'] - p['D_B'],
-            p['pi_dB'] + p['zeta_2'] * p['L_B'] - p['zeta_2'] * p['D_B']
-        ])
-        X = np.linalg.solve(A, B)
-        p['pi_B'] = X[0]
-        p['T_B'] = X[1]
-        p['E_B'] = X[2]
-        p['B_B'] = X[3]
-        p['M_B'] = X[4]
-        print(p['zeta_2'] * p['M_B'])
-        
-        # finalize interest and variation computation
-        p['iota_LB'] = p['zeta_1'] * p['r_L'] * p['L_B']
-        p['iota_DB'] = p['zeta_1'] * p['r_D'] * p['D_B']
-        p['iota_BB'] = p['zeta_1'] * p['r_B'] * p['B_B']
-        p['DeltaB_B'] = p['zeta_2'] * p['B_B']
-        p['DeltaL_B'] = p['zeta_2'] * p['L_B'] 
-        p['DeltaD_B'] = p['zeta_2'] * p['D_B'] 
-        p['DeltaM_B'] = p['zeta_2'] * p['M_B']
-
     
     def calc_block_4(self):
         # compute steady state for public sector
@@ -326,6 +328,8 @@ class DualEcoModel(ap.Model):
         self.firms = firms1 + firms2 + firms3
 
         # share stocks, flows and prices
+        households = self.households
+        owners = households.select(households.s_E == 1)
         firms = self.firms
         for s in self.sectors:
             group = firms.select(firms.s == s)
@@ -341,11 +345,19 @@ class DualEcoModel(ap.Model):
             group.pi_d = p[f'pi_dF{s}'] / len(group)
 
             group.p_y = p[f'p{s}']
+            group.E = p[f'E_F{s}'] / len(group)
+            group_owners = owners.select(owners.s == s)
+            group_owners.E = p[f'E_F{s}'] / len(group_owners)
 
 
     def create_bank(self):
         p = self.p
         bank = Bank(self)
+        bank.E = p['E_B']
+        households = self.households
+        owners = households.select(households.s_EB == 1)
+        owners.E = p['E_B'] / len(owners)
+
         bank.M = p['M_B']
         bank.D = p['D_B']
         bank.L = p['L_B']

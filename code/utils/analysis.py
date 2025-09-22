@@ -9,17 +9,18 @@ account_names = ['Households', 'Firms', 'Banks',
                  'Government', 'Central Bank']
 
 # definitions des stocks
-stock_keys = ['M', 'A', 'D', 'B', 'L']
+stock_keys = ['M', 'A', 'D', 'B', 'L', 'E']
 stock_names = ['HP Money', 'Cash Advances', 
-               'Deposits', 'Bonds', 'Loans']
+               'Deposits', 'Bonds', 'Loans',
+               'Equities']
 
 # definitions des flux
-flow_keys = ['C', 'W', 'Z', 'T', 'iota_A', 'iota_B', 'iota_L', 'iota_D', 
-             'pi_d', 'pi', 'DeltaA', 'DeltaB', 'DeltaM', 'DeltaL', 'DeltaD']
+flow_keys = ['C', 'W', 'Z', 'T', 'iota_A', 'iota_B', 'iota_L', 'iota_D',  'pi_d', 'pi', 
+             'DeltaA', 'DeltaB', 'DeltaM', 'DeltaL', 'DeltaD', 'DeltaE', 'L_def']
 flow_names = ['Consumption', 'Wages', 'Doles', 'Taxes',  'Int. on advances', 
               'Int. on bonds', 'Int. on loans', 'Int on deposits', 'Entrepreneurial Profits', 
               'Central Bank Profits', 'Var. of advances', 'Var. of bonds', 'Var. of HP Money', 
-              'var. of loans', 'Var. of deposits']
+              'var. of loans', 'Var. of deposits', 'Var of Equities', 'Loan defaults']
 
 
 def print_matrices(matrices):
@@ -36,14 +37,17 @@ def create_matrices_from_params(params, digits=None):
     stock_matrix = pd.DataFrame(0.0, index=stock_keys, columns=account_keys)
     stock_matrix.loc['M', 'H'] = sum_params(params, 'M_H')
     stock_matrix.loc['D', 'H'] = sum_params(params, 'D_H')
+    stock_matrix.loc['E', 'H'] = sum_params(params, 'E_H')
     stock_matrix.loc['M', 'F'] = sum_params(params, 'M_F')
     stock_matrix.loc['D', 'F'] = sum_params(params, 'D_F')
     stock_matrix.loc['L', 'F'] = - sum_params(params, 'L_F')
+    stock_matrix.loc['E', 'F'] = - sum_params(params, 'E_F')
     stock_matrix.loc['M', 'B'] = params.get('M_B', 0)
     stock_matrix.loc['A', 'B'] = - params.get('A_B', 0)
     stock_matrix.loc['D', 'B'] = - params.get('D_B', 0)
     stock_matrix.loc['B', 'B'] = params.get('B_B', 0)
     stock_matrix.loc['L', 'B'] = params.get('L_B', 0)
+    stock_matrix.loc['E', 'B'] = - sum_params(params, 'E_B')
     stock_matrix.loc['M', 'G'] = params.get('M_G', 0)
     stock_matrix.loc['B', 'G'] = - params.get('B_G', 0)
     stock_matrix.loc['M', 'CB'] = - params.get('M_CB', 0)
@@ -62,6 +66,7 @@ def create_matrices_from_params(params, digits=None):
     flow_matrix.loc['pi_d', 'H'] = sum_params(params, 'pi_dH')
     flow_matrix.loc['DeltaM', 'H'] = - sum_params(params, 'DeltaM_H')
     flow_matrix.loc['DeltaD', 'H'] = - sum_params(params, 'DeltaD_H')
+    flow_matrix.loc['DeltaE', 'H'] = - sum_params(params, 'DeltaE_H')
     flow_matrix.loc['C', 'F'] = sum_params(params, 'Q')
     flow_matrix.loc['W', 'F'] = - sum_params(params, 'W_F')
     flow_matrix.loc['T', 'F'] = - sum_params(params, 'T_F')
@@ -71,6 +76,8 @@ def create_matrices_from_params(params, digits=None):
     flow_matrix.loc['DeltaM', 'F'] = - sum_params(params, 'DeltaM_F')
     flow_matrix.loc['DeltaL', 'F'] = sum_params(params, 'DeltaL_F')
     flow_matrix.loc['DeltaD', 'F'] = - sum_params(params, 'DeltaD_F')
+    flow_matrix.loc['DeltaE', 'F'] = sum_params(params, 'DeltaE_F')
+    flow_matrix.loc['L_def', 'F'] = sum_params(params, 'L_def_F')
     flow_matrix.loc['T', 'B'] = - params.get('T_B', 0)
     flow_matrix.loc['iota_A', 'B'] = - params.get('iota_AB', 0)
     flow_matrix.loc['iota_B', 'B'] = params.get('iota_BB', 0)
@@ -82,6 +89,8 @@ def create_matrices_from_params(params, digits=None):
     flow_matrix.loc['DeltaM', 'B'] = - params.get('DeltaM_B', 0)
     flow_matrix.loc['DeltaL', 'B'] = - params.get('DeltaL_B', 0)
     flow_matrix.loc['DeltaD', 'B'] = params.get('DeltaD_B', 0)
+    flow_matrix.loc['DeltaE', 'B'] = params.get('DeltaE_B', 0)
+    flow_matrix.loc['L_def', 'B'] = - params.get('L_def_B', 0)
     flow_matrix.loc['W', 'G'] = - params.get('W_G', 0)
     flow_matrix.loc['Z', 'G'] = - params.get('Z_G', 0)
     flow_matrix.loc['T', 'G'] = params.get('T_G', 0)
