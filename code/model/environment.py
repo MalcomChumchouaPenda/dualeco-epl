@@ -3,7 +3,7 @@
 import agentpy as ap
 
 
-class Region(ap.Space):
+class Country(ap.Space):
     
     def pay_doles(self, amount, government, household):
         government.Z += amount
@@ -18,15 +18,15 @@ class Region(ap.Space):
         government.M += amount
     
     def pay_dividends(self, amount, source, owner):
-        source.pi_d += amount
+        source.Pi_d += amount
         source.M -= amount
-        owner.pi_d += amount
+        owner.Pi_d += amount
         owner.M += amount
     
     def transfer_profits(self, amount, source, target):
-        source.pi += amount
+        source.Pi += amount
         source.M += amount
-        target.pi += amount
+        target.Pi += amount
         target.M += amount
 
     def give_advances(self, amount, central_bank, bank):
@@ -52,10 +52,10 @@ class Region(ap.Space):
     def reimburse_equities(self, target, owner):
         cash = target.M
         amount = target.E
-        target.pi_d -= amount - cash
+        target.Pi_d -= amount - cash
         target.E -= amount
         target.M -= cash
-        owner.pi_d -= amount - cash
+        owner.Pi_d -= amount - cash
         owner.E -= amount
         owner.M += cash
         
