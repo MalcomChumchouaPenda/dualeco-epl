@@ -15,18 +15,14 @@ def param_set():
         'g_ss':np.random.random(),            # taux de croissance
         'N_E1':np.random.randint(1, 25),      # nombre de entrepreneurs dans le secteur productif 1
         'N_E2':np.random.randint(1, 25),      # nombre de entrepreneurs dans le secteur productif 2
-        'N_E3':np.random.randint(1, 25),      # nombre de entrepreneurs dans le secteur productif 3
         'N_W1':np.random.randint(1, 25),      # nombre de salaries dans le secteur productif 1
         'N_W2':np.random.randint(1, 25),      # nombre de salaries dans le secteur productif 2
-        'N_W3':np.random.randint(1, 25),      # nombre de salaries dans le secteur productif 3
         'N_WG':np.random.randint(1, 25),      # nombre de salaries dans le secteur public
         'N_U':np.random.randint(1, 25),       # nombre de chomeurs dans le secteur public
         'phi1':np.random.uniform(0.5, 2.5),   # productivite initial du secteur productif 1
         'phi2':np.random.uniform(0.5, 2.5),   # productivite initial du secteur productif 2
-        'phi3':np.random.uniform(0.5, 2.5),   # productivite initial du secteur productif 3
         'w1':np.random.uniform(0.5, 2.5),     # salaire initial du secteur productif 1
         'w2':np.random.uniform(0.5, 2.5),     # salaire initial du secteur productif 2
-        'w3':np.random.uniform(0.5, 2.5),     # salaire initial du secteur productif 3
         'w_G':np.random.uniform(0.5, 2.5),    # salaire public
         'w_min':np.random.uniform(0.5, 2.5),  # salaire minimum
         'tau': np.random.random(),            # taux d'impots
@@ -171,20 +167,7 @@ def test_create_sufficient_unemployed(model_set2):
 
         p = model.p
         households = model.households
-        assert sum_params(p, 'N_U') == len(households.select(households.s_U == 1)), "abnormal number of public workers"
-
-
-def test_create_households_by_regions(model_set2):
-    for model in model_set2:
-        model.create_households()
-
-        p = model.p
-        households = model.households
-        Na = p['N_E1'] + p['N_W1']
-        N = sum_params(p, 'N_')
-        Nb = N - Na
-        assert Na == len(households.select(households.z == 'a')), "abnormal number of rural households"
-        assert Nb == len(households.select(households.z == 'b')), "abnormal number of urban households"
+        assert sum_params(p, 'N_U') == len(households.select(households.s_U == 1)), "abnormal number of unemployed"
 
 
 def test_create_firms(model_set2):
@@ -208,18 +191,6 @@ def test_create_firms_by_sectors(model_set2):
         for s in model.sectors:
             assert p[f'N_E{s}'] == len(firms.select(firms.s == s)), f"adnormal number of firms in {s}"
 
-
-def test_create_firms_by_regions(model_set2):
-    for model in model_set2:
-        model.create_households()
-        model.create_firms()
-
-        p = model.p
-        firms = model.firms
-        Na = p['N_E1']
-        Nb = p['N_E2'] + p['N_E3']
-        assert Na == len(firms.select(firms.z == 'a')), "abnormal number of firms in rural region"
-        assert Nb == len(firms.select(firms.z == 'b')), "abnormal number of firms in urban region"
 
 
 def test_create_unique_bank(model_set2):
@@ -255,24 +226,20 @@ def test_share_household_stocks(model_set3):
     for model in model_set3:
         p = model.p
         households = model.households
-        for z in model.regions:
-            group = households.select(households.z==z)
-            assert round(p[f'M_H{z}'], 2) == round(sum(group.M), 2)
-            assert round(p[f'D_H{z}'], 2) == round(sum(group.D), 2)
+        assert round(p['M_H'], 2) == round(sum(households.M), 2)
+        assert round(p['D_H'], 2) == round(sum(households.D), 2)
 
 
 def test_share_household_flows(model_set3):
     for model in model_set3:
         p = model.p
         households = model.households
-        for z in model.regions:
-            group = households.select(households.z==z)
-            assert round(p[f'C{z}'], 2) == round(sum(group.C), 2)
-            assert round(p[f'W_H{z}'], 2) == round(sum(group.W), 2)   
-            assert round(p[f'Z_H{z}'], 2) == round(sum(group.Z), 2)   
-            assert round(p[f'T_H{z}'], 2) == round(sum(group.T), 2)
-            assert round(p[f'iota_DH{z}'], 2) == round(sum(group.iota_D), 2)
-            assert round(p[f'pi_dH{z}'], 2) == round(sum(group.pi_d), 2)
+        assert round(p['C'], 2) == round(sum(households.C), 2)
+        assert round(p['W_H'], 2) == round(sum(households.W), 2)   
+        assert round(p['Z_H'], 2) == round(sum(households.Z), 2)   
+        assert round(p['T_H'], 2) == round(sum(households.T), 2)
+        assert round(p['iota_DH'], 2) == round(sum(households.iota_D), 2)
+        assert round(p['Pi_dH'], 2) == round(sum(households.Pi_d), 2)
 
 
 def test_share_firm_stocks(model_set3):
@@ -297,7 +264,7 @@ def test_share_firm_flows(model_set3):
             assert round(p[f'T_F{s}'], 2) == round(sum(group.T), 2)
             assert round(p[f'iota_LF{s}'], 2) == round(sum(group.iota_L), 2)
             assert round(p[f'iota_DF{s}'], 2) == round(sum(group.iota_D), 2)
-            assert round(p[f'pi_dF{s}'], 2) == round(sum(group.pi_d), 2)
+            assert round(p[f'Pi_dF{s}'], 2) == round(sum(group.Pi_d), 2)
 
 
 def test_share_firm_equities(model_set3):
@@ -333,7 +300,7 @@ def test_share_bank_flows(model_set3):
         assert round(p['iota_BB'], 2) == round(bank.iota_B, 2)
         assert round(p['iota_LB'], 2) == round(bank.iota_L, 2)
         assert round(p['iota_DB'], 2) == round(bank.iota_D, 2)
-        assert round(p['pi_dB'], 2) == round(bank.pi_d, 2)
+        assert round(p['Pi_dB'], 2) == round(bank.Pi_d, 2)
 
 
 def test_share_bank_equities(model_set3):
@@ -367,12 +334,12 @@ def test_share_public_sector_flows(model_set3):
         assert round(p['Z_G'], 2) == round(government.Z, 2)
         assert round(p['T_G'], 2) == round(government.T, 2)
         assert round(p['iota_BG'], 2) == round(government.iota_B, 2)
-        assert round(p['pi_G'], 2) == round(government.pi, 2)
+        assert round(p['Pi_G'], 2) == round(government.Pi, 2)
         
         central_bank = model.central_bank 
         assert round(p['iota_ACB'], 2) == round(central_bank.iota_A, 2)
         assert round(p['iota_BCB'], 2) == round(central_bank.iota_B, 2)
-        assert round(p['pi_CB'], 2) == round(central_bank.pi, 2)
+        assert round(p['Pi_CB'], 2) == round(central_bank.Pi, 2)
 
 
 def test_share_consumption_prices(model_set3):
@@ -405,11 +372,11 @@ def test_share_interest_rates(model_set3):
     for model in model_set3:
         p = model.p
         households = model.households
-        household = households.select(households.z == 'a')
+        household = households[0]
         assert household.r_D == p['r_D']
 
         firms = model.firms
-        firm = firms.select(firms.s == 2)[0]
+        firm = firms.select(firms.s == 1)[0]
         assert firm.r_D == p['r_D']
         assert firm.r_L == p['r_L']
 
@@ -427,19 +394,20 @@ def test_share_interest_rates(model_set3):
         assert central_bank.r_B == p['r_B']
 
 
-def test_create_rural_labor_networks(model_set3):
+def test_create_formal_labor_networks(model_set3):
     for model in model_set3:
         model.create_labor_markets()
-        
+
         market = model.labor_markets[1]
         agents = market.agents.to_list()
-        households = model.households
-        households = households.select(households.z=='a')
+        government = model.government
         firms = model.firms
-        firms = firms.select(firms.z=='a')
+        firms = firms.select(firms.s==1)
+        households = model.households
+        assert government in set(agents)
         assert set(households).issubset(set(agents))
         assert set(firms).issubset(set(agents))
-        assert len(agents) == len(households) + len(firms)
+        assert len(agents) == len(households + firms) + 1
 
         p = model.p
         num_employers = p['N_E1']
@@ -448,51 +416,25 @@ def test_create_rural_labor_networks(model_set3):
         max_ratio = min_ratio + 1
         assert len(market.neighbors(firms[0]).to_list()) in [min_ratio, max_ratio]
         assert len(market.neighbors(firms[-1]).to_list()) in [min_ratio, max_ratio]
-        
+        assert len(market.neighbors(government).to_list()) == p['N_WG']
 
-def test_create_formal_urban_labor_networks(model_set3):
+
+def test_create_informal_labor_networks(model_set3):
     for model in model_set3:
         model.create_labor_markets()
 
         market = model.labor_markets[2]
         agents = market.agents.to_list()
-        government = model.government
         firms = model.firms
         firms = firms.select(firms.s==2)
         households = model.households
-        households = households.select(households.z=='b')
-        assert government in set(agents)
-        assert set(households).issubset(set(agents))
-        assert set(firms).issubset(set(agents))
-        assert len(agents) == len(households + firms) + 1
-
-        p = model.p
-        num_employers = p['N_E2']
-        num_employees = p['N_E2'] + p['N_W2']
-        min_ratio = num_employees // num_employers
-        max_ratio = min_ratio + 1
-        assert len(market.neighbors(firms[0]).to_list()) in [min_ratio, max_ratio]
-        assert len(market.neighbors(firms[-1]).to_list()) in [min_ratio, max_ratio]
-        assert len(market.neighbors(government).to_list()) == p['N_WG']
-
-
-def test_create_informal_urban_labor_networks(model_set3):
-    for model in model_set3:
-        model.create_labor_markets()
-
-        market = model.labor_markets[3]
-        agents = market.agents.to_list()
-        firms = model.firms
-        firms = firms.select(firms.s==3)
-        households = model.households
-        households = households.select(households.z=='b')
         assert set(households).issubset(set(agents))
         assert set(firms).issubset(set(agents))
         assert len(agents) == len(households + firms)
 
         p = model.p
-        num_employers = p['N_E3']
-        num_employees = p['N_E3'] + p['N_W3']
+        num_employers = p['N_E2']
+        num_employees = p['N_E2'] + p['N_W2']
         min_ratio = num_employees // num_employers
         max_ratio = min_ratio + 1
         assert len(market.neighbors(firms[0]).to_list()) in [min_ratio, max_ratio]
@@ -507,14 +449,13 @@ def test_create_deposit_networks(model_set3):
         agents = market.agents.to_list()
         bank = model.bank
         firms = model.firms
-        firms = firms.select(firms.s==2)
+        formal_firms = firms.select(firms.s==1)
         households = model.households
-        households = households.select(households.z=='b')
         assert set(households).issubset(set(agents))
-        assert set(firms).issubset(set(agents))
+        assert set(formal_firms).issubset(set(agents))
         assert bank in agents
-        assert len(agents) == len(households + firms) + 1
-        assert len(market.neighbors(bank).to_list()) == len(households + firms)
+        assert len(agents) == len(households + formal_firms) + 1
+        assert len(market.neighbors(bank).to_list()) == len(households + formal_firms)
 
 
 def test_create_credit_networks(model_set3):
@@ -525,31 +466,21 @@ def test_create_credit_networks(model_set3):
         agents = market.agents.to_list()
         bank = model.bank
         firms = model.firms
-        firms = firms.select(firms.s==2)
-        assert set(firms).issubset(set(agents))
+        formal_firms = firms.select(firms.s==1)
+        assert set(formal_firms).issubset(set(agents))
         assert bank in agents
-        assert len(agents) == len(firms) + 1
-        assert len(market.neighbors(bank).to_list()) == len(firms)
+        assert len(agents) == len(formal_firms) + 1
+        assert len(market.neighbors(bank).to_list()) == len(formal_firms)
 
-def test_create_regional_spaces(model_set3):
+
+def test_create_country(model_set3):
     for model in model_set3:
-        model.create_region_spaces()
+        model.create_country()
 
         firms = model.firms
         households = model.households
-        rural_households = households.select(households.z=='a')
-        rural_firms = firms.select(firms.z=='a')
-        rural_space = model.region_spaces['a']
-        rural_agents = rural_space.agents.to_list()
-        assert set(rural_households).issubset(set(rural_agents))
-        assert set(rural_firms).issubset(set(rural_agents))
-        assert len(rural_agents) == len(rural_firms + rural_households)
-
-        urban_households = households.select(households.z=='a')
-        urban_firms = firms.select(firms.z=='a')
-        urban_space = model.region_spaces['a']
-        urban_agents = urban_space.agents.to_list()
-        assert set(urban_households).issubset(set(urban_agents))
-        assert set(urban_firms).issubset(set(urban_agents))
-        assert len(urban_agents) == len(urban_firms + urban_households)
+        agents = model.country.agents.to_list()
+        assert set(households).issubset(set(agents))
+        assert set(firms).issubset(set(agents))
+        assert len(agents) == len(firms + households)
 

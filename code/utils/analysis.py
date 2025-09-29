@@ -15,7 +15,7 @@ stock_names = ['HP Money', 'Cash Advances',
                'Equities']
 
 # definitions des flux
-flow_keys = ['C', 'W', 'Z', 'T', 'iota_A', 'iota_B', 'iota_L', 'iota_D',  'pi_d', 'pi', 
+flow_keys = ['C', 'W', 'Z', 'T', 'iota_A', 'iota_B', 'iota_L', 'iota_D',  'Pi_d', 'Pi', 
              'DeltaA', 'DeltaB', 'DeltaM', 'DeltaL', 'DeltaD', 'DeltaE', 'L_def']
 flow_names = ['Consumption', 'Wages', 'Doles', 'Taxes',  'Int. on advances', 
               'Int. on bonds', 'Int. on loans', 'Int on deposits', 'Entrepreneurial Profits', 
@@ -63,7 +63,7 @@ def create_matrices_from_params(params, digits=None):
     flow_matrix.loc['Z', 'H'] = sum_params(params, 'Z_H')
     flow_matrix.loc['T', 'H'] = - sum_params(params, 'T_H')
     flow_matrix.loc['iota_D', 'H'] = sum_params(params, 'iota_DH')
-    flow_matrix.loc['pi_d', 'H'] = sum_params(params, 'pi_dH')
+    flow_matrix.loc['Pi_d', 'H'] = sum_params(params, 'Pi_dH')
     flow_matrix.loc['DeltaM', 'H'] = - sum_params(params, 'DeltaM_H')
     flow_matrix.loc['DeltaD', 'H'] = - sum_params(params, 'DeltaD_H')
     flow_matrix.loc['DeltaE', 'H'] = - sum_params(params, 'DeltaE_H')
@@ -72,7 +72,7 @@ def create_matrices_from_params(params, digits=None):
     flow_matrix.loc['T', 'F'] = - sum_params(params, 'T_F')
     flow_matrix.loc['iota_L', 'F'] = - sum_params(params, 'iota_LF')
     flow_matrix.loc['iota_D', 'F'] = sum_params(params, 'iota_DF')
-    flow_matrix.loc['pi_d', 'F'] = - sum_params(params, 'pi_dF')
+    flow_matrix.loc['Pi_d', 'F'] = - sum_params(params, 'Pi_dF')
     flow_matrix.loc['DeltaM', 'F'] = - sum_params(params, 'DeltaM_F')
     flow_matrix.loc['DeltaL', 'F'] = sum_params(params, 'DeltaL_F')
     flow_matrix.loc['DeltaD', 'F'] = - sum_params(params, 'DeltaD_F')
@@ -83,7 +83,7 @@ def create_matrices_from_params(params, digits=None):
     flow_matrix.loc['iota_B', 'B'] = params.get('iota_BB', 0)
     flow_matrix.loc['iota_L', 'B'] = params.get('iota_LB', 0)
     flow_matrix.loc['iota_D', 'B'] = - params.get('iota_DB', 0)
-    flow_matrix.loc['pi_d', 'B'] = - params.get('pi_dB', 0)
+    flow_matrix.loc['Pi_d', 'B'] = - params.get('Pi_dB', 0)
     flow_matrix.loc['DeltaA', 'B'] = params.get('DeltaA_B', 0)
     flow_matrix.loc['DeltaB', 'B'] = - params.get('DeltaB_B', 0)
     flow_matrix.loc['DeltaM', 'B'] = - params.get('DeltaM_B', 0)
@@ -95,12 +95,12 @@ def create_matrices_from_params(params, digits=None):
     flow_matrix.loc['Z', 'G'] = - params.get('Z_G', 0)
     flow_matrix.loc['T', 'G'] = params.get('T_G', 0)
     flow_matrix.loc['iota_B', 'G'] = - params.get('iota_BG', 0)
-    flow_matrix.loc['pi', 'G'] = params.get('pi_G', 0)
+    flow_matrix.loc['Pi', 'G'] = params.get('Pi_G', 0)
     flow_matrix.loc['DeltaB', 'G'] = params.get('DeltaB_G', 0)
     flow_matrix.loc['DeltaM', 'G'] = - params.get('DeltaM_G', 0)
     flow_matrix.loc['iota_A', 'CB'] = params.get('iota_ACB', 0)
     flow_matrix.loc['iota_B', 'CB'] = params.get('iota_BCB', 0)
-    flow_matrix.loc['pi', 'CB'] = - params.get('pi_CB', 0)
+    flow_matrix.loc['Pi', 'CB'] = - params.get('Pi_CB', 0)
     flow_matrix.loc['DeltaA', 'CB'] = - params.get('DeltaA_CB', 0)
     flow_matrix.loc['DeltaB', 'CB'] = - params.get('DeltaB_CB', 0)
     flow_matrix.loc['DeltaM', 'CB'] = params.get('DeltaM_CB', 0)
