@@ -77,6 +77,12 @@ class LaborMarket(ap.Network):
         employer.M -= amount
         worker.W += amount
         worker.M += amount
+    
+    def hire_worker(self, worker, employer):
+        self.graph.add_edge(worker, employer)
+    
+    def fire_worker(self, worker, employer):
+        self.graph.remove_edge(worker, employer)
 
 
 class DepositMarket(ap.Network):

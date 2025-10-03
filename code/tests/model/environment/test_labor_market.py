@@ -24,3 +24,24 @@ def test_pay_wages(market):
     assert worker.W == 20
     assert worker.M == 20
 
+
+def test_hire_worker(market):
+    model = market.model
+    worker = ap.Agent(model)
+    employer = ap.Agent(model)
+    market.add_agents([worker, employer])
+
+    market.hire_worker(worker, employer)
+    assert market.graph.has_edge(worker, employer)
+
+
+def test_fire_worker(market):
+    model = market.model
+    worker = ap.Agent(model)
+    employer = ap.Agent(model)
+    market.add_agents([worker, employer])
+    market.graph.add_edge(worker, employer)
+
+    market.fire_worker(worker, employer)
+    assert not market.graph.has_edge(worker, employer)
+
