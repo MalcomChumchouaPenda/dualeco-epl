@@ -57,3 +57,26 @@ def test_pay_interests(market):
     assert client.iota_D == 5
     assert client.D == 30
 
+
+def test_choose_bank(market):
+    model = market.model
+    client = ap.Agent(model)
+    client.bank = None
+    bank1 = ap.Agent(model)
+    bank2 = ap.Agent(model)
+    market.add_agents([client, bank1, bank2])
+
+    assert client.bank is None
+    assert not market.graph.has_edge(client, bank1)
+    assert not market.graph.has_edge(client, bank2)
+
+    market.choose_bank(client, bank1)
+    assert client.bank is bank1
+    assert market.graph.has_edge(client, bank1)
+    assert not market.graph.has_edge(client, bank2)
+
+    market.choose_bank(client, bank2)
+    assert client.bank is bank2
+    assert not market.graph.has_edge(client, bank1)
+    assert market.graph.has_edge(client, bank2)
+

@@ -80,6 +80,14 @@ class LaborMarket(ap.Network):
 
 
 class DepositMarket(ap.Network):
+
+    def choose_bank(self, client, bank):
+        graph = self.graph
+        old_bank = client.bank
+        if client.bank is not None:
+            graph.remove_edge(client, old_bank)
+        graph.add_edge(client, bank)
+        client.bank = bank
     
     def make_deposits(self, amount, client, bank):
         client.D += amount
