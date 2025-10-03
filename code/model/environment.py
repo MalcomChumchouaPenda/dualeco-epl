@@ -66,7 +66,6 @@ class Country(BasicSpace):
         owner.M += cash
         
 
-
 class GoodMarket(BasicSpace):
     
     def consume_goods(self, amount, client, firm):

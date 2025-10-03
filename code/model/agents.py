@@ -1,4 +1,5 @@
 
+import numpy as np
 import agentpy as ap
 
 
@@ -94,13 +95,48 @@ class Bank(ap.Agent):
         self.r_L = 0        # loans interest rate
     
 
-    def ask_advances(self, amount):
-        central_bank = self.model.central_bank
-        central_bank.A += amount
-        central_bank.M += amount
-        self.A += amount
-        self.M += amount
+    def pay_deposit_interests(self):
+        deposit_market = self.model.deposit_market
+        clients = deposit_market.neighbors(self)
+        for client in clients:
+            iota = client.D * self.r_D
+            deposit_market.pay_interests(iota, self, client)
     
+
+    def grant_loans(self):
+        random = self.model.nprandom
+        L_max = self.theta_Ebar * self.V
+        credit_market =  self.model.credit_market
+        firms = credit_market.neighbors(self)
+        for firm in firms:
+            print(firm.L_D, L_max)
+            if 0 < firm.L_D <= L_max:
+                Pr = np.exp(-self.gamma_L * firm.L_D / firm.V)
+                choice = random.choice([0, 1], p=[1-Pr, Pr])
+                print('choice', choice, Pr)
+                if choice:
+                    firm.r_L = self.r_L + (self.beta_L * firm.L_D / firm.V)
+                    print(firm.r_L)
+                    credit_market.give_loans(firm.L_D, self, firm)
+                    L_max -= firm.L_D
+
+
+    def ask_advances(self):
+        A = self.theta_Rbar * self.D - self.R
+        if A > 0:
+            central_bank = self.model.central_bank
+            country = self.model.country
+            country.give_advances(A, central_bank, self)
+            
+
+    def buy_bonds(self):
+        B = self.R - self.theta_Rbar * self.D
+        if B > 0:
+            government = self.model.government
+            B = min(government.B_S, B)        
+            bond_market = self.model.bond_market
+            bond_market.buy_bonds(B, self, government)
+        
 
 
 class Government(ap.Agent):
