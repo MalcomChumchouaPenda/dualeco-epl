@@ -9,6 +9,10 @@ def market():
     return LaborMarket(model)
 
 
+def test_is_network(market):
+    assert isinstance(market, ap.Network)
+
+
 def test_pay_wages(market):
     model = market.model
     employer = ap.Agent(model)

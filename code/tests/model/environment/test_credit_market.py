@@ -10,6 +10,10 @@ def market():
     return CreditMarket(model)
 
 
+def test_is_network(market):
+    assert isinstance(market, ap.Network)
+
+
 def test_give_loans(market):
     model = market.model
     bank = ap.Agent(model)

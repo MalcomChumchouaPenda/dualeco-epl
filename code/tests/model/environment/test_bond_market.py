@@ -12,6 +12,11 @@ def market():
     return market
 
 
+def test_is_space(market):
+    assert isinstance(market, ap.Space)
+    assert market.shape == (1, 1)
+
+
 def test_bank_buy_bonds(market):
     model = market.model
     bank = ap.Agent(model)

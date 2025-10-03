@@ -10,6 +10,11 @@ def market():
     return GoodMarket(model)
 
 
+def test_is_space(market):
+    assert isinstance(market, ap.Space)
+    assert market.shape == (1, 1)
+
+
 def test_consume_goods(market):
     model = market.model
     firm = ap.Agent(model)

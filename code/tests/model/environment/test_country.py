@@ -7,7 +7,12 @@ from model.environment import Country
 @pytest.fixture
 def country():
     model = ap.Model({})
-    return Country(model, (1, 1))
+    return Country(model)
+
+
+def test_is_space(country):
+    assert isinstance(country, ap.Space)
+    assert country.shape == (1, 1)
 
 
 def test_pay_doles(country):

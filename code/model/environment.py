@@ -3,7 +3,13 @@
 import agentpy as ap
 
 
-class Country(ap.Space):
+class BasicSpace(ap.Space):
+    def __init__(self, model, **kwargs):
+        super().__init__(model, shape=(1, 1), 
+                         torus=False, **kwargs)
+
+
+class Country(BasicSpace):
     
     def pay_doles(self, amount, government, household):
         government.Z += amount
@@ -61,7 +67,7 @@ class Country(ap.Space):
         
 
 
-class GoodMarket(ap.Network):
+class GoodMarket(BasicSpace):
     
     def consume_goods(self, amount, client, firm):
         client.C += amount
@@ -137,7 +143,7 @@ class CreditMarket(ap.Network):
         bank.L_def += value
 
 
-class BondMarket(ap.Network):
+class BondMarket(BasicSpace):
 
     def setup(self, **kwargs):
         self.central_bank =  None
