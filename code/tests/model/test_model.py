@@ -28,8 +28,6 @@ def param_set():
         'tau': np.random.random(),            # taux d'impots
         'rho': np.random.random(),            # politique de dividende
         'm':np.random.random(),               # taux de marge brute
-        'alpha_b1':np.random.random(),        # propension a consommer le bien 1 en zone urbaine
-        'alpha_a2':np.random.random(),        # propension a consommer le bien 2 en zone rurale
         'theta_W':np.random.random(),         # proportion desire de fonds de salaire
         'theta_E':np.random.random(),         # proportion desire de capitaux bancaire (rentabilite)
         'theta_M':np.random.random(),         # proportion desire de liquidite
