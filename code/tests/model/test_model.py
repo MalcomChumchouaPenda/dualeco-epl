@@ -47,63 +47,42 @@ def model_set1(param_set):
     for params in param_set:
         model = DualEcoModel(params)
         model.init_params()
+        model.calc_block_1()
+        model.calc_block_2()
+        model.calc_block_3()
+        model.calc_block_4()
         models.append(model)
     return models
 
 
-def test_initialize_empty_stocks_and_flows(model_set1):
-    for model in model_set1:
-        stocks, flows = create_matrices_from_params(model.p)
-        print('stocks\n', stocks, '\nflows\n', flows) 
-
-        account_keys = ['H', 'F', 'B', 'G', 'CB']
-        for key in account_keys:
-            assert stocks.loc['sigma', key] == 0.0
-            assert flows.loc['sigma', key] == 0.0
-
-
 def test_calc_firms_stocks_and_flows(model_set1):
     for model in model_set1:
-        model.calc_block_1()
         stocks, flows = create_matrices_from_params(model.p, digits=2)
         print('stocks\n', stocks, '\nflows\n', flows)
-
         assert stocks.loc['sigma', 'F'] == 0.0
         assert flows.loc['sigma', 'F'] == 0.0
 
 
 def test_calc_banks_stocks_and_flows(model_set1):
     for model in model_set1:
-        model.calc_block_1()
-        model.calc_block_2()
         stocks, flows = create_matrices_from_params(model.p, digits=2)
         print('stocks\n', stocks, '\nflows\n', flows)
-
         assert stocks.loc['sigma', 'B'] == 0
         assert flows.loc['sigma', 'B'] == 0
 
 
 def test_calc_households_stocks_and_flows(model_set1):
     for model in model_set1:
-        model.calc_block_1()
-        model.calc_block_2()
-        model.calc_block_3()
         stocks, flows = create_matrices_from_params(model.p, digits=2)
         print('stocks\n', stocks, '\nflows\n', flows)
-
         assert stocks.loc['sigma', 'H'] == 0
         assert flows.loc['sigma', 'H'] == 0
 
 
 def test_calc_public_sector_stocks_and_flows(model_set1):
     for model in model_set1:
-        model.calc_block_1()
-        model.calc_block_2()
-        model.calc_block_3()
-        model.calc_block_4()
         stocks, flows = create_matrices_from_params(model.p, digits=2)
         print('stocks\n', stocks, '\nflows\n', flows)
-
         assert stocks.loc['sigma', 'G'] == 0
         assert stocks.loc['sigma', 'CB'] == 0
         assert flows.loc['sigma', 'G'] == 0
@@ -112,117 +91,92 @@ def test_calc_public_sector_stocks_and_flows(model_set1):
 
 
 @pytest.fixture
-def model_set2(param_set):
+def model_set2(model_set1):
     models = []
-    for params in param_set:
-        model = DualEcoModel(params)
-        model.init_params()
-        model.calc_block_1()
-        model.calc_block_2()
-        model.calc_block_3()
-        model.calc_block_4()
+    for model in model_set1:
+        model.create_households()
+        model.create_firms()
+        model.create_banks()
+        model.create_public_sector()
         models.append(model)
     return models
 
 
 def test_create_sufficient_households(model_set2):
     for model in model_set2:
-        model.create_households()
-        assert sum_params(model.p, 'N') == len(model.households), "insufficient households"
-    
-    for household in model_set2[0].households:
-        assert isinstance(household, Household)
+        assert sum_params(model.p, 'N') == len(model.households)
+        for household in model.households:
+            assert isinstance(household, Household)
 
 
 def test_create_sufficient_owners(model_set2):
     for model in model_set2:
-        model.create_households()
-
         p = model.p
         households = model.households
         owners = households.select(households.s_E == 1)
-        assert sum_params(model.p, 'N_B') == len(owners.select(owners.s_EB == 1)), "abnormal number of bank owners"
-        assert sum_params(model.p, 'N_E') == len(owners.select(owners.s_EB == 0)), "abnormal number of firm owners"
+        assert sum_params(model.p, 'N_B') == len(owners.select(owners.s_EB == 1))
+        assert sum_params(model.p, 'N_E') == len(owners.select(owners.s_EB == 0))
         for s in model.sectors:
-            assert sum_params(p, f'N_E{s}') == len(owners.select(owners.s == s)), f"abnormal number of owners type {s}"
+            assert sum_params(p, f'N_E{s}') == len(owners.select(owners.s == s))
 
 
 def test_create_sufficient_workers(model_set2):
     for model in model_set2:
-        model.create_households()
-
         p = model.p
         households = model.households
         workers = households.select(households.s_W == 1)
-        assert sum_params(p, 'N_WG') == len(workers.select(workers.s_WG==1)), "abnormal number of public workers"
-        assert sum_params(p, 'N_WG') == len(workers.select(workers.s==0)), "abnormal number of public workers"
+        assert sum_params(p, 'N_WG') == len(workers.select(workers.s_WG==1))
+        assert sum_params(p, 'N_WG') == len(workers.select(workers.s==0))
         for s in model.sectors:
-            assert sum_params(p, f'N_W{s}') == len(workers.select(workers.s==s)), f"abnormal number of firm workers type {s}"
+            assert sum_params(p, f'N_W{s}') == len(workers.select(workers.s==s))
 
 
 def test_create_sufficient_unemployed(model_set2):
     for model in model_set2:
-        model.create_households()
-
         p = model.p
         households = model.households
-        assert sum_params(p, 'N_U') == len(households.select(households.s_U == 1)), "abnormal number of unemployed"
+        assert sum_params(p, 'N_U') == len(households.select(households.s_U == 1))
 
 
 def test_create_firms(model_set2):
     for model in model_set2:
-        model.create_households()
-        model.create_firms()
         N = sum_params(model.p, 'N_E')
         assert N == len(model.firms)
-
-    for firm in model_set2[0].firms:
-        assert isinstance(firm, Firm)
+        for firm in model.firms:
+            assert isinstance(firm, Firm)
 
 
 def test_create_firms_by_sectors(model_set2):
     for model in model_set2:
-        model.create_households()
-        model.create_firms()
-
         p = model.p
         firms = model.firms
         for s in model.sectors:
-            assert p[f'N_E{s}'] == len(firms.select(firms.s == s)), f"adnormal number of firms in {s}"
-
+            assert p[f'N_E{s}'] == len(firms.select(firms.s == s))
 
 
 def test_create_banks(model_set2):
     for model in model_set2:
-        model.create_households()
-        model.create_firms()
-        model.create_banks()
         N = sum_params(model.p, 'N_B')
         assert N == len(model.banks)
-
-    for bank in model_set2[0].banks:
-        assert isinstance(bank, Bank)
-
+        for bank in model_set2[0].banks:
+            assert isinstance(bank, Bank)
 
 
 def test_create_public_sector(model_set2):
     for model in model_set2:
-        model.create_households()
-        model.create_firms()
-        model.create_banks()
-        model.create_public_sector()
         assert isinstance(model.government, Government)
         assert isinstance(model.central_bank, CentralBank)
 
 
-
 @pytest.fixture
 def model_set3(model_set2):
+    models = []
     for model in model_set2:
-        model.create_households()
-        model.create_firms()
-        model.create_banks()
-        model.create_public_sector()
+        model.create_labor_markets()
+        model.create_deposit_market()
+        model.create_credit_market()
+        model.create_country()
+        models.append(model)
     return model_set2
 
 
@@ -406,8 +360,6 @@ def test_share_interest_rates(model_set3):
 
 def test_create_formal_labor_networks(model_set3):
     for model in model_set3:
-        model.create_labor_markets()
-
         market = model.labor_markets[1]
         agents = market.agents.to_list()
         government = model.government
@@ -424,8 +376,9 @@ def test_create_formal_labor_networks(model_set3):
         num_employees = p['N_E1'] + p['N_W1']
         min_ratio = num_employees // num_employers
         max_ratio = min_ratio + 1
-        assert len(market.neighbors(firms[0]).to_list()) in [min_ratio, max_ratio]
-        assert len(market.neighbors(firms[-1]).to_list()) in [min_ratio, max_ratio]
+        for firm in firms:
+            employees = market.neighbors(firm).to_list()
+            assert len(employees) in [min_ratio, max_ratio]
         assert len(market.neighbors(government).to_list()) == p['N_WG']
 
 
@@ -447,14 +400,13 @@ def test_create_informal_labor_networks(model_set3):
         num_employees = p['N_E2'] + p['N_W2']
         min_ratio = num_employees // num_employers
         max_ratio = min_ratio + 1
-        assert len(market.neighbors(firms[0]).to_list()) in [min_ratio, max_ratio]
-        assert len(market.neighbors(firms[-1]).to_list()) in [min_ratio, max_ratio]
+        for firm in firms:
+            employees = market.neighbors(firm).to_list()
+            assert len(employees) in [min_ratio, max_ratio]
 
 
 def test_create_deposit_networks(model_set3):
     for model in model_set3:
-        model.create_deposit_market()
-
         market = model.deposit_market
         agents = market.agents.to_list()
         banks = model.banks
@@ -471,14 +423,15 @@ def test_create_deposit_networks(model_set3):
         num_clients = len(households + formal_firms)
         min_ratio = num_clients // num_bank
         max_ratio = min_ratio + 1
-        assert len(market.neighbors(banks[0]).to_list()) in [min_ratio, max_ratio]
-        assert len(market.neighbors(banks[-1]).to_list()) in [min_ratio, max_ratio]
+        for bank in banks:
+            clients = market.neighbors(bank).to_list()
+            assert len(clients) in [min_ratio, max_ratio]
+            assert round(sum(clients.D), 2) == round(bank.D, 2)
+            assert round(sum(clients.iota_D), 2) == round(bank.iota_D, 2)
 
 
 def test_create_credit_networks(model_set3):
     for model in model_set3:
-        model.create_credit_market()
-
         market = model.credit_market
         agents = market.agents.to_list()
         banks = model.banks
@@ -493,14 +446,15 @@ def test_create_credit_networks(model_set3):
         num_firms = p['N_E1']
         min_ratio = num_firms // num_bank
         max_ratio = min_ratio + 1
-        assert len(market.neighbors(banks[0]).to_list()) in [min_ratio, max_ratio]
-        assert len(market.neighbors(banks[-1]).to_list()) in [min_ratio, max_ratio]
+        for bank in banks:
+            clients = market.neighbors(bank).to_list()
+            assert len(clients) in [min_ratio, max_ratio]
+            assert round(sum(clients.L), 2) == round(bank.L, 2)
+            assert round(sum(clients.iota_L), 2) == round(bank.iota_L, 2)
 
 
 def test_create_country(model_set3):
     for model in model_set3:
-        model.create_country()
-
         firms = model.firms
         households = model.households
         agents = model.country.agents.to_list()

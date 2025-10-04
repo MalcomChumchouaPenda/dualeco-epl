@@ -314,14 +314,10 @@ class DualEcoModel(ap.Model):
             owner.E = p['E_B'] / len(banks)
 
         banks.M = p['M_B'] / len(banks)
-        banks.D = p['D_B'] / len(banks)
-        banks.L = p['L_B'] / len(banks)
         banks.B = p['B_B'] / len(banks)
 
         banks.T = p['T_B'] / len(banks)
         banks.iota_A = p['iota_AB'] / len(banks)
-        banks.iota_D = p['iota_DB'] / len(banks)
-        banks.iota_L = p['iota_LB'] / len(banks)
         banks.iota_B = p['iota_BB'] / len(banks)
         banks.Pi_d = p['Pi_dB'] / len(banks)
 
@@ -424,6 +420,8 @@ class DualEcoModel(ap.Model):
         graph = market.graph
         for i, client in enumerate(formal_firms + households):
             bank = banks[i % j]
+            bank.D += client.D
+            bank.iota_D += client.iota_D
             bank_pos = market.positions[bank]
             client_pos = market.positions[client]
             graph.add_edge(client_pos, bank_pos)
@@ -445,6 +443,8 @@ class DualEcoModel(ap.Model):
         graph = market.graph
         for i, firm in enumerate(formal_firms):
             bank = banks[i % j]
+            bank.L  += firm.L
+            bank.iota_L += firm.iota_L
             bank_pos = market.positions[bank]
             firm_pos = market.positions[firm]
             graph.add_edge(firm_pos, bank_pos)
