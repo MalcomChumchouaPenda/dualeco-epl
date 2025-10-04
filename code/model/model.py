@@ -210,7 +210,7 @@ class DualEcoModel(ap.Model):
 
     def create_households(self):
         p = self.p
-        bank_owners = ap.AgentList(self, 1, Household)
+        bank_owners = ap.AgentList(self, p['N_B'], Household)
         bank_owners.s_EB = 1
         bank_owners.s_E = 1
         
@@ -282,6 +282,8 @@ class DualEcoModel(ap.Model):
         firms = self.firms
         for s in self.sectors:
             group = firms.select(firms.s == s)
+            group.p_y = p[f'p{s}']
+
             group.M = p[f'M_F{s}'] / len(group)
             group.D = p[f'D_F{s}'] / len(group)
             group.L = p[f'L_F{s}'] / len(group)
@@ -293,38 +295,43 @@ class DualEcoModel(ap.Model):
             group.iota_D = p[f'iota_DF{s}'] / len(group)
             group.Pi_d = p[f'Pi_dF{s}'] / len(group)
 
-            group.p_y = p[f'p{s}']
-            group.E = p[f'E_F{s}'] / len(group)
+
             group_owners = owners.select(owners.s == s)
-            group_owners.E = p[f'E_F{s}'] / len(group_owners)
+            for firm, owner in zip(group, group_owners):
+                firm.owner = owner
+                firm.E = p[f'E_F{s}'] / len(group)
+                owner.E = p[f'E_F{s}'] / len(group_owners)
 
 
-    def create_bank(self):
+    def create_banks(self):
         p = self.p
-        bank = Bank(self)
-        bank.E = p['E_B']
+        banks = ap.AgentList(self, p['N_B'], Bank)
         households = self.households
         owners = households.select(households.s_EB == 1)
-        owners.E = p['E_B'] / len(owners)
+        for bank, owner in zip(banks, owners):
+            bank.owner =  owner
+            bank.E = p['E_B'] / len(banks)
+            owner.E = p['E_B'] / len(banks)
 
-        bank.M = p['M_B']
-        bank.D = p['D_B']
-        bank.L = p['L_B']
-        bank.B = p['B_B']
+        banks.M = p['M_B'] / len(banks)
+        banks.D = p['D_B'] / len(banks)
+        banks.L = p['L_B'] / len(banks)
+        banks.B = p['B_B'] / len(banks)
 
-        bank.T = p['T_B']
-        bank.iota_A = p['iota_AB']
-        bank.iota_D = p['iota_DB']
-        bank.iota_L = p['iota_LB']
-        bank.iota_B = p['iota_BB']
-        bank.Pi_d = p['Pi_dB']
+        banks.T = p['T_B'] / len(banks)
+        banks.iota_A = p['iota_AB'] / len(banks)
+        banks.iota_D = p['iota_DB'] / len(banks)
+        banks.iota_L = p['iota_LB'] / len(banks)
+        banks.iota_B = p['iota_BB'] / len(banks)
+        banks.Pi_d = p['Pi_dB'] / len(banks)
 
-        bank.r_D = p['r_D']
-        bank.r_L = p['r_L']
-        bank.r_A = p['r_A']
-        bank.r_B = p['r_B']
-        self.bank = bank
+        banks.r_D = p['r_D']
+        banks.r_L = p['r_L']
+        banks.r_A = p['r_A']
+        banks.r_B = p['r_B']
+        self.banks = banks
     
+
     def create_public_sector(self):
         p = self.p
         government = Government(self)
@@ -400,48 +407,45 @@ class DualEcoModel(ap.Model):
         
 
     def create_deposit_market(self):
-        bank = self.bank
+        banks = self.banks
         firms = self.firms
         households = self.households
         formal_firms = firms.select(firms.s==1)
 
         # populate deposit market
         market = ap.Network(self)
-        market.add_agents([bank])
+        market.add_agents(banks)
         market.add_agents(formal_firms)
         market.add_agents(households)
         self.deposit_market = market
 
-        # create firm deposit networks
-        bank_pos = market.positions[bank]
+        # create deposit networks
+        j = len(banks)
         graph = market.graph
-        for firm in formal_firms:
-            firm_pos = market.positions[firm]
-            graph.add_edge(firm_pos, bank_pos)
-
-        # create household deposit networks
-        bank_pos = market.positions[bank]
-        graph = market.graph
-        for household in households:
-            household_pos = market.positions[household]
-            graph.add_edge(household_pos, bank_pos)
+        for i, client in enumerate(formal_firms + households):
+            bank = banks[i % j]
+            bank_pos = market.positions[bank]
+            client_pos = market.positions[client]
+            graph.add_edge(client_pos, bank_pos)
 
 
     def create_credit_market(self):
-        bank = self.bank
+        banks = self.banks
         firms = self.firms
         formal_firms = firms.select(firms.s==1)
 
         # populate credit market
         market = ap.Network(self)
-        market.add_agents([bank])
+        market.add_agents(banks)
         market.add_agents(formal_firms)
         self.credit_market = market
 
         # create credit networks
-        bank_pos = market.positions[bank]
+        j = len(banks)
         graph = market.graph
-        for firm in formal_firms:
+        for i, firm in enumerate(formal_firms):
+            bank = banks[i % j]
+            bank_pos = market.positions[bank]
             firm_pos = market.positions[firm]
             graph.add_edge(firm_pos, bank_pos)
 

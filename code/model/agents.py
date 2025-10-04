@@ -62,6 +62,7 @@ class Firm(ap.Agent):
         self.r_L = 0        # loan interest rate
 
         self.bank = None
+        self.owner = None
 
 
     def withdraw_deposits(self, amount):
@@ -93,7 +94,9 @@ class Bank(ap.Agent):
         self.r_A = 0        # advance interest rate
         self.r_B = 0        # bonds interest rate
         self.r_L = 0        # loans interest rate
-    
+
+        self.owner = None
+        
 
     def pay_deposit_interests(self):
         deposit_market = self.model.deposit_market

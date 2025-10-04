@@ -59,7 +59,6 @@ def bank2(bank1):
     return bank
 
 
-
 @pytest.mark.repeat(5)
 def test_do_not_grant_loans_if_no_demand(bank2, firms1):
     firms = firms1
@@ -72,11 +71,12 @@ def test_do_not_grant_loans_if_no_demand(bank2, firms1):
     market.give_loans.assert_not_called()
 
 
+
 @pytest.mark.repeat(5)
 def test_grant_loans_to_best_borrower(bank2, firms1):
     firms = firms1
     firms.L_D = 5
-    firms.V = 500
+    firms.V = 50000
     bank = bank2
     bank.V = 300
     bank.grant_loans()
@@ -86,7 +86,7 @@ def test_grant_loans_to_best_borrower(bank2, firms1):
     for firm in firms:
         assert firm.r_L > bank.r_L
         give_loans.assert_any_call(firm.L_D, bank, firm)
-    
+
 
 @pytest.mark.repeat(5)
 def test_grant_loans_with_maximum_loan(bank2, firms1):
@@ -106,7 +106,7 @@ def test_grant_loans_with_maximum_loan(bank2, firms1):
 @pytest.mark.repeat(5)
 def test_do_not_grant_loans_to_worst_borrower(bank2, firms1):
     firms = firms1
-    firms.L_D = 500
+    firms.L_D = 50000
     firms.V = 50
     bank = bank2
     bank.V = 300
