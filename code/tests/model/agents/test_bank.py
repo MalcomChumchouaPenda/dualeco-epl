@@ -1,7 +1,7 @@
 
 import pytest
 import agentpy as ap
-from mock import MagicMock, call
+from mock import MagicMock
 from model.agents import Bank
 
 
