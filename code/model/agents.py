@@ -23,7 +23,7 @@ class Household(ap.Agent):
         self.Z = 0          # public transfers
         self.T = 0          # taxes
         self.iota_D = 0     # reimbursement of deposit interests
-        self.pi_d = 0       # dividends
+        self.Pi_d = 0       # dividends
 
         self.w_D = 0        # reservation wage
         self.r_D = 0        # deposit interest rate
@@ -55,7 +55,7 @@ class Firm(ap.Agent):
         self.T = 0          # taxes
         self.iota_D = 0     # reimbursement of deposit interests
         self.iota_L = 0     # reimbursement of loan interests
-        self.pi_d = 0       # dividends
+        self.Pi_d = 0       # dividends
 
         self.p_y = 0        # production price
         self.r_D = 0        # deposit interest rate
@@ -88,7 +88,7 @@ class Bank(ap.Agent):
         self.iota_D = 0     # reimbursement of deposit interest
         self.iota_B = 0     # reimbursement of bonds interest
         self.iota_L = 0     # reimbursement of loans interest
-        self.pi_d = 0       # dividends
+        self.Pi_d = 0       # dividends
 
         self.r_D = 0        # deposit interest rate
         self.r_A = 0        # advance interest rate
@@ -96,7 +96,7 @@ class Bank(ap.Agent):
         self.r_L = 0        # loans interest rate
 
         self.owner = None
-        
+
 
     def pay_deposit_interests(self):
         deposit_market = self.model.deposit_market
@@ -140,6 +140,27 @@ class Bank(ap.Agent):
             bond_market = self.model.bond_market
             bond_market.buy_bonds(B, self, government)
         
+
+    def compute_profit(self):
+        self.Pi = self.iota_L + self.iota_B - self.L_def - self.iota_D - self.iota_A
+    
+    def pay_taxes(self):
+        if self.Pi > 0:
+            T = self.tau * self.Pi
+            gov = self.model.government
+            country = self.model.country
+            country.pay_taxes(T, self, gov)
+
+    def pay_dividends(self):
+        if self.Pi > 0:
+            Pi_d = self.rho * (self.Pi - self.T)
+            country = self.model.country
+            country.pay_dividends(Pi_d, self, self.owner)
+    
+    def update_net_worth(self):
+        self.E = self.E + self.Pi - self.T - self.Pi_d
+        self.owner.E = self.E
+
 
 
 class Government(ap.Agent):

@@ -191,33 +191,70 @@ def test_do_not_buy_bonds_if_insufficient_reserves(bank3, government1):
     market.buy_bonds.assert_not_called()
 
 
-
-# @pytest.fixture
-# def bank3(bank1):
-#     bank = bank1
-#     bank.theta_Rbar = 0.5  # ratio reglementaire de liquidite
-#     bank.D = 100
-#     return bank
-
-# def test_compute_profits():
-#     pass
-
-
-# def test_update_networth():
-#     pass
+def test_compute_profits(bank1):
+    bank = bank1
+    bank.iota_L = 50
+    bank.iota_B = 50
+    bank.L_def = 10
+    bank.iota_D = 20
+    bank.iota_A = 20
+    bank.compute_profit()
+    assert round(bank.Pi, 2) == 50.0
 
 
-# def test_pay_dividends_if_profits():
-#     pass
+@pytest.mark.parametrize('Pi, T', [(25, 2.5), (50, 5.0)])
+def test_pay_taxes_if_profits(bank1, government1, Pi, T):
+    bank = bank1
+    bank.tau = 0.1
+    bank.Pi = Pi
+    bank.pay_taxes()
+        
+    government = government1
+    country = bank.model.country
+    country.pay_taxes.assert_called_with(T, bank, government)
 
 
-# def test_do_not_pay_dividends_if_losses():
-#     pass
+@pytest.mark.parametrize('Pi', [0, -25, -50])
+def test_do_not_pay_taxes_if_losses(bank1, Pi):
+    bank = bank1
+    bank.tau = 0.1
+    bank.Pi = Pi
+    bank.pay_taxes()
+    
+    country = bank.model.country
+    country.pay_taxes.assert_not_called()
 
 
-# def test_pay_taxes_if_profits():
-#     pass
+@pytest.mark.parametrize('Pi, T, Pi_d', [(25, 5, 10.0), (50, 10.0, 20.0)])
+def test_pay_dividends_if_profits(bank1, Pi, T, Pi_d):
+    bank = bank1
+    bank.rho = 0.5
+    bank.Pi = Pi
+    bank.T = T
+    bank.pay_dividends()
+    
+    country = bank.model.country
+    country.pay_dividends.assert_called_with(Pi_d, bank, bank.owner)
 
 
-# def test_do_not_pay_taxes_if_losses():
-#     pass
+@pytest.mark.parametrize('Pi', [0, -25, -50])
+def test_do_not_pay_dividends_if_losses(bank1, Pi):
+    bank = bank1
+    bank.Pi = Pi
+    bank.pay_dividends()
+    
+    country = bank.model.country
+    country.pay_dividends.assert_not_called()
+
+
+def test_update_net_worth(bank1):
+    bank = bank1
+    bank.E = 60
+    bank.Pi = 40
+    bank.T = 15
+    bank.Pi_d = 10
+    bank.owner = MagicMock()
+    bank.update_net_worth()
+    assert round(bank.E, 2) == round(60 + 40 - 15 - 10, 2)
+    assert round(bank.E, 2) == round(bank.owner.E, 2)
+
