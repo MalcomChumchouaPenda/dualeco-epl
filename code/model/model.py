@@ -155,7 +155,8 @@ class DualEcoModel(ap.Model):
     def calc_block_3(self):
         # compute steady state for households
         p = self.p
-        p['C'] = p['Q1'] + p['Q2']
+        p['C1'] = p['Q1'] 
+        p['C2'] = p['Q2']
         p['W_G'] = p['w_G'] * p['N_WG']
         p['W_H'] = p['W_F1'] + p['W_F2'] + p['W_G']
         p['Z_H'] = p['theta_Zbar'] * p['w_G'] * p['N_U']
@@ -163,7 +164,7 @@ class DualEcoModel(ap.Model):
         p['Y'] = p['W_H'] + p['Pi_dH'] + p['Z_H'] + p['zeta_1'] * p['r_D'] * p['D_H']
         p['T_H'] = p['tau'] * (p['Y'] - p['Z_H'])
         p['Y_d'] = p['Y'] - p['T_H']                
-        p['M_H'] = ((p['Y_d'] - p['C']) / p['zeta_2']) - p['D_H']
+        p['M_H'] = ((p['Y_d'] - p['C1']- p['C2']) / p['zeta_2']) - p['D_H']
                 
          # finalize interest and variation computation
         p['iota_DH'] = p['zeta_1'] * p['r_D'] * p['D_H']
@@ -256,7 +257,8 @@ class DualEcoModel(ap.Model):
         households = self.households
         households.M = p['M_H'] / len(households)
         households.D = p['D_H'] / len(households)
-        households.C = p['C'] / len(households)
+        households.C1 = p['C1'] / len(households)
+        households.C2 = p['C2'] / len(households)
         households.W = p['W_H'] / len(households)
         households.Z = p['Z_H'] / len(households)
         households.T = p['T_H'] / len(households)

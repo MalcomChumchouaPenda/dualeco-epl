@@ -190,7 +190,8 @@ def test_share_household_flows(model_set3):
     for model in model_set3:
         p = model.p
         households = model.households
-        assert round(p['C'], 2) == round(sum(households.C), 2)
+        assert round(p['C1'], 2) == round(sum(households.C1), 2)
+        assert round(p['C2'], 2) == round(sum(households.C2), 2)
         assert round(p['W_H'], 2) == round(sum(households.W), 2)   
         assert round(p['Z_H'], 2) == round(sum(households.Z), 2)   
         assert round(p['T_H'], 2) == round(sum(households.T), 2)
