@@ -9,7 +9,7 @@ class BasicSpace(ap.Space):
                          torus=False, **kwargs)
 
 
-class Country(BasicSpace):
+class Economy(BasicSpace):
     
     def pay_doles(self, amount, government, household):
         government.Z += amount

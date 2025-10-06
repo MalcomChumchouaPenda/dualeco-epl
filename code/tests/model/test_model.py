@@ -175,7 +175,7 @@ def model_set3(model_set2):
         model.create_labor_markets()
         model.create_deposit_market()
         model.create_credit_market()
-        model.create_country()
+        model.create_economy()
         models.append(model)
     return model_set2
 
@@ -453,11 +453,11 @@ def test_create_credit_networks(model_set3):
             assert round(sum(clients.iota_L), 2) == round(bank.iota_L, 2)
 
 
-def test_create_country(model_set3):
+def test_create_economy(model_set3):
     for model in model_set3:
         firms = model.firms
         households = model.households
-        agents = model.country.agents.to_list()
+        agents = model.economy.agents.to_list()
         assert set(households).issubset(set(agents))
         assert set(firms).issubset(set(agents))
         assert len(agents) == len(firms + households)

@@ -450,11 +450,11 @@ class DualEcoModel(ap.Model):
             graph.add_edge(firm_pos, bank_pos)
 
 
-    def create_country(self):
+    def create_economy(self):
         firms = self.firms
         households = self.households
-        country = ap.Space(self, (0, 1))
-        country.add_agents(firms)
-        country.add_agents(households)
-        self.country = country
+        economy = ap.Space(self, (0, 1))
+        economy.add_agents(firms)
+        economy.add_agents(households)
+        self.economy = economy
 
