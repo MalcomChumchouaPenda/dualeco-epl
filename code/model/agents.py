@@ -6,28 +6,34 @@ import agentpy as ap
 class Household(ap.Agent):
     
     def setup(self):
-        self.z = ''         # region of household
-        self.s = 0          # employment sector of household
-        self.s_E = 0        # entrepreneur indicator variable
-        self.s_EB = 0       # bank owner indicator variable
+        self.s_U = 0        # unemployed indicator variable
         self.s_W = 0        # employee indicator variable
         self.s_WG = 0       # public employee indicator variable
-        self.s_U = 0        # unemployed indicator variable
+        self.s_E = 0        # entrepreneur indicator variable
+        self.s_EB = 0       # bank owner indicator variable
+        self.s_Y = 0        # employment sector of household
+        self.n_W = 0        # degree of formality of employment
+        self.l = 0          # labor employed
+        self.l_S = 1        # labor supply
 
         self.M = 0          # cash money
         self.D = 0          # deposits
+        self.D_star = 0     # deposits desired
         self.E = 0          # equities
+        self.E_star = 0     # equities desired
+        self.V = 0          # net worth
 
-        self.C = 0          # consumption
+        self.C_star = 0     # consumption desired
+        self.C1 = 0         # consumption of goods 1
+        self.C2 = 0         # consumption of goods 2
         self.W = 0          # wages
+        self.w_D = 0        # reservation wage
         self.Z = 0          # public transfers
         self.T = 0          # taxes
         self.iota_D = 0     # reimbursement of deposit interests
         self.Pi_d = 0       # dividends
 
-        self.w_D = 0        # reservation wage
         self.r_D = 0        # deposit interest rate
-
         self.bank = None
 
 
@@ -42,24 +48,33 @@ class Household(ap.Agent):
 class Firm(ap.Agent):
     
     def setup(self):
-        self.s = 0          # firm's sector
-        self.z = ''         # firm's region
+        self.s_Y = 0        # firm's sector
+        self.n_W = 0        # degree of formality on labor market
+        self.n_T = 0        # degree of formality on credit market
+        self.N_J = 0        # number of vacant job
+        self.l = 0          # labour employed
+        self.l_D = 0        # labour demand
 
         self.M = 0          # cash money
         self.D = 0          # deposits
         self.L = 0          # loans
+        self.L_D = 0        # credit demand
+        self.L_def = 0      # loan defaults
         self.E = 0          # equities
+        self.V = 0          # net worth
 
         self.Q = 0          # sales
         self.W = 0          # wages
         self.T = 0          # taxes
         self.iota_D = 0     # reimbursement of deposit interests
         self.iota_L = 0     # reimbursement of loan interests
+        self.Pi = 0         # profit
         self.Pi_d = 0       # dividends
 
-        self.p_y = 0        # production price
+        self.p_Y = 0        # production price
         self.r_D = 0        # deposit interest rate
         self.r_L = 0        # loan interest rate
+        self.w = 0          # wage offered
 
         self.bank = None
         self.owner = None
@@ -81,13 +96,16 @@ class Bank(ap.Agent):
         self.D = 0          # deposits
         self.B = 0          # bonds
         self.L = 0          # loans
+        self.L_def = 0      # default loans
         self.E = 0          # equities
+        self.V = 0          # net worth
 
         self.T = 0          # taxes
         self.iota_A = 0     # reimbursement of advance interest
         self.iota_D = 0     # reimbursement of deposit interest
         self.iota_B = 0     # reimbursement of bonds interest
         self.iota_L = 0     # reimbursement of loans interest
+        self.Pi = 0         # profits
         self.Pi_d = 0       # dividends
 
         self.r_D = 0        # deposit interest rate
@@ -128,8 +146,8 @@ class Bank(ap.Agent):
         A = self.theta_Rbar * self.D - self.R
         if A > 0:
             central_bank = self.model.central_bank
-            country = self.model.country
-            country.give_advances(A, central_bank, self)
+            economy = self.model.economy
+            economy.give_advances(A, central_bank, self)
             
 
     def buy_bonds(self):
@@ -148,14 +166,14 @@ class Bank(ap.Agent):
         if self.Pi > 0:
             T = self.tau * self.Pi
             gov = self.model.government
-            country = self.model.country
-            country.pay_taxes(T, self, gov)
+            economy = self.model.economy
+            economy.pay_taxes(T, self, gov)
 
     def pay_dividends(self):
         if self.Pi > 0:
             Pi_d = self.rho * (self.Pi - self.T)
-            country = self.model.country
-            country.pay_dividends(Pi_d, self, self.owner)
+            economy = self.model.economy
+            economy.pay_dividends(Pi_d, self, self.owner)
     
     def update_net_worth(self):
         self.E = self.E + self.Pi - self.T - self.Pi_d
@@ -168,14 +186,15 @@ class Government(ap.Agent):
     def setup(self):
         self.M = 0          # reserves
         self.B = 0          # bonds
+        self.B_S = 0        # bonds supply
 
-        self.W = 0          # wages
+        self.W = 0          # wage bill
         self.Z = 0          # public transfers
         self.T = 0          # taxes
         self.iota_B = 0     # reimbursement of bond interests
-        self.pi = 0         # profits
+        self.Pi = 0         # profits
 
-        self.w = 0          # wage
+        self.w = 0          # wage offered
         self.r_B = 0        # bond interest rate
 
 
@@ -188,7 +207,7 @@ class CentralBank(ap.Agent):
 
         self.iota_A = 0     # reimbursement of advance interests
         self.iota_B = 0     # reimbursement of bond interests
-        self.pi = 0         # profit
+        self.Pi = 0         # profit
 
         self.r_A = 0        # advance interest rate
         self.r_B = 0        # bond interest rate

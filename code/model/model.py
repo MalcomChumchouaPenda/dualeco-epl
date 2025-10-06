@@ -216,12 +216,12 @@ class DualEcoModel(ap.Model):
         
         firm_owners1 = ap.AgentList(self, p['N_E1'], Household)
         firm_owners1.s_E = 1
-        firm_owners1.s = 1
+        firm_owners1.s_Y = 1
         firm_owners1.w_D = p['w1']
         
         firm_owners2 = ap.AgentList(self, p['N_E2'], Household)
         firm_owners2.s_E = 1
-        firm_owners2.s = 2
+        firm_owners2.s_Y = 2
         firm_owners2.w_D = p['w2']
 
         firm_owners = firm_owners1 + firm_owners2
@@ -229,12 +229,12 @@ class DualEcoModel(ap.Model):
         self.households = owners
         
         private_workers1 = ap.AgentList(self, p['N_W1'], Household)
-        private_workers1.s = 1
+        private_workers1.s_Y = 1
         private_workers1.s_W = 1
         private_workers1.w_D = p['w1']
         
         private_workers2 = ap.AgentList(self, p['N_W2'], Household)
-        private_workers2.s = 2
+        private_workers2.s_Y = 2
         private_workers2.s_W = 1
         private_workers2.w_D = p['w2']
         
@@ -268,39 +268,39 @@ class DualEcoModel(ap.Model):
     def create_firms(self):
         p = self.p
         firms1 = ap.AgentList(self, p['N_E1'], Firm)
-        firms1.s = 1
+        firms1.s_Y = 1
         firms1.r_D = p['r_D']
         firms1.r_L = p['r_L']
 
         firms2 = ap.AgentList(self, p['N_E2'], Firm)
-        firms2.s = 2
+        firms2.s_Y = 2
         self.firms = firms1 + firms2
 
         # share stocks, flows and prices
         households = self.households
         owners = households.select(households.s_E == 1)
         firms = self.firms
-        for s in self.sectors:
-            group = firms.select(firms.s == s)
-            group.p_y = p[f'p{s}']
+        for s_Y in self.sectors:
+            group = firms.select(firms.s_Y == s_Y)
+            group.p_y = p[f'p{s_Y}']
 
-            group.M = p[f'M_F{s}'] / len(group)
-            group.D = p[f'D_F{s}'] / len(group)
-            group.L = p[f'L_F{s}'] / len(group)
+            group.M = p[f'M_F{s_Y}'] / len(group)
+            group.D = p[f'D_F{s_Y}'] / len(group)
+            group.L = p[f'L_F{s_Y}'] / len(group)
 
-            group.Q = p[f'Q{s}'] / len(group)
-            group.W = p[f'W_F{s}'] / len(group)
-            group.T = p[f'T_F{s}'] / len(group)
-            group.iota_L = p[f'iota_LF{s}'] / len(group)
-            group.iota_D = p[f'iota_DF{s}'] / len(group)
-            group.Pi_d = p[f'Pi_dF{s}'] / len(group)
+            group.Q = p[f'Q{s_Y}'] / len(group)
+            group.W = p[f'W_F{s_Y}'] / len(group)
+            group.T = p[f'T_F{s_Y}'] / len(group)
+            group.iota_L = p[f'iota_LF{s_Y}'] / len(group)
+            group.iota_D = p[f'iota_DF{s_Y}'] / len(group)
+            group.Pi_d = p[f'Pi_dF{s_Y}'] / len(group)
 
 
-            group_owners = owners.select(owners.s == s)
+            group_owners = owners.select(owners.s_Y == s_Y)
             for firm, owner in zip(group, group_owners):
                 firm.owner = owner
-                firm.E = p[f'E_F{s}'] / len(group)
-                owner.E = p[f'E_F{s}'] / len(group_owners)
+                firm.E = p[f'E_F{s_Y}'] / len(group)
+                owner.E = p[f'E_F{s_Y}'] / len(group_owners)
 
 
     def create_banks(self):
@@ -363,7 +363,7 @@ class DualEcoModel(ap.Model):
         firms = self.firms
 
         # populate formal urban labor market        
-        formal_firms = firms.select(firms.s==1)
+        formal_firms = firms.select(firms.s_Y==1)
         formal_market = ap.Network(self)
         formal_market.add_agents([government])
         formal_market.add_agents(formal_firms)
@@ -371,7 +371,7 @@ class DualEcoModel(ap.Model):
 
         # create formal labor network for private sector
         j = len(formal_firms)
-        private_workers = households.select(households.s==1)
+        private_workers = households.select(households.s_Y==1)
         for i, worker in enumerate(private_workers):
             employer = formal_firms[i % j]
             employer_pos = formal_market.positions[employer]
@@ -386,14 +386,14 @@ class DualEcoModel(ap.Model):
             formal_market.graph.add_edge(employer_pos, worker_pos)
 
         # populate informal urban labor market
-        informal_firms = firms.select(firms.s==2)
+        informal_firms = firms.select(firms.s_Y==2)
         informal_market = ap.Network(self)
         informal_market.add_agents(informal_firms)
         informal_market.add_agents(households)
 
         # create informal urban labor network
         j = len(informal_firms)
-        private_workers = households.select(households.s==2)
+        private_workers = households.select(households.s_Y==2)
         for i, worker in enumerate(private_workers):
             employer = informal_firms[i % j]
             employer_pos = informal_market.positions[employer]
@@ -406,7 +406,7 @@ class DualEcoModel(ap.Model):
         banks = self.banks
         firms = self.firms
         households = self.households
-        formal_firms = firms.select(firms.s==1)
+        formal_firms = firms.select(firms.s_Y==1)
 
         # populate deposit market
         market = ap.Network(self)
@@ -430,7 +430,7 @@ class DualEcoModel(ap.Model):
     def create_credit_market(self):
         banks = self.banks
         firms = self.firms
-        formal_firms = firms.select(firms.s==1)
+        formal_firms = firms.select(firms.s_Y==1)
 
         # populate credit market
         market = ap.Network(self)
