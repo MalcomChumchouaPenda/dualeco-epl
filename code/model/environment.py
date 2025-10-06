@@ -83,11 +83,35 @@ class LaborMarket(ap.Network):
         worker.W += amount
         worker.M += amount
     
-    def hire_worker(self, worker, employer):
+    def accept_job(self, worker, employer):
         self.graph.add_edge(worker, employer)
+        employer.N_J -= 1
+        worker.n_W = employer.n_W
+
+        if worker.property is employer:
+            worker.s_W = 0
+            worker.s_E = 1
+            worker.s_U = 0
+        else:
+            worker.s_W = 1
+            worker.s_E = 0
+            worker.s_U = 0
+
+        if hasattr(employer, 's_Y'):
+            worker.s_Y = employer.s_Y
+            worker.s_WG = 0
+        else:
+            worker.s_Y = 0
+            worker.s_WG = 1
     
-    def fire_worker(self, worker, employer):
+    def leave_job(self, worker, employer):
         self.graph.remove_edge(worker, employer)
+        worker.s_WG = 0
+        worker.s_Y = 0
+        worker.n_W = 0
+        worker.s_W = 0
+        worker.s_E = 0
+        worker.s_U = 1
 
 
 class DepositMarket(ap.Network):
