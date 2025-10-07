@@ -1,5 +1,6 @@
 
 import pytest
+import numpy as np
 import agentpy as ap
 from mock import MagicMock
 from model.agents import Bank
@@ -60,11 +61,18 @@ def test_pay_deposit_interests(bank1, clients1):
 
 
 @pytest.fixture
-def firms1(model):
+def credit_market(model):
+    market = MagicMock()
+    market.r_L = 0.1
+    model.credit_market = market
+    return market
+
+@pytest.fixture
+def firms1(model, credit_market):
     firms = ap.AgentList(model, 3)
     firms.r_L = 0
-    firms.V = 100
-    model.credit_market.neighbors.return_value = firms
+    firms.E = 100
+    credit_market.neighbors.return_value = firms
     return firms
 
 @pytest.fixture
@@ -72,65 +80,78 @@ def bank2(bank1):
     bank = bank1
     bank.theta_Ebar = 0.5  # ratio reglementaire de capital
     bank.beta_L = 0.5      # elastticite du taux d'interet
-    bank.gamma_L = 1.0     # probabilite de pret
-    bank.r_L = 0.1
-    bank.V = 100
+    bank.gamma_L = 0.5     # probabilite de pret
+    bank.E = 300
     return bank
 
+@pytest.fixture
+def random(model, monkeypatch):
+    f = MagicMock()
+    monkeypatch.setattr(model, 'nprandom', f)
+    return f
 
-@pytest.mark.repeat(5)
-def test_do_not_grant_loans_if_no_demand(bank2, firms1):
-    firms = firms1
-    firms.L_D = 0
+@pytest.fixture
+def exp(monkeypatch):
+    f = MagicMock()
+    monkeypatch.setattr(np, 'exp', f)
+    return f
+
+
+@pytest.mark.parametrize('L_D', [25, 50])   
+def test_grant_loans_to_ranked_borrower(bank2, firms1, L_D, random, exp):
+    random.choice.return_value = 1
+    exp.return_value = 0.75
+    firms1.L_D = L_D
     bank = bank2
     bank.grant_loans()
-    
-    market = bank.model.credit_market
-    market.neighbors.assert_called_once_with(bank)
-    market.give_loans.assert_not_called()
+
+    exp.assert_called_with(-0.005 * L_D)
+    random.choice.assert_called_with([0, 1], p=[0.25, 0.75])
+    give_loans = bank.model.credit_market.give_loans
+    for firm in firms1:
+        give_loans.assert_any_call(L_D, bank, firm)
 
 
-@pytest.mark.repeat(5)
-def test_grant_loans_to_best_borrower(bank2, firms1):
-    firms = firms1
-    firms.L_D = 5
-    firms.V = 50000
+@pytest.mark.parametrize('L_D, r_L', [(25, 0.225), (50, 0.35)])   
+def test_grant_loans_with_differents_rates(bank2, firms1, L_D, r_L, random):
+    random.choice.return_value = 1
+    firms1.L_D = L_D
+    bank2.grant_loans()    
+    for firm in firms1:
+        assert firm.r_L == r_L
+
+
+def test_grant_loans_with_maximum_loan(bank2, firms1, random):
+    random.choice.return_value = 1
+    firms1.L_D = 100
     bank = bank2
-    bank.V = 300
-    bank.grant_loans()
-        
-    market = bank.model.credit_market
-    give_loans = market.give_loans
-    for firm in firms:
-        assert firm.r_L > bank.r_L
-        give_loans.assert_any_call(firm.L_D, bank, firm)
-
-
-@pytest.mark.repeat(5)
-def test_grant_loans_with_maximum_loan(bank2, firms1):
-    firms = firms1
-    firms.L_D = 50
-    firms.V = 500
-    bank = bank2
-    bank.V = 150
     bank.grant_loans()
 
     market = bank.model.credit_market
     calls = market.give_loans.call_args_list
     loans = sum([call.args[0] for call in calls])
-    assert loans <= bank.theta_Ebar * bank.V
+    assert loans <= bank.theta_Ebar * bank.E
 
 
-@pytest.mark.repeat(5)
-def test_do_not_grant_loans_to_worst_borrower(bank2, firms1):
-    firms = firms1
-    firms.L_D = 50000
-    firms.V = 50
+@pytest.mark.parametrize('L_D', [25, 50])
+def test_do_not_grant_loans_to_ranked_borrower(bank2, firms1, L_D, random):
+    random.choice.return_value = 0
+    firms1.L_D = L_D
     bank = bank2
-    bank.V = 300
     bank.grant_loans()
-        
+
+    give_loans = bank.model.credit_market.give_loans
+    give_loans.assert_not_called()
+
+
+def test_do_not_grant_loans_if_no_demand(bank2, firms1, random):
+    random.choice.return_value = 1
+    firms1.L_D = 0
+    bank = bank2
+    bank.grant_loans()
+    
     market = bank.model.credit_market
+    market.neighbors.assert_called_once_with(bank)
     market.give_loans.assert_not_called()
 
 

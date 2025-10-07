@@ -178,20 +178,20 @@ class Bank(ap.Agent):
 
     def grant_loans(self):
         random = self.model.nprandom
-        L_max = self.theta_Ebar * self.V
+        L_max = self.theta_Ebar * self.E
         credit_market =  self.model.credit_market
         firms = credit_market.neighbors(self)
         for firm in firms:
-            print(firm.L_D, L_max)
+            print('Max', firm.L_D, L_max)
             if 0 < firm.L_D <= L_max:
-                Pr = np.exp(-self.gamma_L * firm.L_D / firm.V)
+                Pr = np.exp(-self.gamma_L * firm.L_D / firm.E)
                 choice = random.choice([0, 1], p=[1-Pr, Pr])
-                print('choice', choice, Pr)
                 if choice:
-                    firm.r_L = self.r_L + (self.beta_L * firm.L_D / firm.V)
-                    print(firm.r_L)
+                    firm.r_L = credit_market.r_L + (self.beta_L * firm.L_D / firm.E)
                     credit_market.give_loans(firm.L_D, self, firm)
                     L_max -= firm.L_D
+                print('choice', choice, 'with prob', Pr)
+                print('r_L', firm.r_L, 'from', self.beta_L , firm.L_D , firm.E)
 
 
     def ask_advances(self):
