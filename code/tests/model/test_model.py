@@ -28,10 +28,13 @@ def param_set():
         'w_min':np.random.uniform(0.5, 2.5),  # salaire minimum
         'tau': np.random.random(),            # taux d'impots
         'rho': np.random.random(),            # politique de dividende
+        'delta': np.random.random(),          # parametre d'ajustement
+        'upsilon_F': np.random.random(),      # parametre d'ajustement des salaires des firmes
         'm':np.random.random(),               # taux de marge brute
         'theta_W':np.random.random(),         # proportion desire de fonds de salaire
         'theta_E':np.random.random(),         # proportion desire de capitaux bancaire (rentabilite)
         'theta_M':np.random.random(),         # proportion desire de liquidite
+        'theta_y':np.random.random(),         # proportion desire de sotck d'invendus
         'theta_Zbar':np.random.random(),      # proportion reglementaire des allocations publics
         'r_D': np.random.random(),            # taux d'interet sur les depots bancaires
         'r_L': np.random.random(),            # taux d'interet sur les credits bancaires
@@ -284,6 +287,32 @@ def test_share_firm_equities(model_set3):
             for firm in sector_firms:
                 assert firm.owner in sector_owners
                 assert round(firm.E, 2) == round(firm.owner.E, 2)
+
+
+def test_share_firm_prices(model_set3):
+    for model in model_set3:
+        p = model.p
+        firms = model.firms
+        for s in model.sectors:
+            group = firms.select(firms.s_Y==s)
+            for firm in group:
+                assert firm.w == p[f'w{s}']
+                assert firm.p_y == p[f'p{s}']
+                if s == 1:
+                    assert firm.r_L == p['r_L']
+
+
+def test_share_firm_behavior_params(model_set3):
+    for model in model_set3:
+        p = model.p
+        firms = model.firms
+        for s in model.sectors:
+            group = firms.select(firms.s_Y==s)
+            for firm in group:
+                assert firm.delta == p['delta']
+                assert firm.theta_y == p['theta_y']
+                assert firm.upsilon == p['upsilon_F']
+                assert firm.phi == p[f'phi{s}']
 
 
 def test_share_bank_stocks(model_set3):

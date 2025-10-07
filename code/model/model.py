@@ -282,34 +282,46 @@ class DualEcoModel(ap.Model):
         households = self.households
         owners = households.select(households.s_E == 1)
         firms = self.firms
-        for s_Y in self.sectors:
-            formal = 1 if s_Y == 1 else 0
-            group = firms.select(firms.s_Y == s_Y)
+        for s in self.sectors:
+            formal = 1 if s == 1 else 0
+            group = firms.select(firms.s_Y == s)
             group.n_W = formal
             group.n_T = formal
+            
+            # share prices
+            group.p_y = p[f'p{s}']
+            group.w = p[f'w{s}']
+            if formal:
+                group.r_L = p['r_L']
+            
+            # share nbehavior parameters
+            group.delta = p['delta']
+            group.theta_y = p['theta_y']
+            group.upsilon = p['upsilon_F']
+            group.phi = p[f'phi{s}']
 
-            group.p_y = p[f'p{s_Y}']
+            # share nominal stocks
+            group.M = p[f'M_F{s}'] / len(group)
+            group.D = p[f'D_F{s}'] / len(group)
+            group.L = p[f'L_F{s}'] / len(group)
 
-            group.M = p[f'M_F{s_Y}'] / len(group)
-            group.D = p[f'D_F{s_Y}'] / len(group)
-            group.L = p[f'L_F{s_Y}'] / len(group)
+            # share nominal flows
+            group.Q = p[f'Q{s}'] / len(group)
+            group.W = p[f'W_F{s}'] / len(group)
+            group.T = p[f'T_F{s}'] / len(group)
+            group.iota_L = p[f'iota_LF{s}'] / len(group)
+            group.iota_D = p[f'iota_DF{s}'] / len(group)
+            group.Pi_d = p[f'Pi_dF{s}'] / len(group)
 
-            group.Q = p[f'Q{s_Y}'] / len(group)
-            group.W = p[f'W_F{s_Y}'] / len(group)
-            group.T = p[f'T_F{s_Y}'] / len(group)
-            group.iota_L = p[f'iota_LF{s_Y}'] / len(group)
-            group.iota_D = p[f'iota_DF{s_Y}'] / len(group)
-            group.Pi_d = p[f'Pi_dF{s_Y}'] / len(group)
+            # share real stocks and flows
+            group.y = p[f'Q{s}'] / (len(group) * p[f'p{s}'])
+            group.l = p[f'Q{s}'] / (len(group) * p[f'w{s}'])
 
-
-            group.y = p[f'Q{s_Y}'] / (len(group) * p[f'p{s_Y}'])
-            group.l = p[f'Q{s_Y}'] / (len(group) * p[f'w{s_Y}'])
-
-            group_owners = owners.select(owners.s_Y == s_Y)
+            group_owners = owners.select(owners.s_Y == s)
             for firm, owner in zip(group, group_owners):
                 firm.owner = owner
-                firm.E = p[f'E_F{s_Y}'] / len(group)
-                owner.E = p[f'E_F{s_Y}'] / len(group_owners)
+                firm.E = p[f'E_F{s}'] / len(group)
+                owner.E = p[f'E_F{s}'] / len(group_owners)
 
 
     def create_banks(self):
