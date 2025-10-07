@@ -283,7 +283,11 @@ class DualEcoModel(ap.Model):
         owners = households.select(households.s_E == 1)
         firms = self.firms
         for s_Y in self.sectors:
+            formal = 1 if s_Y == 1 else 0
             group = firms.select(firms.s_Y == s_Y)
+            group.n_W = formal
+            group.n_T = formal
+
             group.p_y = p[f'p{s_Y}']
 
             group.M = p[f'M_F{s_Y}'] / len(group)
@@ -297,6 +301,9 @@ class DualEcoModel(ap.Model):
             group.iota_D = p[f'iota_DF{s_Y}'] / len(group)
             group.Pi_d = p[f'Pi_dF{s_Y}'] / len(group)
 
+
+            group.y = p[f'Q{s_Y}'] / (len(group) * p[f'p{s_Y}'])
+            group.l = p[f'Q{s_Y}'] / (len(group) * p[f'w{s_Y}'])
 
             group_owners = owners.select(owners.s_Y == s_Y)
             for firm, owner in zip(group, group_owners):

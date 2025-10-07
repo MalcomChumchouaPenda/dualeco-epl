@@ -114,8 +114,8 @@ def test_create_sufficient_owners(model_set2):
         owners = households.select(households.s_E == 1)
         assert sum_params(model.p, 'N_B') == len(owners.select(owners.s_EB == 1))
         assert sum_params(model.p, 'N_E') == len(owners.select(owners.s_EB == 0))
-        for s_Y in model.sectors:
-            assert sum_params(p, f'N_E{s_Y}') == len(owners.select(owners.s_Y == s_Y))
+        for s in model.sectors:
+            assert sum_params(p, f'N_E{s}') == len(owners.select(owners.s_Y == s))
 
 
 def test_create_sufficient_workers(model_set2):
@@ -125,8 +125,8 @@ def test_create_sufficient_workers(model_set2):
         workers = households.select(households.s_W == 1)
         assert sum_params(p, 'N_WG') == len(workers.select(workers.s_WG==1))
         assert sum_params(p, 'N_WG') == len(workers.select(workers.s_Y==0))
-        for s_Y in model.sectors:
-            assert sum_params(p, f'N_W{s_Y}') == len(workers.select(workers.s_Y==s_Y))
+        for s in model.sectors:
+            assert sum_params(p, f'N_W{s}') == len(workers.select(workers.s_Y==s))
 
 
 def test_create_sufficient_unemployed(model_set2):
@@ -148,8 +148,13 @@ def test_create_firms_by_sectors(model_set2):
     for model in model_set2:
         p = model.p
         firms = model.firms
-        for s_Y in model.sectors:
-            assert p[f'N_E{s_Y}'] == len(firms.select(firms.s_Y == s_Y))
+        for s in model.sectors:
+            formal = 1 if s == 1 else 0
+            group = firms.select(firms.s_Y == s)
+            assert p[f'N_E{s}'] == len(group)
+            for firm in group:
+                assert firm.n_W == formal
+                assert firm.n_T == formal
 
 
 def test_create_banks(model_set2):
@@ -203,25 +208,66 @@ def test_share_firm_stocks(model_set3):
     for model in model_set3:
         p = model.p
         firms = model.firms
-        for s_Y in model.sectors:
-            group = firms.select(firms.s_Y==s_Y)
-            assert round(p[f'M_F{s_Y}'], 2) == round(sum(group.M), 2)
-            assert round(p[f'D_F{s_Y}'], 2) == round(sum(group.D), 2)
-            assert round(p[f'L_F{s_Y}'], 2) == round(sum(group.L), 2)
+        for s in model.sectors:
+            group = firms.select(firms.s_Y==s)
+            assert round(p[f'M_F{s}'], 2) == round(sum(group.M), 2)
+            assert round(p[f'D_F{s}'], 2) == round(sum(group.D), 2)
+            assert round(p[f'L_F{s}'], 2) == round(sum(group.L), 2)
+            assert round(p[f'E_F{s}'], 2) == round(sum(group.E), 2)
 
 
-def test_share_firm_flows(model_set3):
+def test_share_firm_net_worth(model_set3):
     for model in model_set3:
         p = model.p
         firms = model.firms
-        for s_Y in model.sectors:
-            group = firms.select(firms.s_Y==s_Y)
-            assert round(p[f'Q{s_Y}'], 2) == round(sum(group.Q), 2)
-            assert round(p[f'W_F{s_Y}'], 2) == round(sum(group.W), 2)    
-            assert round(p[f'T_F{s_Y}'], 2) == round(sum(group.T), 2)
-            assert round(p[f'iota_LF{s_Y}'], 2) == round(sum(group.iota_L), 2)
-            assert round(p[f'iota_DF{s_Y}'], 2) == round(sum(group.iota_D), 2)
-            assert round(p[f'Pi_dF{s_Y}'], 2) == round(sum(group.Pi_d), 2)
+        for s in model.sectors:
+            group = firms.select(firms.s_Y==s)
+            V = p[f'D_F{s}'] + p[f'M_F{s}'] - p[f'E_F{s}'] - p[f'L_F{s}']
+            assert round(V, 2) == round(sum(group.V), 2)
+
+
+def test_share_firm_production(model_set3):
+    for model in model_set3:
+        p = model.p
+        firms = model.firms
+        for s in model.sectors:
+            group = firms.select(firms.s_Y==s)
+            assert round(sum(group.y_inv), 2) == 0
+            assert round(sum(group.y_star), 2) == 0
+            assert round(p[f'Q{s}'], 2) == round(sum(group.Q), 2)  
+            assert round(p[f'Q{s}'] / p[f'p{s}'], 2) == round(sum(group.y), 2)
+
+
+def test_share_firm_wages_and_labor(model_set3):
+    for model in model_set3:
+        p = model.p
+        firms = model.firms
+        for s in model.sectors:
+            group = firms.select(firms.s_Y==s)
+            assert round(sum(group.N_J), 2) == 0
+            assert round(sum(group.l_D), 2) == 0
+            assert round(p[f'W_F{s}'], 2) == round(sum(group.W), 2)  
+            assert round(p[f'Q{s}'] / p[f'w{s}'], 2) == round(sum(group.l), 2)
+
+
+def test_share_firm_interests(model_set3):
+    for model in model_set3:
+        p = model.p
+        firms = model.firms
+        for s in model.sectors:
+            group = firms.select(firms.s_Y==s)
+            assert round(p[f'iota_LF{s}'], 2) == round(sum(group.iota_L), 2)
+            assert round(p[f'iota_DF{s}'], 2) == round(sum(group.iota_D), 2)
+
+
+def test_share_firm_profits_and_taxes(model_set3):
+    for model in model_set3:
+        p = model.p
+        firms = model.firms
+        for s in model.sectors:
+            group = firms.select(firms.s_Y==s)
+            assert round(p[f'Pi_dF{s}'], 2) == round(sum(group.Pi_d), 2)
+            assert round(p[f'T_F{s}'], 2) == round(sum(group.T), 2)
 
 
 def test_share_firm_equities(model_set3):
@@ -230,10 +276,10 @@ def test_share_firm_equities(model_set3):
         firms = model.firms
         households = model.households
         owners = households.select(households.s_E == 1)
-        for s_Y in model.sectors:
-            sector_firms = firms.select(firms.s_Y == s_Y)
-            sector_owners = owners.select(owners.s_Y == s_Y)
-            assert round(sum(sector_firms.E), 2) == round(sum_params(p, f'E_F{s_Y}'), 2)
+        for s in model.sectors:
+            sector_firms = firms.select(firms.s_Y == s)
+            sector_owners = owners.select(owners.s_Y == s)
+            assert round(sum(sector_firms.E), 2) == round(sum_params(p, f'E_F{s}'), 2)
             assert round(sum(sector_firms.E), 2) == round(sum(sector_owners.E), 2)
             for firm in sector_firms:
                 assert firm.owner in sector_owners
@@ -309,18 +355,18 @@ def test_share_consumption_prices(model_set3):
     for model in model_set3:
         p = model.p
         firms = model.firms
-        for s_Y in model.sectors:
-            group = firms.select(firms.s_Y == s_Y)
-            assert group[0].p_y == p[f'p{s_Y}']
+        for s in model.sectors:
+            group = firms.select(firms.s_Y == s)
+            assert group[0].p_y == p[f'p{s}']
 
 
 def test_share_reservation_wages(model_set3):
     for model in model_set3:
         p = model.p
         households = model.households
-        for s_Y in model.sectors:
-            group1 = households.select(households.s_Y == s_Y)
-            assert group1[0].w_D == p[f'w{s_Y}']
+        for s in model.sectors:
+            group1 = households.select(households.s_Y == s)
+            assert group1[0].w_D == p[f'w{s}']
 
         group2 = households.select(households.s_WG == 1)
         group3 = households.select(households.s_U == 1)
