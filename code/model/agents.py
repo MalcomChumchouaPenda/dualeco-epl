@@ -160,11 +160,6 @@ class Bank(ap.Agent):
         self.Pi = 0         # profits
         self.Pi_d = 0       # dividends
 
-        self.r_D = 0        # deposit interest rate
-        self.r_A = 0        # advance interest rate
-        self.r_B = 0        # bonds interest rate
-        self.r_L = 0        # loans interest rate
-
         self.owner = None
 
 
@@ -172,7 +167,7 @@ class Bank(ap.Agent):
         deposit_market = self.model.deposit_market
         clients = deposit_market.neighbors(self)
         for client in clients:
-            iota = client.D * self.r_D
+            iota = client.D * deposit_market.r_D
             deposit_market.pay_interests(iota, self, client)
     
 
@@ -215,16 +210,16 @@ class Bank(ap.Agent):
         self.Pi = self.iota_L + self.iota_B - self.L_def - self.iota_D - self.iota_A
     
     def pay_taxes(self):
+        economy = self.model.economy
         if self.Pi > 0:
-            T = self.tau * self.Pi
+            T = economy.tau * self.Pi
             gov = self.model.government
-            economy = self.model.economy
             economy.pay_taxes(T, self, gov)
 
     def pay_dividends(self):
+        economy = self.model.economy
         if self.Pi > 0:
             Pi_d = self.rho * (self.Pi - self.T)
-            economy = self.model.economy
             economy.pay_dividends(Pi_d, self, self.owner)
     
     def update_net_worth(self):

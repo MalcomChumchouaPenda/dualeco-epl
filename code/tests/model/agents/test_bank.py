@@ -9,10 +9,6 @@ from model.agents import Bank
 @pytest.fixture
 def model():
     model = ap.Model({'seed':0})
-    model.deposit_market = MagicMock()
-    model.credit_market = MagicMock()
-    model.bond_market = MagicMock()
-    model.economy = MagicMock()
     return model
 
 @pytest.fixture
@@ -40,24 +36,30 @@ def test_default_state(bank1):
     
 
 @pytest.fixture
-def clients1(model):
+def deposit_market(model):
+    market = MagicMock()
+    market.r_D = 0.2
+    model.deposit_market = market
+    return market
+
+@pytest.fixture
+def clients1(model, deposit_market):
     clients = ap.AgentList(model, 3)
     for i, client in enumerate(clients):
         client.D = i * 10
-    model.deposit_market.neighbors.return_value = clients
+    deposit_market.neighbors.return_value = clients
     return clients
 
 
-def test_pay_deposit_interests(bank1, clients1):
+def test_pay_deposit_interests(bank1, clients1, deposit_market):
     bank = bank1
-    bank.r_D = 0.1
     bank.pay_deposit_interests()
 
-    market = bank.model.deposit_market
-    market.neighbors.assert_called_once_with(bank)
+    deposit_market.neighbors.assert_called_once_with(bank)
+    pay_interests = deposit_market.pay_interests
     for client in clients1:
-        iota = bank.r_D * client.D
-        market.pay_interests.assert_any_call(iota, bank, client)
+        iota = 0.2 * client.D
+        pay_interests.assert_any_call(iota, bank, client)
 
 
 @pytest.fixture
@@ -156,10 +158,17 @@ def test_do_not_grant_loans_if_no_demand(bank2, firms1, random):
 
 
 @pytest.fixture
+def economy(model):
+    economy = MagicMock()
+    economy.tau = 0.1
+    model.economy = economy
+    return economy
+
+
+@pytest.fixture
 def central_bank1(model):
     central_bank = ap.Agent(model)
     model.central_bank = central_bank
-    model.economy = MagicMock()
     return central_bank
 
 @pytest.fixture
@@ -170,64 +179,59 @@ def bank3(bank1):
     return bank
 
 
-def test_ask_advances_if_insufficient_reserves(bank3, central_bank1):
+def test_ask_advances_if_insufficient_reserves(bank3, central_bank1, economy):
     central_bank = central_bank1
     bank = bank3
     bank.R = 25
     bank.ask_advances()
-
-    economy = bank.model.economy
     economy.give_advances.assert_called_with(25, central_bank, bank)
 
 
-def test_do_not_ask_advances_if_sufficient_reserves(bank3, central_bank1):
+def test_do_not_ask_advances_if_sufficient_reserves(bank3, economy):
     bank = bank3
     bank.R = 125
     bank.ask_advances()
-
-    economy = bank.model.economy
     economy.give_advances.assert_not_called()
 
+
+@pytest.fixture
+def bond_market(model):
+    market = MagicMock()
+    model.bond_market = market
+    return market
 
 @pytest.fixture
 def government1(model):
     government = ap.Agent(model)
     model.government = government
-    model.bond_market = MagicMock()
     return government
 
 
-def test_buy_bonds_if_sufficient_reserves(bank3, government1):
+def test_buy_bonds_if_sufficient_reserves(bank3, government1, bond_market):
     government = government1
     government.B_S = 200
     bank = bank3
     bank.R = 150
     bank.buy_bonds()
-
-    market = bank.model.bond_market
-    market.buy_bonds.assert_called_with(100, bank, government)
+    bond_market.buy_bonds.assert_called_with(100, bank, government)
 
 
-def test_buy_available_bonds(bank3, government1):
+def test_buy_available_bonds(bank3, government1, bond_market):
     government = government1
     government.B_S = 50
     bank = bank3
     bank.R = 150
     bank.buy_bonds()
-
-    market = bank.model.bond_market
-    market.buy_bonds.assert_called_with(50, bank, government)
+    bond_market.buy_bonds.assert_called_with(50, bank, government)
 
 
-def test_do_not_buy_bonds_if_insufficient_reserves(bank3, government1):
+def test_do_not_buy_bonds_if_no_reserves(bank3, government1, bond_market):
     government = government1
     government.B_S = 50
     bank = bank3
     bank.R = 25
     bank.buy_bonds()
-
-    market = bank.model.bond_market
-    market.buy_bonds.assert_not_called()
+    bond_market.buy_bonds.assert_not_called()
 
 
 def test_compute_profits(bank1):
@@ -242,47 +246,36 @@ def test_compute_profits(bank1):
 
 
 @pytest.mark.parametrize('Pi, T', [(25, 2.5), (50, 5.0)])
-def test_pay_taxes_if_profits(bank1, government1, Pi, T):
+def test_pay_taxes_if_profits(bank1, government1, economy, Pi, T):
     bank = bank1
-    bank.tau = 0.1
     bank.Pi = Pi
     bank.pay_taxes()
-        
-    government = government1
-    economy = bank.model.economy
-    economy.pay_taxes.assert_called_with(T, bank, government)
+    economy.pay_taxes.assert_called_with(T, bank, government1)
 
 
 @pytest.mark.parametrize('Pi', [0, -25, -50])
-def test_do_not_pay_taxes_if_losses(bank1, Pi):
+def test_do_not_pay_taxes_if_losses(bank1, economy, Pi):
     bank = bank1
-    bank.tau = 0.1
     bank.Pi = Pi
     bank.pay_taxes()
-    
-    economy = bank.model.economy
     economy.pay_taxes.assert_not_called()
 
 
 @pytest.mark.parametrize('Pi, T, Pi_d', [(25, 5, 10.0), (50, 10.0, 20.0)])
-def test_pay_dividends_if_profits(bank1, Pi, T, Pi_d):
+def test_pay_dividends_if_profits(bank1, economy, Pi, T, Pi_d):
     bank = bank1
     bank.rho = 0.5
     bank.Pi = Pi
     bank.T = T
     bank.pay_dividends()
-    
-    economy = bank.model.economy
     economy.pay_dividends.assert_called_with(Pi_d, bank, bank.owner)
 
 
 @pytest.mark.parametrize('Pi', [0, -25, -50])
-def test_do_not_pay_dividends_if_losses(bank1, Pi):
+def test_do_not_pay_dividends_if_losses(bank1, economy, Pi):
     bank = bank1
     bank.Pi = Pi
     bank.pay_dividends()
-    
-    economy = bank.model.economy
     economy.pay_dividends.assert_not_called()
 
 
