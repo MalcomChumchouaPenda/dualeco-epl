@@ -51,9 +51,17 @@ class Firm(ap.Agent):
         self.s_Y = 0        # firm's sector
         self.n_W = 0        # degree of formality on labor market
         self.n_T = 0        # degree of formality on credit market
+        
+        self.p_Y = 0        # production price
+        self.r_L = 0        # loan interest rate
+        self.w = 0          # wage offered
+
         self.N_J = 0        # number of vacant job
         self.l = 0          # labour employed
         self.l_D = 0        # labour demand
+        self.y_inv = 0      # production unsold (inventories)
+        self.y_star = 0     # production desired
+        self.y = 0          # production
 
         self.M = 0          # cash money
         self.D = 0          # deposits
@@ -62,7 +70,6 @@ class Firm(ap.Agent):
         self.L_def = 0      # loan defaults
         self.E = 0          # equities
         self.V = 0          # net worth
-
         self.Q = 0          # sales
         self.W = 0          # wages
         self.T = 0          # taxes
@@ -71,20 +78,65 @@ class Firm(ap.Agent):
         self.Pi = 0         # profit
         self.Pi_d = 0       # dividends
 
-        self.p_Y = 0        # production price
-        self.r_D = 0        # deposit interest rate
-        self.r_L = 0        # loan interest rate
-        self.w = 0          # wage offered
+        self.phi = 0        # productivity
+        self.delta = 0      # max adjustment parameters
+        self.theta_y = 0    # desired maximum proportion of inventories
+        self.upsilon = 0    # stickness of wage
 
         self.bank = None
         self.owner = None
 
 
-    def withdraw_deposits(self, amount):
-        self.M += amount
-        self.D -= amount
-        self.bank.M -= amount
-        self.bank.D -= amount
+    def plan_production(self):
+        model = self.model
+        labor_market = model.labor_market
+        random = model.nprandom
+        U = random.uniform    
+
+        # price and quantity adjustment
+        if self.y_inv <= self.theta_y * self.y:
+            self.p_Y = self.p_Y * (1 + U(0, self.delta))
+            self.y_star = self.y * (1 + U(0, self.delta))
+        else:
+            self.p_Y = self.p_Y * (1 - U(0, self.delta))
+            self.y_star = self.y * (1 - U(0, self.delta))
+
+        # labor demand
+        self.l_D = self.y_star / self.phi
+        self.N_J = max(0, round(self.l_D - self.l))
+
+        # wage adjustment
+        Pr = self.upsilon * np.exp(-labor_market.upsilon * labor_market.u)
+        if self.l_D > self.l:
+            if random.choice([0, 1], p=[1-Pr, Pr]):
+                self.w = self.w * (1 + U(0, self.delta))
+        else:
+            if random.choice([0, 1], p=[Pr, 1-Pr]):
+                self.w = self.w * (1 - U(0, self.delta))
+        
+        # demand of credit
+        self.L_D = max(0, self.w * self.l_D - self.D - self.M)
+
+
+    def compute_profit(self):
+        self.Pi = self.Q + self.iota_D - self.W - self.iota_L
+    
+    def pay_taxes(self):
+        if self.Pi > 0 and self.n_T:
+            model = self.model
+            gov = model.government
+            economy = model.economy
+            economy.pay_taxes(economy.tau * self.Pi, self, gov)
+
+    def pay_dividends(self):
+        if self.Pi > 0:
+            Pi_d = self.rho * (self.Pi - self.T)
+            economy = self.model.economy
+            economy.pay_dividends(Pi_d, self, self.owner)
+    
+    def update_net_worth(self):
+        self.E = self.E + self.Pi - self.T - self.Pi_d
+        self.owner.E = self.E
 
 
 
