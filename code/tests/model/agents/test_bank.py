@@ -35,6 +35,15 @@ def test_default_state(bank1):
     assert bank.T == 0
     
 
+def test_default_params(bank1):
+    bank = bank1
+    assert bank.delta == 0
+    assert bank.theta_Ebar == 0
+    assert bank.theta_Rbar == 0
+    assert bank.beta_L == 0
+    assert bank.gamma_L == 0
+
+
 @pytest.fixture
 def deposit_market(model):
     market = MagicMock()

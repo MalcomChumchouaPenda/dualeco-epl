@@ -36,6 +36,10 @@ def param_set():
         'theta_M':np.random.random(),         # proportion desire de liquidite
         'theta_y':np.random.random(),         # proportion desire de sotck d'invendus
         'theta_Zbar':np.random.random(),      # proportion reglementaire des allocations publics
+        'theta_Ebar':np.random.random(),      # ratio minimum de capital bancaire
+        'theta_Rbar':np.random.random(),      # ratio minimum de liquidite bancaire
+        'beta_L':np.random.random(),          # elasticite du taux d'interet du credit au levier financier
+        'gamma_L':np.random.random(),         # elasticite de la probabilite de credit au levier financier
         'r_D': np.random.random(),            # taux d'interet sur les depots bancaires
         'r_L': np.random.random(),            # taux d'interet sur les credits bancaires
         'r_B': np.random.random(),            # taux d'interet sur les bons du tresors
@@ -315,7 +319,7 @@ def test_share_firm_behavior_params(model_set3):
                 assert firm.phi == p[f'phi{s}']
 
 
-def test_share_bank_stocks(model_set3):
+def test_share_bank_financial_stocks(model_set3):
     for model in model_set3:
         p = model.p
         banks = model.banks
@@ -326,7 +330,7 @@ def test_share_bank_stocks(model_set3):
         assert round(p['L_B'], 2) == round(sum(banks.L), 2)
 
 
-def test_share_bank_flows(model_set3):
+def test_share_bank_financial_flows(model_set3):
     for model in model_set3:
         p = model.p
         banks = model.banks
@@ -349,6 +353,17 @@ def test_share_bank_equities(model_set3):
         for bank in banks:
             assert bank.owner in owners
             assert round(bank.E, 2) == round(bank.owner.E, 2)
+
+
+def test_share_bank_behavior_params(model_set3):
+    for model in model_set3:
+        p = model.p
+        for bank in model.banks:
+            assert bank.delta == p['delta']
+            assert bank.theta_Ebar == p['theta_Ebar']
+            assert bank.theta_Rbar == p['theta_Rbar']
+            assert bank.gamma_L == p['gamma_L']
+            assert bank.beta_L == p['beta_L']
 
 
 def test_share_public_sector_stocks(model_set3):
@@ -406,6 +421,7 @@ def test_share_reservation_wages(model_set3):
         assert gov.w == p['w_G']
 
 
+# ! must place interest rate on a common market
 def test_share_interest_rates(model_set3):
     for model in model_set3:
         p = model.p

@@ -342,6 +342,12 @@ class DualEcoModel(ap.Model):
         banks.iota_B = p['iota_BB'] / len(banks)
         banks.Pi_d = p['Pi_dB'] / len(banks)
 
+        banks.delta = p['delta']
+        banks.theta_Ebar = p['theta_Ebar']
+        banks.theta_Rbar = p['theta_Rbar']
+        banks.gamma_L = p['gamma_L']
+        banks.beta_L = p['beta_L']
+
         banks.r_D = p['r_D']
         banks.r_L = p['r_L']
         banks.r_A = p['r_A']

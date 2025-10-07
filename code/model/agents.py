@@ -160,6 +160,12 @@ class Bank(ap.Agent):
         self.Pi = 0         # profits
         self.Pi_d = 0       # dividends
 
+        self.delta = 0      # adjustment parameter
+        self.theta_Ebar = 0 # minimum capital ratio
+        self.theta_Rbar = 0 # minimum liquidity ratio
+        self.beta_L = 0     # elasticity of interest rate to leverage ratio
+        self.gamma_L = 0    # elasticity of loan probability to leverage ratio
+        
         self.owner = None
 
 
@@ -209,6 +215,7 @@ class Bank(ap.Agent):
     def compute_profit(self):
         self.Pi = self.iota_L + self.iota_B - self.L_def - self.iota_D - self.iota_A
     
+
     def pay_taxes(self):
         economy = self.model.economy
         if self.Pi > 0:
@@ -216,12 +223,14 @@ class Bank(ap.Agent):
             gov = self.model.government
             economy.pay_taxes(T, self, gov)
 
+
     def pay_dividends(self):
         economy = self.model.economy
         if self.Pi > 0:
             Pi_d = self.rho * (self.Pi - self.T)
             economy.pay_dividends(Pi_d, self, self.owner)
-    
+
+
     def update_net_worth(self):
         self.E = self.E + self.Pi - self.T - self.Pi_d
         self.owner.E = self.E
