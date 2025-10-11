@@ -65,6 +65,7 @@ def test_calc_firms_stocks_and_flows(model_set1):
     for model in model_set1:
         stocks, flows = create_matrices_from_params(model.p, digits=2)
         print('stocks\n', stocks, '\nflows\n', flows)
+        assert stocks.loc['Y_inv', 'sigma'] > 0
         assert stocks.loc['sigma', 'F'] == 0.0
         assert flows.loc['sigma', 'F'] == 0.0
 
@@ -93,6 +94,23 @@ def test_calc_public_sector_stocks_and_flows(model_set1):
         assert stocks.loc['sigma', 'CB'] == 0
         assert flows.loc['sigma', 'G'] == 0
         assert flows.loc['sigma', 'CB'] == 0
+        
+
+def test_is_globally_stock_consistent(model_set1):
+    for model in model_set1:
+        stocks, flows = create_matrices_from_params(model.p, digits=2)
+        print('stocks\n', stocks, '\nflows\n', flows)
+        for key in stocks.index:
+            if key not in ['Y_inv', 'V']:
+                assert stocks.loc[key, 'sigma'] == 0
+
+
+def test_is_globally_flow_consistent(model_set1):
+    for model in model_set1:
+        stocks, flows = create_matrices_from_params(model.p, digits=2)
+        print('stocks\n', stocks, '\nflows\n', flows)
+        for key in flows.index:
+            assert flows.loc[key, 'sigma'] == 0
 
 
 @pytest.fixture

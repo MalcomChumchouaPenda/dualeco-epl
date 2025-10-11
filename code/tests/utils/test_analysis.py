@@ -17,7 +17,7 @@ def test_sum_params_with_prefix():
 @pytest.fixture
 def keys():
     account_keys = ['H', 'F', 'B', 'G', 'CB']
-    stock_keys = ['M', 'A', 'D', 'B', 'L', 'E']
+    stock_keys = ['Y_inv', 'M', 'A', 'D', 'B', 'L', 'E']
     flow_keys = ['C', 'W', 'Z', 'T', 'iota_A', 'iota_B', 
                  'iota_L', 'iota_D', 'Pi_d', 'Pi', 
                  'DeltaA', 'DeltaB', 'DeltaM', 'DeltaL', 

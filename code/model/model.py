@@ -62,6 +62,8 @@ class DualEcoModel(ap.Model):
             else:
                 p[f'p{s}'] = (1 + p['m']) * p[f'w{s}']
                 p[f'Q{s}'] = 0
+            p[f'y_inv{s}'] = p['theta_y'] * p[f'y{s}']
+            p[f'Y_inv{s}'] = p[f'w{s}'] * p[f'y_inv{s}'] / p[f'phi{s}']
 
             if s == 1:
                 # for modern sector
@@ -166,7 +168,8 @@ class DualEcoModel(ap.Model):
         p['Y_d'] = p['Y'] - p['T_H']                
         p['M_H'] = ((p['Y_d'] - p['C1']- p['C2']) / p['zeta_2']) - p['D_H']
                 
-         # finalize interest and variation computation
+        # finalize equities, interest and variation computation
+        p['E_H'] = p['E_F1'] + p['E_F2'] + p['E_B']
         p['iota_DH'] = p['zeta_1'] * p['r_D'] * p['D_H']
         p['DeltaD_H'] = p['zeta_2'] * p['D_H']
         p['DeltaM_H'] = p['zeta_2'] * p[f'M_H'] 
@@ -178,7 +181,6 @@ class DualEcoModel(ap.Model):
         p['Z_G'] = p['Z_H']
         p['A_CB'] = p['M_G'] = 0
         p['T_G'] = p['T_H'] + p['T_F1'] + p['T_B']
-        p['M_F'] = p['M_F1'] + p['M_F2']
         A = np.array([
             [1, -1, 0, 0, 0],
             [0, 0, 1, 0, -1],

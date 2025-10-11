@@ -9,10 +9,9 @@ account_names = ['Households', 'Firms', 'Banks',
                  'Government', 'Central Bank']
 
 # definitions des stocks
-stock_keys = ['M', 'A', 'D', 'B', 'L', 'E']
-stock_names = ['HP Money', 'Cash Advances', 
-               'Deposits', 'Bonds', 'Loans',
-               'Equities']
+stock_keys = ['Y_inv', 'M', 'A', 'D', 'B', 'L', 'E']
+stock_names = ['HP Money', 'Cash Advances', 'Deposits', 
+               'Bonds', 'Loans', 'Equities']
 
 # definitions des flux
 flow_keys = ['C', 'W', 'Z', 'T', 'iota_A', 'iota_B', 'iota_L', 'iota_D',  'Pi_d', 'Pi', 
@@ -35,6 +34,7 @@ def sum_params(params, prefix):
 
 def create_matrices_from_params(params, digits=None):
     stock_matrix = pd.DataFrame(0.0, index=stock_keys, columns=account_keys)
+    stock_matrix.loc['Y_inv', 'F'] = sum_params(params, 'Y_inv')
     stock_matrix.loc['M', 'H'] = sum_params(params, 'M_H')
     stock_matrix.loc['D', 'H'] = sum_params(params, 'D_H')
     stock_matrix.loc['E', 'H'] = sum_params(params, 'E_H')
