@@ -55,6 +55,7 @@ class Firm(ap.Agent):
         self.p_Y = 0        # production price
         self.r_L = 0        # loan interest rate
         self.w = 0          # wage offered
+        self.m = 0          # price markup
 
         self.N_J = 0        # number of vacant job
         self.l = 0          # labour employed
@@ -63,7 +64,7 @@ class Firm(ap.Agent):
         self.y_star = 0     # production desired
         self.y = 0          # production
         self.q_e = 0        # sales expectation
-        self.q_D = 0        # desired level of production
+        self.y_D = 0        # desired level of production
 
         self.Y_inv = 0      # nominal inventories
         self.M = 0          # cash money
@@ -82,7 +83,7 @@ class Firm(ap.Agent):
         self.Pi_d = 0       # dividends
 
         self.phi = 0        # productivity
-        self.delta_max = 0  # max adjustment parameters
+        self.delta = 0  # max adjustment parameters
         self.theta_y = 0    # desired maximum proportion of inventories
         self.upsilon = 0    # stickness of wage
 
@@ -91,16 +92,34 @@ class Firm(ap.Agent):
     
 
     def plan_production(self):
-        uniform = self.model.nprandom.uniform
+        random = self.model.nprandom
+        U, delta = random.uniform, self.delta
+        labor_market = self.model.labor_market
+        
+        # revision of sales expectation and price markup
         y_tot = self.y + self.y_inv
         q = self.Q / self.p_Y
         if q >= self.q_e:
-            delta = uniform(self.delta_max)
-            self.q_e = self.q_e * (1 + delta)
+            self.q_e = self.q_e * (1 + U(0, delta))
+            self.m = self.m * (1 + U(0, delta))
         elif q < y_tot:
-            delta = uniform(self.delta_max)
-            self.q_e = self.q_e * (1 - delta)
-        self.q_D = self.q_e * (1 + self.theta_y) - self.y_inv
+            self.q_e = self.q_e * (1 - U(0, delta))
+            self.m = self.m * (1 - U(0, delta))
+
+        # desired production level and labor demand
+        self.y_D = self.q_e * (1 + self.theta_y) - self.y_inv
+        self.l_D = self.y_D / self.phi
+
+        # wage revision and price setting
+        Pr = self.upsilon * np.exp(-labor_market.upsilon * labor_market.u)
+        if self.l_D > self.l:
+            if random.choice([0, 1], p=[1-Pr, Pr]):
+                self.w = self.w * (1 + U(0, self.delta))
+        else:
+            if random.choice([0, 1], p=[Pr, 1-Pr]):
+                self.w = self.w * (1 - U(0, self.delta))
+        print(self.m, self.w , self.phi)
+        self.p_Y = (1 + self.m) * self.w / self.phi
 
 
     # def plan_production(self):
@@ -118,17 +137,9 @@ class Firm(ap.Agent):
     #         self.y_star = self.y * (1 - U(0, self.delta))
 
     #     # labor demand
-    #     self.l_D = self.y_star / self.phi
     #     self.N_J = max(0, round(self.l_D - self.l))
 
     #     # wage adjustment
-    #     Pr = self.upsilon * np.exp(-labor_market.upsilon * labor_market.u)
-    #     if self.l_D > self.l:
-    #         if random.choice([0, 1], p=[1-Pr, Pr]):
-    #             self.w = self.w * (1 + U(0, self.delta))
-    #     else:
-    #         if random.choice([0, 1], p=[Pr, 1-Pr]):
-    #             self.w = self.w * (1 - U(0, self.delta))
         
     #     # demand of credit
     #     self.L_D = max(0, self.w * self.l_D - self.D - self.M)
@@ -176,7 +187,7 @@ class Bank(ap.Agent):
         self.Pi = 0            # profits
         self.Pi_d = 0          # dividends
 
-        self.delta_max = 0     # adjustment parameter
+        self.delta = 0     # adjustment parameter
         self.theta_Ebar = 0    # minimum capital ratio
         self.theta_Rbar = 0    # minimum liquidity ratio
         self.beta_L = 0        # elasticity of interest rate to leverage ratio

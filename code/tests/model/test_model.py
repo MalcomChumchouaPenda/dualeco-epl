@@ -28,7 +28,7 @@ def param_set():
         'w_min':np.random.uniform(0.5, 2.5),  # salaire minimum
         'tau': np.random.random(),            # taux d'impots
         'rho': np.random.random(),            # politique de dividende
-        'delta_max': np.random.random(),      # parametre d'ajustement
+        'delta': np.random.random(),      # parametre d'ajustement
         'upsilon_F': np.random.random(),      # parametre d'ajustement des salaires des firmes
         'm':np.random.random(),               # taux de marge brute
         'theta_W':np.random.random(),         # proportion desire de fonds de salaire
@@ -320,6 +320,7 @@ def test_share_firm_prices(model_set3):
         for s in model.sectors:
             group = firms.select(firms.s_Y==s)
             for firm in group:
+                assert firm.m == p['m']
                 assert firm.w == p[f'w{s}']
                 assert firm.p_y == p[f'p{s}']
                 if s == 1:
@@ -333,7 +334,7 @@ def test_share_firm_behavior_params(model_set3):
         for s in model.sectors:
             group = firms.select(firms.s_Y==s)
             for firm in group:
-                assert firm.delta_max == p['delta_max']
+                assert firm.delta == p['delta']
                 assert firm.theta_y == p['theta_y']
                 assert firm.upsilon == p['upsilon_F']
                 assert firm.phi == p[f'phi{s}']
@@ -379,7 +380,7 @@ def test_share_bank_behavior_params(model_set3):
     for model in model_set3:
         p = model.p
         for bank in model.banks:
-            assert bank.delta_max == p['delta_max']
+            assert bank.delta == p['delta']
             assert bank.theta_Ebar == p['theta_Ebar']
             assert bank.theta_Rbar == p['theta_Rbar']
             assert bank.gamma_L == p['gamma_L']

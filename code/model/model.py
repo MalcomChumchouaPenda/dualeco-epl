@@ -293,11 +293,12 @@ class DualEcoModel(ap.Model):
             # share prices
             group.p_y = p[f'p{s}']
             group.w = p[f'w{s}']
+            group.m = p['m']
             if formal:
                 group.r_L = p['r_L']
             
             # share behavior parameters
-            group.delta_max = p['delta_max']
+            group.delta = p['delta']
             group.theta_y = p['theta_y']
             group.upsilon = p['upsilon_F']
             group.phi = p[f'phi{s}']
@@ -347,7 +348,7 @@ class DualEcoModel(ap.Model):
         banks.iota_B = p['iota_BB'] / len(banks)
         banks.Pi_d = p['Pi_dB'] / len(banks)
 
-        banks.delta_max = p['delta_max']
+        banks.delta = p['delta']
         banks.theta_Ebar = p['theta_Ebar']
         banks.theta_Rbar = p['theta_Rbar']
         banks.gamma_L = p['gamma_L']
