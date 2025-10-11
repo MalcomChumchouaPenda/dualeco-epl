@@ -59,10 +59,11 @@ class Firm(ap.Agent):
         self.N_J = 0        # number of vacant job
         self.l = 0          # labour employed
         self.l_D = 0        # labour demand
-        self.y_inv = 0      # production unsold (inventories)
+        self.y_inv = 0      # real inventories
         self.y_star = 0     # production desired
         self.y = 0          # production
 
+        self.Y_inv = 0      # nominal inventories
         self.M = 0          # cash money
         self.D = 0          # deposits
         self.L = 0          # loans

@@ -43,6 +43,7 @@ def test_default_nominal_stocks_and_flows(firm1):
     assert firm.L == 0
     assert firm.L_D == 0
     assert firm.L_def == 0
+    assert firm.Y_inv == 0
     assert firm.D == 0
     assert firm.M == 0
     assert firm.V == 0

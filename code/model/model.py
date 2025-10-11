@@ -296,13 +296,14 @@ class DualEcoModel(ap.Model):
             if formal:
                 group.r_L = p['r_L']
             
-            # share nbehavior parameters
+            # share behavior parameters
             group.delta = p['delta']
             group.theta_y = p['theta_y']
             group.upsilon = p['upsilon_F']
             group.phi = p[f'phi{s}']
 
             # share nominal stocks
+            group.Y_inv = p[f'Y_inv{s}'] /  len(group)
             group.M = p[f'M_F{s}'] / len(group)
             group.D = p[f'D_F{s}'] / len(group)
             group.L = p[f'L_F{s}'] / len(group)
@@ -316,6 +317,7 @@ class DualEcoModel(ap.Model):
             group.Pi_d = p[f'Pi_dF{s}'] / len(group)
 
             # share real stocks and flows
+            group.y_inv = p[f'y_inv{s}'] /  len(group)
             group.y = p[f'Q{s}'] / (len(group) * p[f'p{s}'])
             group.l = p[f'Q{s}'] / (len(group) * p[f'w{s}'])
 

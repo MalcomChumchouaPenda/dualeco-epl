@@ -257,10 +257,11 @@ def test_share_firm_production(model_set3):
         firms = model.firms
         for s in model.sectors:
             group = firms.select(firms.s_Y==s)
-            assert round(sum(group.y_inv), 2) == 0
             assert round(sum(group.y_star), 2) == 0
-            assert round(p[f'Q{s}'], 2) == round(sum(group.Q), 2)  
-            assert round(p[f'Q{s}'] / p[f'p{s}'], 2) == round(sum(group.y), 2)
+            assert round(sum(group.Y_inv), 2) == round(p[f'Y_inv{s}'], 2) 
+            assert round(sum(group.y_inv), 2) == round(p[f'y_inv{s}'], 2) 
+            assert round(sum(group.y), 2) == round(p[f'Q{s}'] / p[f'p{s}'], 2)
+            assert round(sum(group.Q), 2) == round(p[f'Q{s}'], 2)  
 
 
 def test_share_firm_wages_and_labor(model_set3):
