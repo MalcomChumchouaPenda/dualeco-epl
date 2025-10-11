@@ -48,7 +48,7 @@ class DualEcoModel(ap.Model):
     def calc_block_1(self):
         # calculate steady state for firms
         p = self.p
-        p['zeta_1'] = 1 / (1 + p['g_ss'])
+        p['zeta_1'] = 1 / (1 + p['g'])
         p['zeta_2'] = 1 - p['zeta_1']
         
         # for each sector of production

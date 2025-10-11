@@ -12,7 +12,7 @@ from utils.analysis import sum_params, create_matrices_from_params
 def param_set():
     np.random.seed = 0
     return [{
-        'g_ss':np.random.random(),            # taux de croissance
+        'g':np.random.random(),            # taux de croissance
         'N_E1':np.random.randint(1, 25),      # nombre de entrepreneurs dans le secteur productif 1
         'N_E2':np.random.randint(1, 25),      # nombre de entrepreneurs dans le secteur productif 2
         'N_W1':np.random.randint(1, 25),      # nombre de salaries dans le secteur productif 1
