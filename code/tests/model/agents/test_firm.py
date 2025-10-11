@@ -29,7 +29,8 @@ def test_default_status(firm1):
 
 def test_default_real_stocks_and_flows(firm1):
     firm = firm1
-    assert firm.N_J == 0
+    assert firm.N_Jc == 0
+    assert firm.N_Jd == 0
     assert firm.l == 0
     assert firm.l_D == 0
     assert firm.y == 0
@@ -283,15 +284,6 @@ def test_apply_for_credit(firm1, D, M, L_D):
 #     return firm
 
 
-# @pytest.mark.parametrize('l, N_J',  
-#                          [(90, 0), 
-#                           (100, 0), 
-#                           (110, 10)])
-# def test_set_labor_demand(firm3, l, N_J):
-#     firm = firm3
-#     firm.l = l
-#     firm.open_vacancies()
-#     assert firm.N_J == N_J
 
 
 
@@ -310,6 +302,37 @@ def test_apply_for_credit(firm1, D, M, L_D):
 #     return firm
 
 
+@pytest.fixture
+def workers(model, labor_market):
+    workers = ap.AgentList(model, 5)
+    labor_market.neighbors.return_value = workers
+    return workers
+
+@pytest.fixture
+def firm5(firm2, workers):
+    firm = firm2
+    firm.l = 4.5
+    return firm
+
+
+@pytest.mark.parametrize('l_D, N_Jd', [(3, 2), (3.5, 1), (4.5, 0)])
+def test_destroy_jobs(firm5, l_D, N_Jd):
+    firm = firm5
+    firm.l_D = l_D
+    firm.destroy_jobs()
+    labor_market = firm.model.labor_market
+    assert labor_market.leave_job.call_count == N_Jd
+    assert firm.N_Jd == N_Jd
+    assert firm.N_Jc == 0
+
+
+@pytest.mark.parametrize('l_D, N_Jc', [(6, 2), (5.5, 1), (4.5, 0)])
+def test_create_jobs(firm5, l_D, N_Jc):
+    firm = firm5
+    firm.l_D = l_D
+    firm.create_jobs()
+    assert firm.N_Jd == 0
+    assert firm.N_Jc == N_Jc
 
 
 @pytest.fixture

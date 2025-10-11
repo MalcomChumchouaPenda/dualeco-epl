@@ -57,7 +57,8 @@ class Firm(ap.Agent):
         self.w = 0          # wage offered
         self.m = 0          # price markup
 
-        self.N_J = 0        # number of vacant job
+        self.N_Jc = 0        # number of job created
+        self.N_Jd = 0        # number of job destroyed
         self.l = 0          # labour employed
         self.l_D = 0        # labour demand
         self.y_inv = 0      # real inventories
@@ -124,6 +125,17 @@ class Firm(ap.Agent):
 
     def apply_for_credit(self):
         self.L_D = max(0, self.w * self.l_D - self.D - self.M)
+    
+    def destroy_jobs(self):
+        labor_market = self.model.labor_market
+        workers = labor_market.neighbors(self)
+        self.N_Jd = int(np.ceil(max(0, self.l - self.l_D)))
+        for worker in workers.random(self.N_Jd):
+            labor_market.leave_job(worker, self)
+    
+    def create_jobs(self):
+        self.N_Jc = int(np.ceil(max(0, self.l_D - self.l)))
+        
 
     def compute_profit(self):
         self.Pi = self.Q + self.iota_D - self.W - self.iota_L

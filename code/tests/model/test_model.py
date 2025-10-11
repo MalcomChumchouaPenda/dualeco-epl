@@ -271,7 +271,8 @@ def test_share_firm_wages_and_labor(model_set3):
         firms = model.firms
         for s in model.sectors:
             group = firms.select(firms.s_Y==s)
-            assert round(sum(group.N_J), 2) == 0
+            assert round(sum(group.N_Jc), 2) == 0
+            assert round(sum(group.N_Jd), 2) == 0
             assert round(sum(group.l_D), 2) == 0
             assert round(p[f'W_F{s}'], 2) == round(sum(group.W), 2)  
             assert round(p[f'Q{s}'] / p[f'w{s}'], 2) == round(sum(group.l), 2)
