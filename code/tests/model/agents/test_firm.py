@@ -353,11 +353,16 @@ def firm6(firm1, economy):
 def test_compute_profits(firm6):
     firm = firm6
     firm.Q = 100
+    firm.Y_inv = 25
+    firm.y_inv = 10
     firm.iota_D = 50
+    firm.phi = 1
+    firm.w = 5
     firm.W = 75
     firm.iota_L = 25
     firm.compute_profit()
-    assert firm.Pi == 50.0
+    assert firm.Pi == 75.0
+    assert firm.Y_inv == 50
 
 
 @pytest.fixture

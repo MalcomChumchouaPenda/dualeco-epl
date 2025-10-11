@@ -138,7 +138,10 @@ class Firm(ap.Agent):
         
 
     def compute_profit(self):
-        self.Pi = self.Q + self.iota_D - self.W - self.iota_L
+        Y_inv = self.w * self.y_inv / self.phi
+        DeltaY_inv = Y_inv - self.Y_inv
+        self.Pi = self.Q + DeltaY_inv + self.iota_D - self.W - self.iota_L
+        self.Y_inv = Y_inv
     
     def pay_taxes(self):
         if self.Pi > 0 and self.n_T:
