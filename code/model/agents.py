@@ -122,28 +122,8 @@ class Firm(ap.Agent):
         self.p_Y = (1 + self.m) * self.w / self.phi
 
 
-    # def plan_production(self):
-    #     model = self.model
-    #     labor_market = model.labor_market
-    #     random = model.nprandom
-    #     U = random.uniform    
-
-    #     # price and quantity adjustment
-    #     if self.y_inv <= self.theta_y * self.y:
-    #         self.p_Y = self.p_Y * (1 + U(0, self.delta))
-    #         self.y_star = self.y * (1 + U(0, self.delta))
-    #     else:
-    #         self.p_Y = self.p_Y * (1 - U(0, self.delta))
-    #         self.y_star = self.y * (1 - U(0, self.delta))
-
-    #     # labor demand
-    #     self.N_J = max(0, round(self.l_D - self.l))
-
-    #     # wage adjustment
-        
-    #     # demand of credit
-    #     self.L_D = max(0, self.w * self.l_D - self.D - self.M)
-
+    def apply_for_credit(self):
+        self.L_D = max(0, self.w * self.l_D - self.D - self.M)
 
     def compute_profit(self):
         self.Pi = self.Q + self.iota_D - self.W - self.iota_L

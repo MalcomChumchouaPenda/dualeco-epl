@@ -9,10 +9,10 @@ from model.agents import Firm
 @pytest.fixture
 def model():
     model = ap.Model({'seed':0})
-    model.good_market = MagicMock()
-    model.deposit_market = MagicMock()
-    model.credit_market = MagicMock()
-    model.economy = MagicMock()
+    # model.good_market = MagicMock()
+    # model.deposit_market = MagicMock()
+    # model.credit_market = MagicMock()
+    # model.economy = MagicMock()
     return model
 
 @pytest.fixture
@@ -262,17 +262,17 @@ def test_set_price(firm4, random, Q, y, y_inv, Pr, l, p_Y):
     assert firm.p_Y == p_Y
 
 
-# @pytest.mark.parametrize('D, M, L_D', 
-#                          [(50, 50, 0), (0, 50, 50), 
-#                           (50, 0, 50), (100, 50, 0)])
-# def test_apply_for_credit(firm1, D, M, L_D):
-#     firm = firm1
-#     firm.D = D
-#     firm.M = M
-#     firm.l_D = 100
-#     firm.w = 1
-#     firm.apply_for_credit()
-#     assert firm.L_D == L_D
+@pytest.mark.parametrize('D, M, L_D', 
+                         [(50, 50, 0), (0, 50, 50), 
+                          (50, 0, 50), (100, 50, 0)])
+def test_apply_for_credit(firm1, D, M, L_D):
+    firm = firm1
+    firm.D = D
+    firm.M = M
+    firm.l_D = 100
+    firm.w = 1
+    firm.apply_for_credit()
+    assert firm.L_D == L_D
 
 
 # @pytest.fixture
