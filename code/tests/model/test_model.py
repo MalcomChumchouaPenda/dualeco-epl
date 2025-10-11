@@ -28,7 +28,7 @@ def param_set():
         'w_min':np.random.uniform(0.5, 2.5),  # salaire minimum
         'tau': np.random.random(),            # taux d'impots
         'rho': np.random.random(),            # politique de dividende
-        'delta': np.random.random(),          # parametre d'ajustement
+        'delta_max': np.random.random(),      # parametre d'ajustement
         'upsilon_F': np.random.random(),      # parametre d'ajustement des salaires des firmes
         'm':np.random.random(),               # taux de marge brute
         'theta_W':np.random.random(),         # proportion desire de fonds de salaire
@@ -261,6 +261,7 @@ def test_share_firm_production(model_set3):
             assert round(sum(group.Y_inv), 2) == round(p[f'Y_inv{s}'], 2) 
             assert round(sum(group.y_inv), 2) == round(p[f'y_inv{s}'], 2) 
             assert round(sum(group.y), 2) == round(p[f'Q{s}'] / p[f'p{s}'], 2)
+            assert round(sum(group.q_e), 2) == round(p[f'Q{s}'] / p[f'p{s}'], 2)
             assert round(sum(group.Q), 2) == round(p[f'Q{s}'], 2)  
 
 
@@ -332,7 +333,7 @@ def test_share_firm_behavior_params(model_set3):
         for s in model.sectors:
             group = firms.select(firms.s_Y==s)
             for firm in group:
-                assert firm.delta == p['delta']
+                assert firm.delta_max == p['delta_max']
                 assert firm.theta_y == p['theta_y']
                 assert firm.upsilon == p['upsilon_F']
                 assert firm.phi == p[f'phi{s}']
@@ -378,7 +379,7 @@ def test_share_bank_behavior_params(model_set3):
     for model in model_set3:
         p = model.p
         for bank in model.banks:
-            assert bank.delta == p['delta']
+            assert bank.delta_max == p['delta_max']
             assert bank.theta_Ebar == p['theta_Ebar']
             assert bank.theta_Rbar == p['theta_Rbar']
             assert bank.gamma_L == p['gamma_L']

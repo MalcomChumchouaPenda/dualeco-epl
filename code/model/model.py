@@ -297,7 +297,7 @@ class DualEcoModel(ap.Model):
                 group.r_L = p['r_L']
             
             # share behavior parameters
-            group.delta = p['delta']
+            group.delta_max = p['delta_max']
             group.theta_y = p['theta_y']
             group.upsilon = p['upsilon_F']
             group.phi = p[f'phi{s}']
@@ -319,6 +319,7 @@ class DualEcoModel(ap.Model):
             # share real stocks and flows
             group.y_inv = p[f'y_inv{s}'] /  len(group)
             group.y = p[f'Q{s}'] / (len(group) * p[f'p{s}'])
+            group.q_e = p[f'Q{s}'] / (len(group) * p[f'p{s}'])
             group.l = p[f'Q{s}'] / (len(group) * p[f'w{s}'])
 
             group_owners = owners.select(owners.s_Y == s)
@@ -346,7 +347,7 @@ class DualEcoModel(ap.Model):
         banks.iota_B = p['iota_BB'] / len(banks)
         banks.Pi_d = p['Pi_dB'] / len(banks)
 
-        banks.delta = p['delta']
+        banks.delta_max = p['delta_max']
         banks.theta_Ebar = p['theta_Ebar']
         banks.theta_Rbar = p['theta_Rbar']
         banks.gamma_L = p['gamma_L']

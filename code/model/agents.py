@@ -62,6 +62,8 @@ class Firm(ap.Agent):
         self.y_inv = 0      # real inventories
         self.y_star = 0     # production desired
         self.y = 0          # production
+        self.q_e = 0        # sales expectation
+        self.q_D = 0        # desired level of production
 
         self.Y_inv = 0      # nominal inventories
         self.M = 0          # cash money
@@ -80,43 +82,56 @@ class Firm(ap.Agent):
         self.Pi_d = 0       # dividends
 
         self.phi = 0        # productivity
-        self.delta = 0      # max adjustment parameters
+        self.delta_max = 0  # max adjustment parameters
         self.theta_y = 0    # desired maximum proportion of inventories
         self.upsilon = 0    # stickness of wage
 
         self.bank = None
         self.owner = None
-
+    
 
     def plan_production(self):
-        model = self.model
-        labor_market = model.labor_market
-        random = model.nprandom
-        U = random.uniform    
+        uniform = self.model.nprandom.uniform
+        y_tot = self.y + self.y_inv
+        q = self.Q / self.p_Y
+        if q >= self.q_e:
+            delta = uniform(self.delta_max)
+            self.q_e = self.q_e * (1 + delta)
+        elif q < y_tot:
+            delta = uniform(self.delta_max)
+            self.q_e = self.q_e * (1 - delta)
+        self.q_D = self.q_e * (1 + self.theta_y) - self.y_inv
 
-        # price and quantity adjustment
-        if self.y_inv <= self.theta_y * self.y:
-            self.p_Y = self.p_Y * (1 + U(0, self.delta))
-            self.y_star = self.y * (1 + U(0, self.delta))
-        else:
-            self.p_Y = self.p_Y * (1 - U(0, self.delta))
-            self.y_star = self.y * (1 - U(0, self.delta))
 
-        # labor demand
-        self.l_D = self.y_star / self.phi
-        self.N_J = max(0, round(self.l_D - self.l))
+    # def plan_production(self):
+    #     model = self.model
+    #     labor_market = model.labor_market
+    #     random = model.nprandom
+    #     U = random.uniform    
 
-        # wage adjustment
-        Pr = self.upsilon * np.exp(-labor_market.upsilon * labor_market.u)
-        if self.l_D > self.l:
-            if random.choice([0, 1], p=[1-Pr, Pr]):
-                self.w = self.w * (1 + U(0, self.delta))
-        else:
-            if random.choice([0, 1], p=[Pr, 1-Pr]):
-                self.w = self.w * (1 - U(0, self.delta))
+    #     # price and quantity adjustment
+    #     if self.y_inv <= self.theta_y * self.y:
+    #         self.p_Y = self.p_Y * (1 + U(0, self.delta))
+    #         self.y_star = self.y * (1 + U(0, self.delta))
+    #     else:
+    #         self.p_Y = self.p_Y * (1 - U(0, self.delta))
+    #         self.y_star = self.y * (1 - U(0, self.delta))
+
+    #     # labor demand
+    #     self.l_D = self.y_star / self.phi
+    #     self.N_J = max(0, round(self.l_D - self.l))
+
+    #     # wage adjustment
+    #     Pr = self.upsilon * np.exp(-labor_market.upsilon * labor_market.u)
+    #     if self.l_D > self.l:
+    #         if random.choice([0, 1], p=[1-Pr, Pr]):
+    #             self.w = self.w * (1 + U(0, self.delta))
+    #     else:
+    #         if random.choice([0, 1], p=[Pr, 1-Pr]):
+    #             self.w = self.w * (1 - U(0, self.delta))
         
-        # demand of credit
-        self.L_D = max(0, self.w * self.l_D - self.D - self.M)
+    #     # demand of credit
+    #     self.L_D = max(0, self.w * self.l_D - self.D - self.M)
 
 
     def compute_profit(self):
@@ -144,28 +159,28 @@ class Firm(ap.Agent):
 class Bank(ap.Agent):
     
     def setup(self):
-        self.M = 0          # cash money
-        self.A = 0          # cash advances
-        self.D = 0          # deposits
-        self.B = 0          # bonds
-        self.L = 0          # loans
-        self.L_def = 0      # default loans
-        self.E = 0          # equities
-        self.V = 0          # net worth
+        self.M = 0             # cash money
+        self.A = 0             # cash advances
+        self.D = 0             # deposits
+        self.B = 0             # bonds
+        self.L = 0             # loans
+        self.L_def = 0         # default loans
+        self.E = 0             # equities
+        self.V = 0             # net worth
 
-        self.T = 0          # taxes
-        self.iota_A = 0     # reimbursement of advance interest
-        self.iota_D = 0     # reimbursement of deposit interest
-        self.iota_B = 0     # reimbursement of bonds interest
-        self.iota_L = 0     # reimbursement of loans interest
-        self.Pi = 0         # profits
-        self.Pi_d = 0       # dividends
+        self.T = 0             # taxes
+        self.iota_A = 0        # reimbursement of advance interest
+        self.iota_D = 0        # reimbursement of deposit interest
+        self.iota_B = 0        # reimbursement of bonds interest
+        self.iota_L = 0        # reimbursement of loans interest
+        self.Pi = 0            # profits
+        self.Pi_d = 0          # dividends
 
-        self.delta = 0      # adjustment parameter
-        self.theta_Ebar = 0 # minimum capital ratio
-        self.theta_Rbar = 0 # minimum liquidity ratio
-        self.beta_L = 0     # elasticity of interest rate to leverage ratio
-        self.gamma_L = 0    # elasticity of loan probability to leverage ratio
+        self.delta_max = 0     # adjustment parameter
+        self.theta_Ebar = 0    # minimum capital ratio
+        self.theta_Rbar = 0    # minimum liquidity ratio
+        self.beta_L = 0        # elasticity of interest rate to leverage ratio
+        self.gamma_L = 0       # elasticity of loan probability to leverage ratio
         
         self.owner = None
 

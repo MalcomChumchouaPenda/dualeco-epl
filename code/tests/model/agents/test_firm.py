@@ -35,6 +35,8 @@ def test_default_real_stocks_and_flows(firm1):
     assert firm.y == 0
     assert firm.y_inv == 0
     assert firm.y_star == 0
+    assert firm.q_e == 0
+    assert firm.q_D == 0
 
 
 def test_default_nominal_stocks_and_flows(firm1):
@@ -66,31 +68,10 @@ def test_default_prices(firm1):
 def test_default_params(firm1):
     firm = firm1
     assert firm.phi == 0
-    assert firm.delta == 0
+    assert firm.delta_max == 0
     assert firm.theta_y == 0
     assert firm.upsilon == 0
 
-
-@pytest.fixture
-def labor_market():
-    market = MagicMock()
-    market.upsilon = 0.5
-    market.u = 0.5
-    return market
-
-@pytest.fixture
-def firm2(firm1, labor_market):
-    firm = firm1
-    firm.upsilon = 0.25
-    firm.theta_y = 0.25
-    firm.phi = 1
-    firm.y = 100
-    firm.y_inv = 0
-    firm.p_Y = 1
-    firm.w = 1
-    firm.l = 100
-    firm.model.labor_market = labor_market
-    return firm
 
 @pytest.fixture
 def random(model, monkeypatch):
@@ -98,109 +79,200 @@ def random(model, monkeypatch):
     monkeypatch.setattr(model, 'nprandom', f)
     return f
 
+
 @pytest.fixture
-def exp(monkeypatch):
-    f = MagicMock()
-    monkeypatch.setattr(np, 'exp', f)
-    return f
+def firm2(firm1):
+    firm = firm1
+    firm.delta_max = 0.5
+    firm.theta_y = 0.25
+    firm.p_Y = 10
+    firm.q_e = 10
+    return firm
 
 
-@pytest.mark.parametrize('y_inv', [0, 10, 20])
-def test_increase_price(firm2, y_inv, random):
+@pytest.mark.parametrize('Q, y, y_inv', 
+                         [(110, 4, 5), (100, 4, 5),
+                          (110, 6, 5), (100, 6, 5)])
+def test_increase_sales_expectation(firm2, random, Q, y, y_inv):
     random.uniform.return_value = 0.25
     firm = firm2
+    firm.Q = Q
+    firm.y = y
     firm.y_inv = y_inv
+
     firm.plan_production()
-    assert firm.p_Y == 1.25
+    random.uniform.assert_called_with(firm.delta_max)
+    assert firm.q_e == 12.5
+        
 
-
-@pytest.mark.parametrize('y_inv', [100, 75, 50])
-def test_decrease_price(firm2, y_inv, random):
+@pytest.mark.parametrize('Q, y, y_inv', 
+                         [(90, 6, 5), (80, 6, 5), 
+                          (90, 7, 5), (80, 7, 5)])
+def test_decrease_sales_expectation(firm2, random, Q, y, y_inv):
     random.uniform.return_value = 0.25
     firm = firm2
+    firm.Q = Q
+    firm.y = y
     firm.y_inv = y_inv
+
     firm.plan_production()
-    assert firm.p_Y == 0.75
+    random.uniform.assert_called_with(firm.delta_max)
+    assert firm.q_e == 7.5
 
 
-@pytest.mark.parametrize('y_inv', [0, 10, 20])    
-def test_increase_desired_production(firm2, y_inv, random):
+@pytest.mark.parametrize('Q, y, y_inv', 
+                         [(90, 4, 5), (80, 3, 5), 
+                          (90, 3, 5), (80, 2, 5)])
+def test_maintain_sales_expectation(firm2, random, Q, y, y_inv):
     random.uniform.return_value = 0.25
     firm = firm2
+    firm.Q = Q
+    firm.y = y
     firm.y_inv = y_inv
+
     firm.plan_production()
-    assert firm.y_star == 125
+    random.uniform.assert_not_called()
+    assert firm.q_e == 10
 
 
-@pytest.mark.parametrize('y_inv', [100, 75, 50])
-def test_decrease_desired_production(firm2, y_inv, random):
+@pytest.mark.parametrize('Q, y, y_inv, q_D', 
+                         [(100, 4, 5, 10.625), (90, 4, 5, 7.5), 
+                          (100, 6, 5, 10.625), (90, 6, 5, 4.375)])
+def test_set_desired_production_level(firm2, random, Q, y, y_inv, q_D):
     random.uniform.return_value = 0.25
     firm = firm2
+    firm.Q = Q
+    firm.y = y
     firm.y_inv = y_inv
-    firm.plan_production()
-    assert firm.y_star == 75
-
-
-@pytest.mark.parametrize('y_inv, l_D', [(0, 125), (100, 75)])
-def test_set_labor_demand(firm2, y_inv, l_D, random):
-    random.uniform.return_value = 0.25
-    firm = firm2
-    firm.y_inv = y_inv
-    firm.plan_production()
-    assert firm.l_D == l_D    # y_star / phi
-
-
-@pytest.mark.parametrize('y_inv, N_J', [(0, 25), (100, 0)])
-def test_create_vacant_jobs(firm2, y_inv, N_J, random):
-    random.uniform.return_value = 0.25
-    firm = firm2
-    firm.y_inv = y_inv
-    firm.plan_production()
-    assert firm.N_J == N_J    # max(0, l_D - l)
-
-
-@pytest.mark.parametrize('Pr, w', [(0, 1), (1, 1.25)])    
-def test_increase_wage(firm2, Pr, w, random, exp):
-    random.uniform.return_value = 0.25
-    random.choice.return_value = Pr
-    exp.return_value = 0.5
-    firm = firm2
-    firm.y_inv = 0
-
-    firm.plan_production()  
-    exp.assert_called_with(-0.25)
-    random.choice.assert_called_with([0, 1], p=[0.875, 0.125])
-    assert firm.l_D > firm.l
-    assert firm.w == w
-
-
-@pytest.mark.parametrize('Pr, w', [(0, 1), (1, 0.75)])   
-def test_decrease_wage(firm2, Pr, w, random, exp):
-    random.uniform.return_value = 0.25
-    random.choice.return_value = Pr
-    exp.return_value = 0.5
-    firm = firm2
-    firm.y_inv = 100
 
     firm.plan_production()
-    exp.assert_called_with(-0.25)
-    random.choice.assert_called_with([0, 1], p=[0.125, 0.875])
-    assert firm.l_D <= firm.l
-    assert firm.w == w
+    assert firm.q_D == q_D
 
 
-@pytest.mark.parametrize('D, M, L_D', [(50, 50, 0), (0, 50, 50), 
-                                       (50, 0, 50), (100, 50, 0)])
-def test_set_credit_demand(firm2, D, M, L_D, random):
-    random.uniform.return_value = 0
-    random.choice.return_value = 0
-    firm = firm2
-    firm.D = D
-    firm.M = M
-    firm.plan_production()
-    assert firm.w == 1
-    assert firm.l_D == 100
-    assert firm.L_D == L_D
+# @pytest.fixture
+# def labor_market():
+#     market = MagicMock()
+#     market.upsilon = 0.5
+#     market.u = 0.5
+#     return market
+
+# @pytest.fixture
+# def firm2(firm1, labor_market):
+#     firm = firm1
+#     firm.upsilon = 0.25
+#     firm.theta_y = 0.25
+#     firm.phi = 1
+#     firm.y = 100
+#     firm.y_inv = 0
+#     firm.p_Y = 1
+#     firm.w = 1
+#     firm.l = 100
+#     firm.model.labor_market = labor_market
+#     return firm
+
+# @pytest.fixture
+# def exp(monkeypatch):
+#     f = MagicMock()
+#     monkeypatch.setattr(np, 'exp', f)
+#     return f
+
+
+# @pytest.mark.parametrize('y_inv', [0, 10, 20])
+# def test_increase_price(firm2, y_inv, random):
+#     random.uniform.return_value = 0.25
+#     firm = firm2
+#     firm.y_inv = y_inv
+#     firm.plan_production()
+#     assert firm.p_Y == 1.25
+
+
+# @pytest.mark.parametrize('y_inv', [100, 75, 50])
+# def test_decrease_price(firm2, y_inv, random):
+#     random.uniform.return_value = 0.25
+#     firm = firm2
+#     firm.y_inv = y_inv
+#     firm.plan_production()
+#     assert firm.p_Y == 0.75
+
+
+# @pytest.mark.parametrize('y_inv', [0, 10, 20])    
+# def test_increase_desired_production(firm2, y_inv, random):
+#     random.uniform.return_value = 0.25
+#     firm = firm2
+#     firm.y_inv = y_inv
+#     firm.plan_production()
+#     assert firm.y_star == 125
+
+
+# @pytest.mark.parametrize('y_inv', [100, 75, 50])
+# def test_decrease_desired_production(firm2, y_inv, random):
+#     random.uniform.return_value = 0.25
+#     firm = firm2
+#     firm.y_inv = y_inv
+#     firm.plan_production()
+#     assert firm.y_star == 75
+
+
+# @pytest.mark.parametrize('y_inv, l_D', [(0, 125), (100, 75)])
+# def test_set_labor_demand(firm2, y_inv, l_D, random):
+#     random.uniform.return_value = 0.25
+#     firm = firm2
+#     firm.y_inv = y_inv
+#     firm.plan_production()
+#     assert firm.l_D == l_D    # y_star / phi
+
+
+# @pytest.mark.parametrize('y_inv, N_J', [(0, 25), (100, 0)])
+# def test_create_vacant_jobs(firm2, y_inv, N_J, random):
+#     random.uniform.return_value = 0.25
+#     firm = firm2
+#     firm.y_inv = y_inv
+#     firm.plan_production()
+#     assert firm.N_J == N_J    # max(0, l_D - l)
+
+
+# @pytest.mark.parametrize('Pr, w', [(0, 1), (1, 1.25)])    
+# def test_increase_wage(firm2, Pr, w, random, exp):
+#     random.uniform.return_value = 0.25
+#     random.choice.return_value = Pr
+#     exp.return_value = 0.5
+#     firm = firm2
+#     firm.y_inv = 0
+
+#     firm.plan_production()  
+#     exp.assert_called_with(-0.25)
+#     random.choice.assert_called_with([0, 1], p=[0.875, 0.125])
+#     assert firm.l_D > firm.l
+#     assert firm.w == w
+
+
+# @pytest.mark.parametrize('Pr, w', [(0, 1), (1, 0.75)])   
+# def test_decrease_wage(firm2, Pr, w, random, exp):
+#     random.uniform.return_value = 0.25
+#     random.choice.return_value = Pr
+#     exp.return_value = 0.5
+#     firm = firm2
+#     firm.y_inv = 100
+
+#     firm.plan_production()
+#     exp.assert_called_with(-0.25)
+#     random.choice.assert_called_with([0, 1], p=[0.125, 0.875])
+#     assert firm.l_D <= firm.l
+#     assert firm.w == w
+
+
+# @pytest.mark.parametrize('D, M, L_D', [(50, 50, 0), (0, 50, 50), 
+#                                        (50, 0, 50), (100, 50, 0)])
+# def test_set_credit_demand(firm2, D, M, L_D, random):
+#     random.uniform.return_value = 0
+#     random.choice.return_value = 0
+#     firm = firm2
+#     firm.D = D
+#     firm.M = M
+#     firm.plan_production()
+#     assert firm.w == 1
+#     assert firm.l_D == 100
+#     assert firm.L_D == L_D
 
 
 @pytest.fixture
