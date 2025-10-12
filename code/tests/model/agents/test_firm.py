@@ -286,10 +286,14 @@ def workers(model, labor_market):
 def firm5(firm2, workers):
     firm = firm2
     firm.l = 4.5
+    firm.w = 1
     return firm
 
 
-@pytest.mark.parametrize('l_D, N_Jd', [(3, 2), (3.5, 1), (4.5, 0)])
+@pytest.mark.parametrize('l_D, N_Jd', 
+                         [(3, 2), 
+                          (3.5, 1), 
+                          (4.5, 0)])
 def test_destroy_jobs(firm5, l_D, N_Jd):
     firm = firm5
     firm.l_D = l_D
@@ -300,9 +304,16 @@ def test_destroy_jobs(firm5, l_D, N_Jd):
     assert firm.N_Jc == 0
 
 
-@pytest.mark.parametrize('l_D, N_Jc', [(6, 2), (5.5, 1), (4.5, 0)])
-def test_create_jobs(firm5, l_D, N_Jc):
+@pytest.mark.parametrize('l_D, N_Jc, M, D', 
+                         [(6, 2, 10, 0), 
+                          (6, 1, 5, 0),
+                          (5.5, 1, 0, 10), 
+                          (5.5, 0, 0, 4), 
+                          (4.5, 0, 0, 10)])
+def test_create_jobs(firm5, l_D, N_Jc, M, D):
     firm = firm5
+    firm.M = M
+    firm.D = D
     firm.l_D = l_D
     firm.create_jobs()
     assert firm.N_Jd == 0

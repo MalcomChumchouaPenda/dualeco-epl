@@ -134,7 +134,8 @@ class Firm(ap.Agent):
             labor_market.leave_job(worker, self)
     
     def create_jobs(self):
-        self.N_Jc = int(np.ceil(max(0, self.l_D - self.l)))
+        l_max = min(self.l_D, (self.M + self.D) / self.w)
+        self.N_Jc = int(np.ceil(max(0, l_max - self.l)))
     
     def produce_goods(self):
         labor_market = self.model.labor_market
