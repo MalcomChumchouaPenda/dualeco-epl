@@ -8,12 +8,7 @@ from model.agents import Firm
 
 @pytest.fixture
 def model():
-    model = ap.Model({'seed':0})
-    # model.good_market = MagicMock()
-    # model.deposit_market = MagicMock()
-    # model.credit_market = MagicMock()
-    # model.economy = MagicMock()
-    return model
+    return ap.Model()
 
 @pytest.fixture
 def firm1(model):
@@ -283,13 +278,14 @@ def workers(model, labor_market):
     return workers
 
 @pytest.fixture
-def firm5(firm2, workers):
+def firm5(firm2):
     firm = firm2
     firm.l = 4.5
     firm.w = 1
     return firm
 
 
+@pytest.mark.usefixtures('workers')
 @pytest.mark.parametrize('l_D, N_Jd', 
                          [(3, 2), 
                           (3.5, 1), 
@@ -343,15 +339,14 @@ def economy():
 
 @pytest.fixture
 def government(model):
-    government = ap.Agent(model)
-    model.government = government
-    return government
+    return ap.Agent(model)
 
 @pytest.fixture
 def firm6(firm1, economy, government):
     firm = firm1
     firm.owner = MagicMock()
     firm.model.economy = economy
+    firm.model.government = government
     return firm
 
 
