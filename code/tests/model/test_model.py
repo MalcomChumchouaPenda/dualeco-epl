@@ -214,19 +214,81 @@ def test_share_household_stocks(model_set3):
         households = model.households
         assert round(p['M_H'], 2) == round(sum(households.M), 2)
         assert round(p['D_H'], 2) == round(sum(households.D), 2)
+    
+
+def test_share_household_incomes(model_set3):
+    for model in model_set3:
+        p = model.p
+        households = model.households
+        assert round(p['W_H'], 2) == round(sum(households.W), 2)   
+        assert round(p['Z_H'], 2) == round(sum(households.Z), 2)   
+        assert round(p['iota_DH'], 2) == round(sum(households.iota_D), 2)
+        assert round(p['Pi_dH'], 2) == round(sum(households.Pi_d), 2)
+        
+
+def test_share_household_incomes_by_status(model_set3):
+    for model in model_set3:
+        p = model.p
+        households = model.households
+        owners = households.select(households.s_E == 1)
+        bank_owners = owners.select(owners.s_EB == 1)
+        firm_owners1 = owners.select(owners.s_Y == 1)
+        firm_owners2 = owners.select(owners.s_Y == 2)
+        workers = households.select(households.s_W == 1)
+        public_workers = workers.select(workers.s_WG == 1)
+        private_workers1 = workers.select(workers.s_Y == 1)
+        private_workers2 = workers.select(workers.s_Y == 2)
+        unemployed = households.select(households.s_U == 1)
+        assert round(p['W_F1'], 2) == round(sum(private_workers1.W) + sum(firm_owners1.W), 2)   
+        assert round(p['W_F2'], 2) == round(sum(private_workers2.W) + sum(firm_owners2.W), 2)  
+        assert round(p['W_G'], 2) == round(sum(public_workers.W), 2)  
+        assert round(p['Z_G'], 2) == round(sum(unemployed.Z), 2)  
+        assert round(p['Pi_dF1'], 2) == round(sum(firm_owners1.Pi_d), 2)  
+        assert round(p['Pi_dF2'], 2) == round(sum(firm_owners2.Pi_d), 2) 
+        assert round(p['Pi_dB'], 2) == round(sum(bank_owners.Pi_d), 2)  
 
 
-def test_share_household_flows(model_set3):
+def test_share_household_reservation_wages(model_set3):
+    for model in model_set3:
+        p = model.p
+        households = model.households
+        for s in model.sectors:
+            group1 = households.select(households.s_Y == s)
+            assert group1[0].w_D == p[f'w{s}']
+
+        group2 = households.select(households.s_WG == 1)
+        group3 = households.select(households.s_U == 1)
+        assert group2[0].w_D == p['w_G']
+        assert group3[0].w_D == p['w_min']
+
+
+def test_share_household_expenses(model_set3):
     for model in model_set3:
         p = model.p
         households = model.households
         assert round(p['C1'], 2) == round(sum(households.C1), 2)
         assert round(p['C2'], 2) == round(sum(households.C2), 2)
-        assert round(p['W_H'], 2) == round(sum(households.W), 2)   
-        assert round(p['Z_H'], 2) == round(sum(households.Z), 2)   
         assert round(p['T_H'], 2) == round(sum(households.T), 2)
-        assert round(p['iota_DH'], 2) == round(sum(households.iota_D), 2)
-        assert round(p['Pi_dH'], 2) == round(sum(households.Pi_d), 2)
+
+
+def test_share_household_taxes_by_gross_incomes(model_set3):
+    for model in model_set3:
+        p = model.p
+        households = model.households
+        Y = households.W + households.iota_D + households.Pi_d
+        for y, household in zip(Y, households):
+            assert round(household.T / p['T_H'], 2) == round(y / sum(Y), 2)
+
+
+def test_share_household_consumption_by_disposable_incomes(model_set3):
+    for model in model_set3:
+        p = model.p
+        households = model.households
+        Y = households.W + households.iota_D + households.Pi_d
+        Y_d = Y - households.T + households.Z 
+        for y_d, household in zip(Y_d, households):
+            assert round(household.C1 / p['C1'], 2) == round(y_d / sum(Y_d), 2)
+            assert round(household.C2 / p['C2'], 2) == round(y_d / sum(Y_d), 2)
 
 
 def test_share_firm_stocks(model_set3):
@@ -257,7 +319,7 @@ def test_share_firm_production(model_set3):
         firms = model.firms
         for s in model.sectors:
             group = firms.select(firms.s_Y==s)
-            assert round(sum(group.y_star), 2) == 0
+            assert round(sum(group.y_D), 2) == 0
             assert round(sum(group.Y_inv), 2) == round(p[f'Y_inv{s}'], 2) 
             assert round(sum(group.y_inv), 2) == round(p[f'y_inv{s}'], 2) 
             assert round(sum(group.y), 2) == round(p[f'Q{s}'] / p[f'p{s}'], 2)
@@ -314,18 +376,26 @@ def test_share_firm_equities(model_set3):
                 assert round(firm.E, 2) == round(firm.owner.E, 2)
 
 
-def test_share_firm_prices(model_set3):
+def test_share_firm_prices_and_wages(model_set3):
     for model in model_set3:
         p = model.p
         firms = model.firms
         for s in model.sectors:
-            group = firms.select(firms.s_Y==s)
+            group = firms.select(firms.s_Y == s)
             for firm in group:
                 assert firm.m == p['m']
                 assert firm.w == p[f'w{s}']
                 assert firm.p_y == p[f'p{s}']
-                if s == 1:
-                    assert firm.r_L == p['r_L']
+
+
+def test_share_firm_interest_rates(model_set3):
+    for model in model_set3:
+        p = model.p
+        for firm in model.firms:
+            if firm.s_Y == 1:
+                assert firm.r_L == p['r_L']
+            else:
+                assert firm.r_L == 0
 
 
 def test_share_firm_behavior_params(model_set3):
@@ -417,28 +487,9 @@ def test_share_public_sector_flows(model_set3):
         assert round(p['Pi_CB'], 2) == round(central_bank.Pi, 2)
 
 
-def test_share_consumption_prices(model_set3):
+def test_share_public_sector_prices(model_set3):
     for model in model_set3:
         p = model.p
-        firms = model.firms
-        for s in model.sectors:
-            group = firms.select(firms.s_Y == s)
-            assert group[0].p_y == p[f'p{s}']
-
-
-def test_share_reservation_wages(model_set3):
-    for model in model_set3:
-        p = model.p
-        households = model.households
-        for s in model.sectors:
-            group1 = households.select(households.s_Y == s)
-            assert group1[0].w_D == p[f'w{s}']
-
-        group2 = households.select(households.s_WG == 1)
-        group3 = households.select(households.s_U == 1)
-        assert group2[0].w_D == p['w_G']
-        assert group3[0].w_D == p['w_min']
-
         gov = model.government
         assert gov.w == p['w_G']
 

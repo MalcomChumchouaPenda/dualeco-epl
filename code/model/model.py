@@ -254,19 +254,33 @@ class DualEcoModel(ap.Model):
         unemployed.s_U = 1
         unemployed.w_D = p['w_min']
         self.households += unemployed
-    
-        # share stocks, flows and prices
+
+        # share stocks and prices
         households = self.households
         households.M = p['M_H'] / len(households)
         households.D = p['D_H'] / len(households)
-        households.C1 = p['C1'] / len(households)
-        households.C2 = p['C2'] / len(households)
-        households.W = p['W_H'] / len(households)
-        households.Z = p['Z_H'] / len(households)
-        households.T = p['T_H'] / len(households)
         households.iota_D = p['iota_DH'] / len(households)
-        households.Pi_d = p['Pi_dH'] / len(households)
         households.r_D = p['r_D']
+
+        # share incomes by status
+        public_workers.W = p['W_G'] / len(public_workers)
+        private_workers1.W = p['W_F1'] / len(private_workers1 + firm_owners1)
+        private_workers2.W = p['W_F2'] / len(private_workers2 + firm_owners2)
+        firm_owners1.W = p['W_F1'] / len(private_workers1 + firm_owners1)
+        firm_owners2.W = p['W_F2'] / len(private_workers2 + firm_owners2)
+        unemployed.Z = p['Z_H'] / len(unemployed)
+        bank_owners.Pi_d = p['Pi_dB'] / len(bank_owners)
+        firm_owners1.Pi_d = p['Pi_dF1'] / len(firm_owners1)
+        firm_owners2.Pi_d = p['Pi_dF2'] / len(firm_owners2)
+    
+        # share taxes by gross incomes
+        Y = households.W + households.Pi_d + households.iota_D
+        households.T = Y * p['T_H'] / sum(Y)
+
+        # share consumption by disposable incomes
+        Y_d = Y - households.T + households.Z
+        households.C1 = Y_d * p['C1'] / sum(Y_d)
+        households.C2 = Y_d * p['C2'] / sum(Y_d)
 
 
     def create_firms(self):

@@ -18,12 +18,12 @@ class Household(ap.Agent):
 
         self.M = 0          # cash money
         self.D = 0          # deposits
-        self.D_star = 0     # deposits desired
+        self.D_D = 0     # deposits desired
         self.E = 0          # equities
-        self.E_star = 0     # equities desired
+        self.E_D = 0     # equities desired
         self.V = 0          # net worth
 
-        self.C_star = 0     # consumption desired
+        self.C_D = 0     # consumption desired
         self.C1 = 0         # consumption of goods 1
         self.C2 = 0         # consumption of goods 2
         self.W = 0          # wages
@@ -57,15 +57,14 @@ class Firm(ap.Agent):
         self.w = 0          # wage offered
         self.m = 0          # price markup
 
-        self.N_Jc = 0        # number of job created
-        self.N_Jd = 0        # number of job destroyed
+        self.N_Jc = 0       # number of job created
+        self.N_Jd = 0       # number of job destroyed
         self.l = 0          # labour employed
         self.l_D = 0        # labour demand
+        self.y_D = 0        # desired level of production
         self.y_inv = 0      # real inventories
-        self.y_star = 0     # production desired
         self.y = 0          # production
         self.q_e = 0        # sales expectation
-        self.y_D = 0        # desired level of production
 
         self.Y_inv = 0      # nominal inventories
         self.M = 0          # cash money

@@ -30,7 +30,7 @@ def test_default_real_stocks_and_flows(firm1):
     assert firm.l_D == 0
     assert firm.y == 0
     assert firm.y_inv == 0
-    assert firm.y_star == 0
+    assert firm.y_D == 0
     assert firm.q_e == 0
     assert firm.y_D == 0
 
