@@ -276,32 +276,6 @@ def test_apply_for_credit(firm1, D, M, L_D):
     assert firm.L_D == L_D
 
 
-# @pytest.fixture
-# def firm3(firm1):
-#     firm = firm1
-#     firm.l_D = 100
-#     firm.phi = 1
-#     return firm
-
-
-
-
-
-# @pytest.fixture
-# def firm2(firm1, labor_market):
-#     firm = firm1
-#     firm.upsilon = 0.25
-#     firm.theta_y = 0.25
-#     firm.phi = 1
-#     firm.y = 100
-#     firm.y_inv = 0
-#     firm.p_Y = 1
-#     firm.w = 1
-#     firm.l = 100
-#     firm.model.labor_market = labor_market
-#     return firm
-
-
 @pytest.fixture
 def workers(model, labor_market):
     workers = ap.AgentList(model, 5)
@@ -335,15 +309,35 @@ def test_create_jobs(firm5, l_D, N_Jc):
     assert firm.N_Jc == N_Jc
 
 
+@pytest.mark.parametrize('y_D, y', 
+                         [(3, 3), (3.5, 3.5), (4, 4),
+                          (5, 5), (5.5, 5), (6, 5)])
+def test_produce_goods(firm5, workers, y_D, y):
+    firm = firm5
+    firm.y_inv = 1
+    firm.y_D = y_D
+    firm.l_D = y_D
+    firm.produce_goods()
+    assert firm.y == y
+    assert firm.y_inv == y + 1
+    assert firm.l == y
+    assert firm.l == sum(workers.l)
+
+
 @pytest.fixture
 def economy():
     economy = MagicMock()
     economy.tau = 0.1
     return economy
 
+@pytest.fixture
+def government(model):
+    government = ap.Agent(model)
+    model.government = government
+    return government
 
 @pytest.fixture
-def firm6(firm1, economy):
+def firm6(firm1, economy, government):
     firm = firm1
     firm.owner = MagicMock()
     firm.model.economy = economy
@@ -365,32 +359,22 @@ def test_compute_profits(firm6):
     assert firm.Y_inv == 50
 
 
-@pytest.fixture
-def government1(model):
-    government = ap.Agent(model)
-    model.government = government
-    return government
-
-
 @pytest.mark.parametrize('Pi, T', [(25, 2.5), (50, 5.0)])
-def test_pay_taxes_if_profits(firm6, government1, Pi, T):
+def test_pay_taxes_if_profits(firm6, government, Pi, T):
     firm = firm6
     firm.n_T = 1
     firm.Pi = Pi
     firm.pay_taxes()
-        
-    government = government1
     economy = firm.model.economy
     economy.pay_taxes.assert_called_with(T, firm, government)
 
 
 @pytest.mark.parametrize('Pi', [0, 25, 50])
-def test_do_not_pay_taxes_if_informal(firm6, government1, Pi):
+def test_do_not_pay_taxes_if_informal(firm6, Pi):
     firm = firm6
     firm.n_T = 0
     firm.Pi = Pi
-    firm.pay_taxes()
-    
+    firm.pay_taxes()    
     economy = firm.model.economy
     economy.pay_taxes.assert_not_called()
 
@@ -401,7 +385,6 @@ def test_do_not_pay_taxes_if_losses(firm6, Pi):
     firm.n_T = 1
     firm.Pi = Pi
     firm.pay_taxes()
-    
     economy = firm.model.economy
     economy.pay_taxes.assert_not_called()
 
@@ -413,7 +396,6 @@ def test_pay_dividends_if_profits(firm6, Pi, T, Pi_d):
     firm.Pi = Pi
     firm.T = T
     firm.pay_dividends()
-    
     economy = firm.model.economy
     economy.pay_dividends.assert_called_with(Pi_d, firm, firm.owner)
 
@@ -422,8 +404,7 @@ def test_pay_dividends_if_profits(firm6, Pi, T, Pi_d):
 def test_do_not_pay_dividends_if_losses(firm6, Pi):
     firm = firm6
     firm.Pi = Pi
-    firm.pay_dividends()
-    
+    firm.pay_dividends()    
     economy = firm.model.economy
     economy.pay_dividends.assert_not_called()
 

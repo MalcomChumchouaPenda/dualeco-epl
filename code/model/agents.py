@@ -135,6 +135,15 @@ class Firm(ap.Agent):
     
     def create_jobs(self):
         self.N_Jc = int(np.ceil(max(0, self.l_D - self.l)))
+    
+    def produce_goods(self):
+        labor_market = self.model.labor_market
+        workers = labor_market.neighbors(self)
+        l = min(self.l_D, len(workers))
+        workers.l = l / len(workers)
+        self.y = l * self.phi
+        self.y_inv += self.y
+        self.l = l
         
 
     def compute_profit(self):
