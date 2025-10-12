@@ -161,7 +161,7 @@ class DualEcoModel(ap.Model):
         p['C2'] = p['Q2']
         p['W_G'] = p['w_G'] * p['N_WG']
         p['W_H'] = p['W_F1'] + p['W_F2'] + p['W_G']
-        p['Z_H'] = p['theta_Zbar'] * p['w_G'] * p['N_U']
+        p['Z_H'] = p['kappa_Z'] * p['w_G'] * p['N_U']
         p['Pi_dH'] = p['Pi_dF1'] + p['Pi_dF2'] + p['Pi_dB']
         p['Y'] = p['W_H'] + p['Pi_dH'] + p['Z_H'] + p['zeta_1'] * p['r_D'] * p['D_H']
         p['T_H'] = p['tau'] * (p['Y'] - p['Z_H'])
@@ -349,8 +349,8 @@ class DualEcoModel(ap.Model):
         banks.Pi_d = p['Pi_dB'] / len(banks)
 
         banks.delta = p['delta']
-        banks.theta_Ebar = p['theta_Ebar']
-        banks.theta_Rbar = p['theta_Rbar']
+        banks.kappa_E = p['kappa_E']
+        banks.kappa_R = p['kappa_R']
         banks.gamma_L = p['gamma_L']
         banks.beta_L = p['beta_L']
 

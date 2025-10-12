@@ -28,16 +28,16 @@ def param_set():
         'w_min':np.random.uniform(0.5, 2.5),  # salaire minimum
         'tau': np.random.random(),            # taux d'impots
         'rho': np.random.random(),            # politique de dividende
-        'delta': np.random.random(),      # parametre d'ajustement
+        'delta': np.random.random(),          # parametre d'ajustement
         'upsilon_F': np.random.random(),      # parametre d'ajustement des salaires des firmes
         'm':np.random.random(),               # taux de marge brute
         'theta_W':np.random.random(),         # proportion desire de fonds de salaire
         'theta_E':np.random.random(),         # proportion desire de capitaux bancaire (rentabilite)
         'theta_M':np.random.random(),         # proportion desire de liquidite
         'theta_y':np.random.random(),         # proportion desire de sotck d'invendus
-        'theta_Zbar':np.random.random(),      # proportion reglementaire des allocations publics
-        'theta_Ebar':np.random.random(),      # ratio minimum de capital bancaire
-        'theta_Rbar':np.random.random(),      # ratio minimum de liquidite bancaire
+        'kappa_Z':np.random.random(),         # proportion reglementaire des allocations publics
+        'kappa_E':np.random.random(),         # ratio minimum de capital bancaire
+        'kappa_R':np.random.random(),         # ratio minimum de liquidite bancaire
         'beta_L':np.random.random(),          # elasticite du taux d'interet du credit au levier financier
         'gamma_L':np.random.random(),         # elasticite de la probabilite de credit au levier financier
         'r_D': np.random.random(),            # taux d'interet sur les depots bancaires
@@ -382,8 +382,8 @@ def test_share_bank_behavior_params(model_set3):
         p = model.p
         for bank in model.banks:
             assert bank.delta == p['delta']
-            assert bank.theta_Ebar == p['theta_Ebar']
-            assert bank.theta_Rbar == p['theta_Rbar']
+            assert bank.kappa_E == p['kappa_E']
+            assert bank.kappa_R == p['kappa_R']
             assert bank.gamma_L == p['gamma_L']
             assert bank.beta_L == p['beta_L']
 

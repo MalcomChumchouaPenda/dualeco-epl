@@ -193,8 +193,8 @@ class Bank(ap.Agent):
         self.Pi_d = 0          # dividends
 
         self.delta = 0     # adjustment parameter
-        self.theta_Ebar = 0    # minimum capital ratio
-        self.theta_Rbar = 0    # minimum liquidity ratio
+        self.kappa_E = 0    # minimum capital ratio
+        self.kappa_R = 0    # minimum liquidity ratio
         self.beta_L = 0        # elasticity of interest rate to leverage ratio
         self.gamma_L = 0       # elasticity of loan probability to leverage ratio
         
@@ -211,7 +211,7 @@ class Bank(ap.Agent):
 
     def grant_loans(self):
         random = self.model.nprandom
-        L_max = self.theta_Ebar * self.E
+        L_max = self.kappa_E * self.E
         credit_market =  self.model.credit_market
         firms = credit_market.neighbors(self)
         for firm in firms:
@@ -228,7 +228,7 @@ class Bank(ap.Agent):
 
 
     def ask_advances(self):
-        A = self.theta_Rbar * self.D - self.R
+        A = self.kappa_R * self.D - self.R
         if A > 0:
             central_bank = self.model.central_bank
             economy = self.model.economy
@@ -236,7 +236,7 @@ class Bank(ap.Agent):
             
 
     def buy_bonds(self):
-        B = self.R - self.theta_Rbar * self.D
+        B = self.R - self.kappa_R * self.D
         if B > 0:
             government = self.model.government
             B = min(government.B_S, B)        

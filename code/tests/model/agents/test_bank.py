@@ -38,8 +38,8 @@ def test_default_state(bank1):
 def test_default_params(bank1):
     bank = bank1
     assert bank.delta == 0
-    assert bank.theta_Ebar == 0
-    assert bank.theta_Rbar == 0
+    assert bank.kappa_E == 0
+    assert bank.kappa_R == 0
     assert bank.beta_L == 0
     assert bank.gamma_L == 0
 
@@ -89,7 +89,7 @@ def firms1(model, credit_market):
 @pytest.fixture
 def bank2(bank1):
     bank = bank1
-    bank.theta_Ebar = 0.5  # ratio reglementaire de capital
+    bank.kappa_E = 0.5  # ratio reglementaire de capital
     bank.beta_L = 0.5      # elastticite du taux d'interet
     bank.gamma_L = 0.5     # probabilite de pret
     bank.E = 300
@@ -141,7 +141,7 @@ def test_grant_loans_with_maximum_loan(bank2, firms1, random):
     market = bank.model.credit_market
     calls = market.give_loans.call_args_list
     loans = sum([call.args[0] for call in calls])
-    assert loans <= bank.theta_Ebar * bank.E
+    assert loans <= bank.kappa_E * bank.E
 
 
 @pytest.mark.parametrize('L_D', [25, 50])
@@ -183,7 +183,7 @@ def central_bank1(model):
 @pytest.fixture
 def bank3(bank1):
     bank = bank1
-    bank.theta_Rbar = 0.5  # ratio reglementaire de liquidite
+    bank.kappa_R = 0.5  # ratio reglementaire de liquidite
     bank.D = 100
     return bank
 
