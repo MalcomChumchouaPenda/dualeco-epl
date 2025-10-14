@@ -67,6 +67,9 @@ class Economy(BasicSpace):
         
 
 class GoodMarket(BasicSpace):
+
+    def setup(self):
+        self.s_Y = 0
     
     def consume_goods(self, amount, client, firm):
         client.C += amount
@@ -76,6 +79,23 @@ class GoodMarket(BasicSpace):
 
 
 class LaborMarket(ap.Network):
+
+    def setup(self):
+        self.n_W = 0
+        self.u = 0
+        self.upsilon = 0
+        self.employers = ap.AgentDList(self.model)
+    
+    def add_employers(self, employers):
+        self.add_agents(employers)
+        self.employers.extend(employers)
+        for employer in employers:
+            employer.n_W = self.n_W
+    
+    def remove_employer(self, employer):
+        employer.n_W = 0
+        self.remove_agents([employer])
+        self.employers.remove(employer)
     
     def pay_wages(self, amount, employer, worker):
         employer.W += amount
@@ -86,7 +106,7 @@ class LaborMarket(ap.Network):
     def accept_job(self, worker, employer):
         self.graph.add_edge(worker, employer)
         employer.N_J -= 1
-        worker.n_W = employer.n_W
+        worker.n_W = self.n_W
 
         if worker.property is employer:
             worker.s_W = 0

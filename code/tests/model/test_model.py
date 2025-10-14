@@ -3,16 +3,16 @@ import pytest
 import numpy as np
 
 from model.model import DualEcoModel
-from model.agents import Household, Firm, Bank
-from model.agents import CentralBank, Government
+from model import agents as ag
+from model import environment as env
 from utils.analysis import sum_params, create_matrices_from_params
 
 
 @pytest.fixture 
-def param_set():
+def sample():
     np.random.seed = 0
     return [{
-        'g':np.random.random(),            # taux de croissance
+        'g':np.random.random(),               # taux de croissance
         'N_E1':np.random.randint(1, 25),      # nombre de entrepreneurs dans le secteur productif 1
         'N_E2':np.random.randint(1, 25),      # nombre de entrepreneurs dans le secteur productif 2
         'N_W1':np.random.randint(1, 25),      # nombre de salaries dans le secteur productif 1
@@ -48,21 +48,28 @@ def param_set():
 
 
 @pytest.fixture
-def model_set1(param_set):
+def models1(sample):
     models = []
-    for params in param_set:
+    for params in sample:
         model = DualEcoModel(params)
         model.init_params()
-        model.calc_block_1()
-        model.calc_block_2()
-        model.calc_block_3()
-        model.calc_block_4()
         models.append(model)
     return models
 
 
-def test_calc_firms_stocks_and_flows(model_set1):
-    for model in model_set1:
+def test_has_empty_stocks_and_flows(models1):
+    for model in models1:
+        stocks, flows = create_matrices_from_params(model.p, digits=2)
+        print('stocks\n', stocks, '\nflows\n', flows)
+        for key in flows.index:
+            assert flows.loc[key, 'sigma'] == 0
+        for key in stocks.index:
+            assert stocks.loc[key, 'sigma'] == 0
+
+
+def test_calc_firms_stocks_and_flows(models1):
+    for model in models1:
+        model.calc_block_1()
         stocks, flows = create_matrices_from_params(model.p, digits=2)
         print('stocks\n', stocks, '\nflows\n', flows)
         assert stocks.loc['Y_inv', 'sigma'] > 0
@@ -70,24 +77,33 @@ def test_calc_firms_stocks_and_flows(model_set1):
         assert flows.loc['sigma', 'F'] == 0.0
 
 
-def test_calc_banks_stocks_and_flows(model_set1):
-    for model in model_set1:
+def test_calc_banks_stocks_and_flows(models1):
+    for model in models1:
+        model.calc_block_1()
+        model.calc_block_2()
         stocks, flows = create_matrices_from_params(model.p, digits=2)
         print('stocks\n', stocks, '\nflows\n', flows)
         assert stocks.loc['sigma', 'B'] == 0
         assert flows.loc['sigma', 'B'] == 0
 
 
-def test_calc_households_stocks_and_flows(model_set1):
-    for model in model_set1:
+def test_calc_households_stocks_and_flows(models1):
+    for model in models1:
+        model.calc_block_1()
+        model.calc_block_2()
+        model.calc_block_3()
         stocks, flows = create_matrices_from_params(model.p, digits=2)
         print('stocks\n', stocks, '\nflows\n', flows)
         assert stocks.loc['sigma', 'H'] == 0
         assert flows.loc['sigma', 'H'] == 0
 
 
-def test_calc_public_sector_stocks_and_flows(model_set1):
-    for model in model_set1:
+def test_calc_public_sector_stocks_and_flows(models1):
+    for model in models1:
+        model.calc_block_1()
+        model.calc_block_2()
+        model.calc_block_3()
+        model.calc_block_4()
         stocks, flows = create_matrices_from_params(model.p, digits=2)
         print('stocks\n', stocks, '\nflows\n', flows)
         assert stocks.loc['sigma', 'G'] == 0
@@ -96,8 +112,12 @@ def test_calc_public_sector_stocks_and_flows(model_set1):
         assert flows.loc['sigma', 'CB'] == 0
         
 
-def test_is_globally_stock_consistent(model_set1):
-    for model in model_set1:
+def test_is_globally_stock_consistent(models1):
+    for model in models1:
+        model.calc_block_1()
+        model.calc_block_2()
+        model.calc_block_3()
+        model.calc_block_4()
         stocks, flows = create_matrices_from_params(model.p, digits=2)
         print('stocks\n', stocks, '\nflows\n', flows)
         for key in stocks.index:
@@ -105,8 +125,12 @@ def test_is_globally_stock_consistent(model_set1):
                 assert stocks.loc[key, 'sigma'] == 0
 
 
-def test_is_globally_flow_consistent(model_set1):
-    for model in model_set1:
+def test_is_globally_flow_consistent(models1):
+    for model in models1:
+        model.calc_block_1()
+        model.calc_block_2()
+        model.calc_block_3()
+        model.calc_block_4()
         stocks, flows = create_matrices_from_params(model.p, digits=2)
         print('stocks\n', stocks, '\nflows\n', flows)
         for key in flows.index:
@@ -114,37 +138,42 @@ def test_is_globally_flow_consistent(model_set1):
 
 
 @pytest.fixture
-def model_set2(model_set1):
+def models2(models1):
     models = []
-    for model in model_set1:
-        model.create_households()
-        model.create_firms()
-        model.create_banks()
-        model.create_public_sector()
+    for model in models1:
+        model.calc_block_1()
+        model.calc_block_2()
+        model.calc_block_3()
+        model.calc_block_4()
         models.append(model)
     return models
 
 
-def test_create_sufficient_households(model_set2):
-    for model in model_set2:
-        assert sum_params(model.p, 'N') == len(model.households)
+def test_create_sufficient_households(models2):
+    for model in models2:
+        model.create_households()
+        p = model.p
+        assert sum_params(p, 'N') == len(model.households)
         for household in model.households:
-            assert isinstance(household, Household)
+            assert isinstance(household, ag.Household)
+            assert household.delta == p['delta']
 
 
-def test_create_sufficient_owners(model_set2):
-    for model in model_set2:
+def test_create_sufficient_owners(models2):
+    for model in models2:
+        model.create_households()
         p = model.p
         households = model.households
         owners = households.select(households.s_E == 1)
-        assert sum_params(model.p, 'N_B') == len(owners.select(owners.s_EB == 1))
-        assert sum_params(model.p, 'N_E') == len(owners.select(owners.s_EB == 0))
+        assert sum_params(p, 'N_B') == len(owners.select(owners.s_EB == 1))
+        assert sum_params(p, 'N_E') == len(owners.select(owners.s_EB == 0))
         for s in model.sectors:
             assert sum_params(p, f'N_E{s}') == len(owners.select(owners.s_Y == s))
 
 
-def test_create_sufficient_workers(model_set2):
-    for model in model_set2:
+def test_create_sufficient_workers(models2):
+    for model in models2:
+        model.create_households()
         p = model.p
         households = model.households
         workers = households.select(households.s_W == 1)
@@ -154,23 +183,31 @@ def test_create_sufficient_workers(model_set2):
             assert sum_params(p, f'N_W{s}') == len(workers.select(workers.s_Y==s))
 
 
-def test_create_sufficient_unemployed(model_set2):
-    for model in model_set2:
+def test_create_sufficient_unemployed(models2):
+    for model in models2:
+        model.create_households()
         p = model.p
         households = model.households
         assert sum_params(p, 'N_U') == len(households.select(households.s_U == 1))
 
 
-def test_create_firms(model_set2):
-    for model in model_set2:
-        N = sum_params(model.p, 'N_E')
+def test_create_firms(models2):
+    for model in models2:
+        model.create_firms()
+        p = model.p
+        N = sum_params(p, 'N_E')
         assert N == len(model.firms)
         for firm in model.firms:
-            assert isinstance(firm, Firm)
+            assert isinstance(firm, ag.Firm)
+            assert firm.m == p['m']
+            assert firm.delta == p['delta']
+            assert firm.theta_y == p['theta_y']
+            assert firm.upsilon_F == p['upsilon_F']
 
 
-def test_create_firms_by_sectors(model_set2):
-    for model in model_set2:
+def test_create_firms_by_sectors(models2):
+    for model in models2:
+        model.create_firms()
         p = model.p
         firms = model.firms
         for s in model.sectors:
@@ -180,141 +217,417 @@ def test_create_firms_by_sectors(model_set2):
             for firm in group:
                 assert firm.n_W == formal
                 assert firm.n_T == formal
+                assert firm.phi == p[f'phi{s}']
 
 
-def test_create_banks(model_set2):
-    for model in model_set2:
-        N = sum_params(model.p, 'N_B')
+def test_create_banks(models2):
+    for model in models2:
+        model.create_banks()
+        p = model.p
+        N = sum_params(p, 'N_B')
         assert N == len(model.banks)
-        for bank in model_set2[0].banks:
-            assert isinstance(bank, Bank)
+        for bank in model.banks:
+            assert isinstance(bank, ag.Bank)
+            assert bank.delta == p['delta']
+            assert bank.kappa_E == p['kappa_E']
+            assert bank.kappa_R == p['kappa_R']
+            assert bank.gamma_L == p['gamma_L']
+            assert bank.beta_L == p['beta_L']
 
 
-def test_create_public_sector(model_set2):
-    for model in model_set2:
-        assert isinstance(model.government, Government)
-        assert isinstance(model.central_bank, CentralBank)
+def test_create_public_sector(models2):
+    for model in models2:
+        model.create_public_sector()
+        assert isinstance(model.government, ag.Government)
+        assert isinstance(model.central_bank, ag.CentralBank)
 
 
 @pytest.fixture
-def model_set3(model_set2):
+def models3(models2):
     models = []
-    for model in model_set2:
+    for model in models2:
+        model.create_households()
+        model.create_firms()
+        model.create_banks()
+        model.create_public_sector()
+        models.append(model)
+    return models
+
+
+def test_create_good_markets(models3):
+    for model in models3:
+        model.create_good_markets()
+        firms = model.firms
+        for s, market in model.good_markets.items():
+            agents = market.agents.to_list()
+            group = firms.select(firms.s_Y == s)
+            assert isinstance(market, env.GoodMarket)
+            assert market.s_Y == s
+            assert set(group) == set(agents)
+
+
+def test_create_labor_markets(models3):
+    for model in models3:
+        model.create_labor_markets()
+        for n, market in model.labor_markets.items():
+            assert isinstance(market, env.LaborMarket)
+            assert market.n_W == n
+
+
+def test_populate_formal_labor_market(models3):
+    for model in models3:
+        model.create_labor_markets()
+        market = model.labor_markets[1]
+        agents = market.agents.to_list()
+        employers = market.employers
+        government = model.government
+        firms = model.firms
+        households = model.households
+        group = firms.select(firms.s_Y == 1)
+        assert set(group).issubset(set(agents))
+        assert set(group).issubset(set(employers))
+        assert set(households).issubset(set(agents))
+        assert not set(households).issubset(set(employers))
+        assert government in set(agents)
+        assert government in set(employers)
+        assert len(agents) == len(households + group) + 1
+
+
+def test_setup_formal_labor_networks(models3):
+    for model in models3:
+        model.create_labor_markets()
+        p = model.p
+        min_ratio = (p['N_E1'] + p['N_W1']) // p['N_E1']
+        max_ratio = min_ratio + 1
+        market = model.labor_markets[1]
+        government = model.government
+        firms = model.firms
+        for firm in firms.select(firms.s_Y==1):
+            employees = market.neighbors(firm).to_list()
+            assert len(employees) in [min_ratio, max_ratio]
+        assert len(market.neighbors(government).to_list()) == p['N_WG']
+
+
+def test_populate_informal_labor_market(models3):
+    for model in models3:
+        model.create_labor_markets()
+        market = model.labor_markets[0]
+        agents = market.agents.to_list()
+        employers = market.employers
+        firms = model.firms
+        households = model.households
+        group = firms.select(firms.s_Y == 2)
+        assert set(group) == set(employers)
+        assert set(group).issubset(set(agents))
+        assert set(households).issubset(set(agents))
+        assert not set(households).issubset(set(employers))
+        assert len(agents) == len(households + group)
+
+
+def test_setup_informal_labor_networks(models3):
+    for model in models3:
+        model.create_labor_markets()
+        p = model.p
+        min_ratio = (p['N_E2'] + p['N_W2']) // p['N_E2']
+        max_ratio = min_ratio + 1
+        market = model.labor_markets[0]
+        firms = model.firms
+        group = firms.select(firms.s_Y == 2)
+        for firm in group:
+            employees = market.neighbors(firm).to_list()
+            assert len(employees) in [min_ratio, max_ratio]
+
+
+def test_create_bond_market(models3):
+    for model in models3:
+        model.create_bond_market()
+        market = model.bond_market
+        agents = market.agents.to_list()
+        banks = model.banks
+        government = model.government
+        central_bank = model.central_bank
+        assert isinstance(market, env.BondMarket)
+        assert government in set(agents)
+        assert central_bank in set(agents)
+        assert set(banks).issubset(set(agents))
+        assert len(agents) == len(banks) + 2
+
+
+def test_create_deposit_market(models3):
+    for model in models3:
+        model.create_deposit_market()
+        market = model.deposit_market
+        agents = market.agents.to_list()
+        banks = model.banks
+        firms = model.firms
+        formal_firms = firms.select(firms.s_Y==1)
+        households = model.households
+        assert isinstance(market, env.DepositMarket)
+        assert set(households).issubset(set(agents))
+        assert set(formal_firms).issubset(set(agents))
+        assert set(banks).issubset(set(agents))
+        assert len(agents) == len(households + formal_firms + banks)
+
+
+def test_setup_initial_deposit_networks(models3):
+    for model in models3:
+        model.create_deposit_market()
+        market = model.deposit_market
+        banks = model.banks
+        firms = model.firms
+        formal_firms = firms.select(firms.s_Y==1)
+        households = model.households
+        num_clients = len(households + formal_firms)
+        min_ratio = num_clients // len(banks)
+        max_ratio = min_ratio + 1
+        for bank in banks:
+            clients = market.neighbors(bank).to_list()
+            assert len(clients) in [min_ratio, max_ratio]
+            for client in clients:
+                assert client.bank == bank
+        
+
+def test_create_credit_market(models3):
+    for model in models3:
+        model.create_deposit_market()
+        model.create_credit_market()
+        market = model.credit_market
+        agents = market.agents.to_list()
+        banks = model.banks
+        firms = model.firms
+        formal_firms = firms.select(firms.s_Y==1)
+        assert isinstance(market, env.CreditMarket)
+        assert set(formal_firms).issubset(set(agents))
+        assert set(banks).issubset(set(agents))
+        assert len(agents) == len(formal_firms + banks)
+
+
+def test_setup_initial_credit_networks(models3):
+    for model in models3:
+        model.create_deposit_market()
+        model.create_credit_market()
+        market = model.credit_market
+        banks = model.banks
+        firms = model.firms
+        formal_firms = firms.select(firms.s_Y==1)
+        min_ratio = len(formal_firms) // len(banks)
+        max_ratio = min_ratio + 1
+        for bank in banks:
+            clients = market.neighbors(bank).to_list()
+            assert len(clients) in [min_ratio, max_ratio]
+            for client in clients:
+                assert client.bank == bank
+            
+
+
+def test_create_economy(models3):
+    for model in models3:
+        model.create_economy()
+        firms = model.firms
+        households = model.households
+        agents = model.economy.agents.to_list()
+        assert set(households).issubset(set(agents))
+        assert set(firms).issubset(set(agents))
+        assert len(agents) == len(firms + households)
+
+
+def test_setup_initial_firms_ownership(models3):
+    for model in models3:
+        model.create_economy()
+        firms = model.firms
+        households = model.households
+        owners = households.select(households.s_E == 1)
+        for s in model.sectors:
+            sector_firms = firms.select(firms.s_Y == s)
+            sector_owners = owners.select(owners.s_Y == s)
+            for firm in sector_firms:
+                assert firm.owner in sector_owners
+
+
+def test_setup_initial_banks_ownership(models3):
+    for model in models3:
+        model.create_economy()
+        banks = model.banks
+        households = model.households
+        owners = households.select(households.s_EB == 1)
+        for bank in banks:
+            assert bank.owner in owners
+
+
+@pytest.fixture
+def models4(models3):
+    models = []
+    for model in models3:
+        model.create_good_markets()
         model.create_labor_markets()
         model.create_deposit_market()
         model.create_credit_market()
+        model.create_bond_market()
         model.create_economy()
         models.append(model)
-    return model_set2
+    return models
 
 
-def test_share_household_stocks(model_set3):
-    for model in model_set3:
+def test_share_initial_firm_equities(models4):
+    for model in models4:
+        model.share_initial_equities()
         p = model.p
-        households = model.households
-        assert round(p['M_H'], 2) == round(sum(households.M), 2)
-        assert round(p['D_H'], 2) == round(sum(households.D), 2)
-    
-
-def test_share_household_incomes(model_set3):
-    for model in model_set3:
-        p = model.p
-        households = model.households
-        assert round(p['W_H'], 2) == round(sum(households.W), 2)   
-        assert round(p['Z_H'], 2) == round(sum(households.Z), 2)   
-        assert round(p['iota_DH'], 2) == round(sum(households.iota_D), 2)
-        assert round(p['Pi_dH'], 2) == round(sum(households.Pi_d), 2)
-        
-
-def test_share_household_incomes_by_status(model_set3):
-    for model in model_set3:
-        p = model.p
-        households = model.households
-        owners = households.select(households.s_E == 1)
-        bank_owners = owners.select(owners.s_EB == 1)
-        firm_owners1 = owners.select(owners.s_Y == 1)
-        firm_owners2 = owners.select(owners.s_Y == 2)
-        workers = households.select(households.s_W == 1)
-        public_workers = workers.select(workers.s_WG == 1)
-        private_workers1 = workers.select(workers.s_Y == 1)
-        private_workers2 = workers.select(workers.s_Y == 2)
-        unemployed = households.select(households.s_U == 1)
-        assert round(p['W_F1'], 2) == round(sum(private_workers1.W) + sum(firm_owners1.W), 2)   
-        assert round(p['W_F2'], 2) == round(sum(private_workers2.W) + sum(firm_owners2.W), 2)  
-        assert round(p['W_G'], 2) == round(sum(public_workers.W), 2)  
-        assert round(p['Z_G'], 2) == round(sum(unemployed.Z), 2)  
-        assert round(p['Pi_dF1'], 2) == round(sum(firm_owners1.Pi_d), 2)  
-        assert round(p['Pi_dF2'], 2) == round(sum(firm_owners2.Pi_d), 2) 
-        assert round(p['Pi_dB'], 2) == round(sum(bank_owners.Pi_d), 2)  
-
-
-def test_share_household_reservation_wages(model_set3):
-    for model in model_set3:
-        p = model.p
+        firms = model.firms
         households = model.households
         for s in model.sectors:
-            group1 = households.select(households.s_Y == s)
-            assert group1[0].w_D == p[f'w{s}']
+            owners = households.select(households.s_E == 1)
+            owners = owners.select(owners.s_Y == s)
+            group = firms.select(firms.s_Y == s)
+            assert round(sum(group.E), 2) == round(p[f'E_F{s}'], 2)
+            assert round(sum(group.E), 2) == round(sum(owners.E), 2)
+            for firm in group:
+                assert round(firm.E, 2) == round(firm.owner.E, 2)
 
-        group2 = households.select(households.s_WG == 1)
-        group3 = households.select(households.s_U == 1)
-        assert group2[0].w_D == p['w_G']
-        assert group3[0].w_D == p['w_min']
+
+def test_share_initial_bank_equities(models4):
+    for model in models4:
+        model.share_initial_equities()
+        p = model.p
+        banks = model.banks
+        households = model.households
+        owners = households.select(households.s_EB == 1)
+        assert round(sum(banks.E), 2) == round(p[f'E_B'], 2)
+        assert round(sum(banks.E), 2) == round(sum(owners.E), 2)
+        for bank in banks:
+            assert round(bank.E, 2) == round(bank.owner.E, 2)
 
 
-def test_share_household_expenses(model_set3):
-    for model in model_set3:
+def test_share_initial_firm_credits(models4):
+    for model in models4:
+        model.share_initial_equities()
+        model.share_initial_credits()
+        p = model.p
+        firms = model.firms
+        for s in model.sectors:
+            group = firms.select(firms.s_Y==s) 
+            assert round(p[f'L_F{s}'], 2) == round(sum(group.L), 2)
+            assert round(p[f'iota_LF{s}'], 2) == round(sum(group.iota_L), 2)
+
+
+def test_share_initial_bank_credits(models4):
+    for model in models4:
+        model.share_initial_equities()
+        model.share_initial_credits()
+        p = model.p
+        banks = model.banks
+        credit_market = model.credit_market
+        assert round(p['L_B'], 2) == round(sum(banks.L), 2)
+        assert round(p['iota_LB'], 2) == round(sum(banks.iota_L), 2)
+        for bank in banks:
+            clients = credit_market.neighbors(bank).to_list()
+            assert round(sum(clients.L), 2) == round(bank.L, 2)
+            assert round(sum(clients.iota_L), 2) == round(bank.iota_L, 2)
+
+
+def test_share_initial_household_deposits(models4):
+    for model in models4:
+        model.share_initial_equities()
+        model.share_initial_credits()
+        model.share_initial_deposits()
         p = model.p
         households = model.households
-        assert round(p['C1'], 2) == round(sum(households.C1), 2)
-        assert round(p['C2'], 2) == round(sum(households.C2), 2)
-        assert round(p['T_H'], 2) == round(sum(households.T), 2)
+        assert round(p['D_H'], 2) == round(sum(households.D), 2)
+        assert round(p['iota_DH'], 2) == round(sum(households.iota_D), 2)
 
 
-def test_share_household_taxes_by_gross_incomes(model_set3):
-    for model in model_set3:
+def test_share_initial_firm_deposits(models4):
+    for model in models4:
+        model.share_initial_equities()
+        model.share_initial_credits()
+        model.share_initial_deposits()
+        p = model.p
+        firms = model.firms
+        for s in model.sectors:
+            group = firms.select(firms.s_Y==s) 
+            assert round(p[f'D_F{s}'], 2) == round(sum(group.D), 2)
+            assert round(p[f'iota_DF{s}'], 2) == round(sum(group.iota_D), 2)
+
+
+def test_share_initial_bank_deposits(models4):
+    for model in models4:
+        model.share_initial_equities()
+        model.share_initial_credits()
+        model.share_initial_deposits()
+        p = model.p
+        banks = model.banks
+        deposit_market = model.deposit_market
+        assert round(p['D_B'], 2) == round(sum(banks.D), 2)
+        assert round(p['iota_DB'], 2) == round(sum(banks.iota_D), 2)
+        for bank in banks:
+            clients = deposit_market.neighbors(bank).to_list()
+            assert round(sum(clients.D), 2) == round(bank.D, 2)
+            assert round(sum(clients.iota_D), 2) == round(bank.iota_D, 2)
+
+
+def test_share_initial_bonds(models4):
+    for model in models4:
+        model.share_initial_equities()
+        model.share_initial_credits()
+        model.share_initial_deposits()
+        model.share_initial_bonds()
+        p = model.p
+        banks = model.banks
+        government = model.government
+        central_bank = model.central_bank
+        assert round(p['B_B'], 2) == round(sum(banks.B), 2)
+        assert round(p['B_G'], 2) == round(government.B, 2)
+        assert round(p['B_CB'], 2) == round(central_bank.B, 2)
+        assert round(p['iota_BB'], 2) == round(sum(banks.iota_B), 2)
+        assert round(p['iota_BG'], 2) == round(government.iota_B, 2)
+        assert round(p['iota_BCB'], 2) == round(central_bank.iota_B, 2)
+        assert government.r_B == p['r_B']
+
+
+def test_share_initial_private_sector_cash(models4):
+    for model in models4:
+        model.share_initial_equities()
+        model.share_initial_credits()
+        model.share_initial_deposits()
+        model.share_initial_bonds()
+        model.share_initial_cash()
         p = model.p
         households = model.households
-        Y = households.W + households.iota_D + households.Pi_d
-        for y, household in zip(Y, households):
-            assert round(household.T / p['T_H'], 2) == round(y / sum(Y), 2)
-
-
-def test_share_household_consumption_by_disposable_incomes(model_set3):
-    for model in model_set3:
-        p = model.p
-        households = model.households
-        Y = households.W + households.iota_D + households.Pi_d
-        Y_d = Y - households.T + households.Z 
-        for y_d, household in zip(Y_d, households):
-            assert round(household.C1 / p['C1'], 2) == round(y_d / sum(Y_d), 2)
-            assert round(household.C2 / p['C2'], 2) == round(y_d / sum(Y_d), 2)
-
-
-def test_share_firm_stocks(model_set3):
-    for model in model_set3:
-        p = model.p
+        banks = model.banks
         firms = model.firms
         for s in model.sectors:
             group = firms.select(firms.s_Y==s)
             assert round(p[f'M_F{s}'], 2) == round(sum(group.M), 2)
-            assert round(p[f'D_F{s}'], 2) == round(sum(group.D), 2)
-            assert round(p[f'L_F{s}'], 2) == round(sum(group.L), 2)
-            assert round(p[f'E_F{s}'], 2) == round(sum(group.E), 2)
+        assert round(p['M_H'], 2) == round(sum(households.M), 2)
+        assert round(p['M_B'], 2) == round(sum(banks.M), 2)
+        assert round(p['A_B'], 2) == round(sum(banks.A), 2)
+        assert round(p['iota_AB'], 2) == round(sum(banks.iota_A), 2)
+        assert set(banks.r_A) == {p['r_A']}
 
 
-def test_share_firm_net_worth(model_set3):
-    for model in model_set3:
+def test_share_initial_public_sector_cash(models4):
+    for model in models4:
+        model.share_initial_equities()
+        model.share_initial_credits()
+        model.share_initial_deposits()
+        model.share_initial_bonds()
+        model.share_initial_cash()
         p = model.p
-        firms = model.firms
-        for s in model.sectors:
-            group = firms.select(firms.s_Y==s)
-            V = p[f'D_F{s}'] + p[f'M_F{s}'] - p[f'E_F{s}'] - p[f'L_F{s}']
-            assert round(V, 2) == round(sum(group.V), 2)
+        government = model.government
+        central_bank = model.central_bank
+        assert round(p['M_G'], 2) == round(government.M, 2)
+        assert round(p['M_CB'], 2) == round(central_bank.M, 2)
+        assert round(p['A_CB'], 2) == round(central_bank.A, 2)
+        assert round(p['iota_ACB'], 2) == round(central_bank.iota_A, 2)
 
 
-def test_share_firm_production(model_set3):
-    for model in model_set3:
+def test_share_initial_production(models4):
+    for model in models4:
+        model.share_initial_equities()
+        model.share_initial_credits()
+        model.share_initial_deposits()
+        model.share_initial_bonds()
+        model.share_initial_cash()
+        model.share_initial_production()
         p = model.p
         firms = model.firms
         for s in model.sectors:
@@ -325,10 +638,43 @@ def test_share_firm_production(model_set3):
             assert round(sum(group.y), 2) == round(p[f'Q{s}'] / p[f'p{s}'], 2)
             assert round(sum(group.q_e), 2) == round(p[f'Q{s}'] / p[f'p{s}'], 2)
             assert round(sum(group.Q), 2) == round(p[f'Q{s}'], 2)  
+            assert set(group.p_Y) == {p[f'p{s}']}
 
 
-def test_share_firm_wages_and_labor(model_set3):
-    for model in model_set3:
+@pytest.fixture
+def models5(models4):
+    models = []
+    for model in models4:
+        model.share_initial_equities()
+        model.share_initial_credits()
+        model.share_initial_deposits()
+        model.share_initial_bonds()
+        model.share_initial_cash()
+        model.share_initial_production()
+        models.append(model)
+    return models
+
+
+def test_share_initial_household_wages(models5):
+    for model in models5:
+        model.share_initial_wages()
+        p = model.p
+        households = model.households
+        unemployed = households.select(households.s_U == 1)
+        public_workers = households.select(households.s_WG == 1)
+        for s in model.sectors:
+            sector_workers = households.select(households.s_Y == s)
+            assert round(sum(sector_workers.W), 2) == round(p[f'W_F{s}'], 2)
+            assert set(sector_workers.w_D) == {p[f'w{s}']} 
+        assert round(sum(public_workers.W), 2) == round(p['W_G'], 2) 
+        assert round(sum(households.W), 2) == round(p['W_H'], 2)   
+        assert set(public_workers.w_D) == {p['w_G']}
+        assert set(unemployed.w_D) == {p['w_min']}
+
+
+def test_share_initial_firm_wages(models5):
+    for model in models5:
+        model.share_initial_wages()
         p = model.p
         firms = model.firms
         for s in model.sectors:
@@ -336,292 +682,147 @@ def test_share_firm_wages_and_labor(model_set3):
             assert round(sum(group.N_Jc), 2) == 0
             assert round(sum(group.N_Jd), 2) == 0
             assert round(sum(group.l_D), 2) == 0
-            assert round(p[f'W_F{s}'], 2) == round(sum(group.W), 2)  
-            assert round(p[f'Q{s}'] / p[f'w{s}'], 2) == round(sum(group.l), 2)
+            assert round(sum(group.W), 2) == round(p[f'W_F{s}'], 2)  
+            assert round(sum(group.l), 2) == round(p[f'Q{s}'] / p[f'w{s}'], 2)
+            assert set(group.w) == {p[f'w{s}']}
 
 
-def test_share_firm_interests(model_set3):
-    for model in model_set3:
+def test_share_initial_public_wages(models5):
+    for model in models5:
+        model.share_initial_wages()
         p = model.p
-        firms = model.firms
-        for s in model.sectors:
-            group = firms.select(firms.s_Y==s)
-            assert round(p[f'iota_LF{s}'], 2) == round(sum(group.iota_L), 2)
-            assert round(p[f'iota_DF{s}'], 2) == round(sum(group.iota_D), 2)
+        government = model.government 
+        assert round(government.W, 2) == round(p['W_G'], 2)
+        assert government.w == p['w_G']
 
 
-def test_share_firm_profits_and_taxes(model_set3):
-    for model in model_set3:
+def test_share_initial_transfers(models5):
+    for model in models5:
+        model.share_initial_wages()
+        model.share_initial_transfers()
         p = model.p
-        firms = model.firms
-        for s in model.sectors:
-            group = firms.select(firms.s_Y==s)
-            assert round(p[f'Pi_dF{s}'], 2) == round(sum(group.Pi_d), 2)
-            assert round(p[f'T_F{s}'], 2) == round(sum(group.T), 2)
+        households = model.households
+        unemployed = households.select(households.s_U == 1) 
+        assert round(p['Z_H'], 2) == round(sum(households.Z), 2)   
+        assert round(p['Z_G'], 2) == round(sum(unemployed.Z), 2) 
 
 
-def test_share_firm_equities(model_set3):
-    for model in model_set3:
+def test_share_initial_firms_profits(models5):
+    for model in models5:
+        model.share_initial_wages()
+        model.share_initial_transfers()
+        model.share_initial_profits()
         p = model.p
-        firms = model.firms
         households = model.households
         owners = households.select(households.s_E == 1)
+        firms = model.firms
         for s in model.sectors:
             sector_firms = firms.select(firms.s_Y == s)
             sector_owners = owners.select(owners.s_Y == s)
-            assert round(sum(sector_firms.E), 2) == round(sum_params(p, f'E_F{s}'), 2)
-            assert round(sum(sector_firms.E), 2) == round(sum(sector_owners.E), 2)
-            for firm in sector_firms:
-                assert firm.owner in sector_owners
-                assert round(firm.E, 2) == round(firm.owner.E, 2)
+            assert round(p[f'Pi_dF{s}'], 2) == round(sum(sector_firms.Pi_d), 2)
+            assert round(p[f'Pi_dF{s}'], 2) == round(sum(sector_owners.Pi_d), 2)
 
 
-def test_share_firm_prices_and_wages(model_set3):
-    for model in model_set3:
-        p = model.p
-        firms = model.firms
-        for s in model.sectors:
-            group = firms.select(firms.s_Y == s)
-            for firm in group:
-                assert firm.m == p['m']
-                assert firm.w == p[f'w{s}']
-                assert firm.p_y == p[f'p{s}']
-
-
-def test_share_firm_interest_rates(model_set3):
-    for model in model_set3:
-        p = model.p
-        for firm in model.firms:
-            if firm.s_Y == 1:
-                assert firm.r_L == p['r_L']
-            else:
-                assert firm.r_L == 0
-
-
-def test_share_firm_behavior_params(model_set3):
-    for model in model_set3:
-        p = model.p
-        firms = model.firms
-        for s in model.sectors:
-            group = firms.select(firms.s_Y==s)
-            for firm in group:
-                assert firm.delta == p['delta']
-                assert firm.theta_y == p['theta_y']
-                assert firm.upsilon == p['upsilon_F']
-                assert firm.phi == p[f'phi{s}']
-
-
-def test_share_bank_financial_stocks(model_set3):
-    for model in model_set3:
-        p = model.p
-        banks = model.banks
-        assert round(p['M_B'], 2) == round(sum(banks.M), 2)
-        assert round(p['A_B'], 2) == round(sum(banks.A), 2)
-        assert round(p['D_B'], 2) == round(sum(banks.D), 2)
-        assert round(p['B_B'], 2) == round(sum(banks.B), 2)
-        assert round(p['L_B'], 2) == round(sum(banks.L), 2)
-
-
-def test_share_bank_financial_flows(model_set3):
-    for model in model_set3:
-        p = model.p
-        banks = model.banks
-        assert round(p['T_B'], 2) == round(sum(banks.T), 2)
-        assert round(p['iota_AB'], 2) == round(sum(banks.iota_A), 2)
-        assert round(p['iota_BB'], 2) == round(sum(banks.iota_B), 2)
-        assert round(p['iota_LB'], 2) == round(sum(banks.iota_L), 2)
-        assert round(p['iota_DB'], 2) == round(sum(banks.iota_D), 2)
-        assert round(p['Pi_dB'], 2) == round(sum(banks.Pi_d), 2)
-
-
-def test_share_bank_equities(model_set3):
-    for model in model_set3:
+def test_share_initial_banks_profits(models5):
+    for model in models5:
+        model.share_initial_wages()
+        model.share_initial_transfers()
+        model.share_initial_profits()
         p = model.p
         banks = model.banks
         households = model.households
         owners = households.select(households.s_EB == 1)
-        assert round(sum(banks.E), 2) == round(sum_params(p, 'E_B'), 2)
-        assert round(sum(banks.E), 2) == round(sum(owners.E), 2)
-        for bank in banks:
-            assert bank.owner in owners
-            assert round(bank.E, 2) == round(bank.owner.E, 2)
+        assert round(p['Pi_dB'], 2) == round(sum(owners.Pi_d), 2)
+        assert round(p['Pi_dB'], 2) == round(sum(banks.Pi_d), 2) 
+        assert round(p['Pi_dH'], 2) == round(sum(households.Pi_d), 2)
 
 
-def test_share_bank_behavior_params(model_set3):
-    for model in model_set3:
-        p = model.p
-        for bank in model.banks:
-            assert bank.delta == p['delta']
-            assert bank.kappa_E == p['kappa_E']
-            assert bank.kappa_R == p['kappa_R']
-            assert bank.gamma_L == p['gamma_L']
-            assert bank.beta_L == p['beta_L']
-
-
-def test_share_public_sector_stocks(model_set3):
-    for model in model_set3:
-        p = model.p
-        government = model.government
-        assert round(p['M_G'], 2) == round(government.M, 2)
-        assert round(p['B_G'], 2) == round(government.B, 2)
-        
-        central_bank = model.central_bank
-        assert round(p['M_CB'], 2) == round(central_bank.M, 2)
-        assert round(p['A_CB'], 2) == round(central_bank.A, 2)
-        assert round(p['B_CB'], 2) == round(central_bank.B, 2)
-
-
-def test_share_public_sector_flows(model_set3):
-    for model in model_set3:
+def test_share_initial_central_bank_profits(models5):
+    for model in models5:
+        model.share_initial_wages()
+        model.share_initial_transfers()
+        model.share_initial_profits()
         p = model.p
         government = model.government 
-        assert round(p['W_G'], 2) == round(government.W, 2)
-        assert round(p['Z_G'], 2) == round(government.Z, 2)
-        assert round(p['T_G'], 2) == round(government.T, 2)
-        assert round(p['iota_BG'], 2) == round(government.iota_B, 2)
-        assert round(p['Pi_G'], 2) == round(government.Pi, 2)
-        
         central_bank = model.central_bank 
-        assert round(p['iota_ACB'], 2) == round(central_bank.iota_A, 2)
-        assert round(p['iota_BCB'], 2) == round(central_bank.iota_B, 2)
         assert round(p['Pi_CB'], 2) == round(central_bank.Pi, 2)
+        assert round(p['Pi_G'], 2) == round(government.Pi, 2)
 
 
-def test_share_public_sector_prices(model_set3):
-    for model in model_set3:
-        p = model.p
-        gov = model.government
-        assert gov.w == p['w_G']
-
-
-# ! must place interest rate on a common market
-def test_share_interest_rates(model_set3):
-    for model in model_set3:
+def test_share_initial_household_taxes(models5):
+    for model in models5:
+        model.share_initial_wages()
+        model.share_initial_transfers()
+        model.share_initial_profits()
+        model.share_initial_taxes()
         p = model.p
         households = model.households
-        household = households[0]
-        assert household.r_D == p['r_D']
-
-        firms = model.firms
-        firm = firms.select(firms.s_Y == 1)[0]
-        assert firm.r_D == p['r_D']
-        assert firm.r_L == p['r_L']
-
-        bank = model.banks[0]
-        assert bank.r_D == p['r_D']
-        assert bank.r_L == p['r_L']
-        assert bank.r_A == p['r_A']
-        assert bank.r_B == p['r_B']
-
-        gov = model.government
-        assert gov.r_B == p['r_B']
-
-        central_bank = model.central_bank
-        assert central_bank.r_A == p['r_A']
-        assert central_bank.r_B == p['r_B']
+        Y = households.W + households.iota_D + households.Pi_d
+        for y, household in zip(Y, households):
+            assert round(household.T / p['T_H'], 2) == round(y / sum(Y), 2)
+        assert round(p['T_H'], 2) == round(sum(households.T), 2)
 
 
-def test_create_formal_labor_networks(model_set3):
-    for model in model_set3:
-        market = model.labor_markets[1]
-        agents = market.agents.to_list()
-        government = model.government
-        firms = model.firms
-        firms = firms.select(firms.s_Y==1)
-        households = model.households
-        assert government in set(agents)
-        assert set(households).issubset(set(agents))
-        assert set(firms).issubset(set(agents))
-        assert len(agents) == len(households + firms) + 1
-
+def test_share_initial_firm_taxes(models5):
+    for model in models5:
+        model.share_initial_wages()
+        model.share_initial_transfers()
+        model.share_initial_profits()
+        model.share_initial_taxes()
         p = model.p
-        num_employers = p['N_E1']
-        num_employees = p['N_E1'] + p['N_W1']
-        min_ratio = num_employees // num_employers
-        max_ratio = min_ratio + 1
-        for firm in firms:
-            employees = market.neighbors(firm).to_list()
-            assert len(employees) in [min_ratio, max_ratio]
-        assert len(market.neighbors(government).to_list()) == p['N_WG']
-
-
-def test_create_informal_labor_networks(model_set3):
-    for model in model_set3:
-        model.create_labor_markets()
-
-        market = model.labor_markets[2]
-        agents = market.agents.to_list()
         firms = model.firms
-        firms = firms.select(firms.s_Y==2)
-        households = model.households
-        assert set(households).issubset(set(agents))
-        assert set(firms).issubset(set(agents))
-        assert len(agents) == len(households + firms)
+        for s in model.sectors:
+            group = firms.select(firms.s_Y==s)
+            assert round(p[f'T_F{s}'], 2) == round(sum(group.T), 2)
 
+
+def test_share_initial_bank_taxes(models5):
+    for model in models5:
+        model.share_initial_wages()
+        model.share_initial_transfers()
+        model.share_initial_profits()
+        model.share_initial_taxes()
         p = model.p
-        num_employers = p['N_E2']
-        num_employees = p['N_E2'] + p['N_W2']
-        min_ratio = num_employees // num_employers
-        max_ratio = min_ratio + 1
-        for firm in firms:
-            employees = market.neighbors(firm).to_list()
-            assert len(employees) in [min_ratio, max_ratio]
-
-
-def test_create_deposit_networks(model_set3):
-    for model in model_set3:
-        market = model.deposit_market
-        agents = market.agents.to_list()
         banks = model.banks
-        firms = model.firms
-        formal_firms = firms.select(firms.s_Y==1)
-        households = model.households
-        assert set(households).issubset(set(agents))
-        assert set(formal_firms).issubset(set(agents))
-        assert set(banks).issubset(set(agents))
-        assert len(agents) == len(households + formal_firms + banks)
-        
+        assert round(p['T_B'], 2) == round(sum(banks.T), 2)
+
+
+def test_share_initial_government_taxes(models5):
+    for model in models5:
+        model.share_initial_wages()
+        model.share_initial_transfers()
+        model.share_initial_profits()
+        model.share_initial_taxes()
         p = model.p
-        num_bank = p['N_B']
-        num_clients = len(households + formal_firms)
-        min_ratio = num_clients // num_bank
-        max_ratio = min_ratio + 1
-        for bank in banks:
-            clients = market.neighbors(bank).to_list()
-            assert len(clients) in [min_ratio, max_ratio]
-            assert round(sum(clients.D), 2) == round(bank.D, 2)
-            assert round(sum(clients.iota_D), 2) == round(bank.iota_D, 2)
+        government = model.government 
+        assert round(p['T_G'], 2) == round(government.T, 2)
 
 
-def test_create_credit_networks(model_set3):
-    for model in model_set3:
-        market = model.credit_market
-        agents = market.agents.to_list()
-        banks = model.banks
-        firms = model.firms
-        formal_firms = firms.select(firms.s_Y==1)
-        assert set(formal_firms).issubset(set(agents))
-        assert set(banks).issubset(set(agents))
-        assert len(agents) == len(formal_firms + banks)
-        
+def test_share_initial_consumption(models5):
+    for model in models5:
+        model.share_initial_wages()
+        model.share_initial_transfers()
+        model.share_initial_profits()
+        model.share_initial_taxes()
+        model.share_initial_consumption()
         p = model.p
-        num_bank = p['N_B']
-        num_firms = p['N_E1']
-        min_ratio = num_firms // num_bank
-        max_ratio = min_ratio + 1
-        for bank in banks:
-            clients = market.neighbors(bank).to_list()
-            assert len(clients) in [min_ratio, max_ratio]
-            assert round(sum(clients.L), 2) == round(bank.L, 2)
-            assert round(sum(clients.iota_L), 2) == round(bank.iota_L, 2)
-
-
-def test_create_economy(model_set3):
-    for model in model_set3:
-        firms = model.firms
         households = model.households
-        agents = model.economy.agents.to_list()
-        assert set(households).issubset(set(agents))
-        assert set(firms).issubset(set(agents))
-        assert len(agents) == len(firms + households)
+        Y = households.W + households.iota_D + households.Pi_d
+        Y_d = Y - households.T + households.Z 
+        for y_d, household in zip(Y_d, households):
+            assert round(household.C1 / p['C1'], 2) == round(y_d / sum(Y_d), 2)
+            assert round(household.C2 / p['C2'], 2) == round(y_d / sum(Y_d), 2)
+        assert round(p['C1'], 2) == round(sum(households.C1), 2)
+        assert round(p['C2'], 2) == round(sum(households.C2), 2)
+
+
+# def test_share_initial_prices(models5):
+#     for model in models5:
+#         model.share_initial_wages()
+#         model.share_initial_transfers()
+#         model.share_initial_profits()
+#         model.share_initial_taxes()
+#         model.share_initial_consumption()
+#         model.share_initial_prices()
+#         assert False
 

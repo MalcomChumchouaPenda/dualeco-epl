@@ -2,9 +2,8 @@
 import pandas as pd
 import numpy as np
 import agentpy as ap
-
-from .agents import Household, Firm, Bank
-from .agents import CentralBank, Government
+from . import agents as ag
+from . import environment as env
 
 
 class DualEcoModel(ap.Model):
@@ -140,7 +139,6 @@ class DualEcoModel(ap.Model):
         p['M_B'] = X[5]
         p['D_B'] = X[6]
         p['D_H'] = X[7]
-        print(p['zeta_2'] * p['M_B'])
         
         # finalize interest and variation computation
         p['iota_LB'] = p['zeta_1'] * p['r_L'] * p['L_B']
@@ -213,195 +211,91 @@ class DualEcoModel(ap.Model):
 
     def create_households(self):
         p = self.p
-        bank_owners = ap.AgentList(self, p['N_B'], Household)
+        bank_owners = ap.AgentList(self, p['N_B'], ag.Household)
         bank_owners.s_EB = 1
         bank_owners.s_E = 1
         
-        firm_owners1 = ap.AgentList(self, p['N_E1'], Household)
+        firm_owners1 = ap.AgentList(self, p['N_E1'], ag.Household)
         firm_owners1.s_E = 1
         firm_owners1.s_Y = 1
-        firm_owners1.w_D = p['w1']
         
-        firm_owners2 = ap.AgentList(self, p['N_E2'], Household)
+        firm_owners2 = ap.AgentList(self, p['N_E2'], ag.Household)
         firm_owners2.s_E = 1
         firm_owners2.s_Y = 2
-        firm_owners2.w_D = p['w2']
 
         firm_owners = firm_owners1 + firm_owners2
         owners = bank_owners + firm_owners
         self.households = owners
         
-        private_workers1 = ap.AgentList(self, p['N_W1'], Household)
+        private_workers1 = ap.AgentList(self, p['N_W1'], ag.Household)
         private_workers1.s_Y = 1
         private_workers1.s_W = 1
-        private_workers1.w_D = p['w1']
         
-        private_workers2 = ap.AgentList(self, p['N_W2'], Household)
+        private_workers2 = ap.AgentList(self, p['N_W2'], ag.Household)
         private_workers2.s_Y = 2
         private_workers2.s_W = 1
-        private_workers2.w_D = p['w2']
         
-        public_workers = ap.AgentList(self, p['N_WG'], Household)
+        public_workers = ap.AgentList(self, p['N_WG'], ag.Household)
         public_workers.s_W = 1
         public_workers.s_WG = 1
-        public_workers.w_D = p['w_G']
 
         private_workers = private_workers1 + private_workers2
         workers = public_workers + private_workers
         self.households += workers
         
-        unemployed = ap.AgentList(self, p['N_U'], Household)
+        unemployed = ap.AgentList(self, p['N_U'], ag.Household)
         unemployed.s_U = 1
-        unemployed.w_D = p['w_min']
         self.households += unemployed
-
-        # share stocks and prices
-        households = self.households
-        households.M = p['M_H'] / len(households)
-        households.D = p['D_H'] / len(households)
-        households.iota_D = p['iota_DH'] / len(households)
-        households.r_D = p['r_D']
-
-        # share incomes by status
-        public_workers.W = p['W_G'] / len(public_workers)
-        private_workers1.W = p['W_F1'] / len(private_workers1 + firm_owners1)
-        private_workers2.W = p['W_F2'] / len(private_workers2 + firm_owners2)
-        firm_owners1.W = p['W_F1'] / len(private_workers1 + firm_owners1)
-        firm_owners2.W = p['W_F2'] / len(private_workers2 + firm_owners2)
-        unemployed.Z = p['Z_H'] / len(unemployed)
-        bank_owners.Pi_d = p['Pi_dB'] / len(bank_owners)
-        firm_owners1.Pi_d = p['Pi_dF1'] / len(firm_owners1)
-        firm_owners2.Pi_d = p['Pi_dF2'] / len(firm_owners2)
-    
-        # share taxes by gross incomes
-        Y = households.W + households.Pi_d + households.iota_D
-        households.T = Y * p['T_H'] / sum(Y)
-
-        # share consumption by disposable incomes
-        Y_d = Y - households.T + households.Z
-        households.C1 = Y_d * p['C1'] / sum(Y_d)
-        households.C2 = Y_d * p['C2'] / sum(Y_d)
+        self.households.delta = p['delta']
 
 
     def create_firms(self):
         p = self.p
-        firms1 = ap.AgentList(self, p['N_E1'], Firm)
+        firms1 = ap.AgentList(self, p['N_E1'], ag.Firm)
         firms1.s_Y = 1
-        firms1.r_D = p['r_D']
-        firms1.r_L = p['r_L']
+        firms1.n_W = 1
+        firms1.n_T = 1
+        firms1.phi = p['phi1']
 
-        firms2 = ap.AgentList(self, p['N_E2'], Firm)
+        firms2 = ap.AgentList(self, p['N_E2'], ag.Firm)
         firms2.s_Y = 2
+        firms2.n_W = 0
+        firms2.n_T = 0
+        firms2.phi = p['phi2']
+
         self.firms = firms1 + firms2
-
-        # share stocks, flows and prices
-        households = self.households
-        owners = households.select(households.s_E == 1)
-        firms = self.firms
-        for s in self.sectors:
-            formal = 1 if s == 1 else 0
-            group = firms.select(firms.s_Y == s)
-            group.n_W = formal
-            group.n_T = formal
-            
-            # share prices
-            group.p_y = p[f'p{s}']
-            group.w = p[f'w{s}']
-            group.m = p['m']
-            if formal:
-                group.r_L = p['r_L']
-            
-            # share behavior parameters
-            group.delta = p['delta']
-            group.theta_y = p['theta_y']
-            group.upsilon = p['upsilon_F']
-            group.phi = p[f'phi{s}']
-
-            # share nominal stocks
-            group.Y_inv = p[f'Y_inv{s}'] /  len(group)
-            group.M = p[f'M_F{s}'] / len(group)
-            group.D = p[f'D_F{s}'] / len(group)
-            group.L = p[f'L_F{s}'] / len(group)
-
-            # share nominal flows
-            group.Q = p[f'Q{s}'] / len(group)
-            group.W = p[f'W_F{s}'] / len(group)
-            group.T = p[f'T_F{s}'] / len(group)
-            group.iota_L = p[f'iota_LF{s}'] / len(group)
-            group.iota_D = p[f'iota_DF{s}'] / len(group)
-            group.Pi_d = p[f'Pi_dF{s}'] / len(group)
-
-            # share real stocks and flows
-            group.y_inv = p[f'y_inv{s}'] /  len(group)
-            group.y = p[f'Q{s}'] / (len(group) * p[f'p{s}'])
-            group.q_e = p[f'Q{s}'] / (len(group) * p[f'p{s}'])
-            group.l = p[f'Q{s}'] / (len(group) * p[f'w{s}'])
-
-            group_owners = owners.select(owners.s_Y == s)
-            for firm, owner in zip(group, group_owners):
-                firm.owner = owner
-                firm.E = p[f'E_F{s}'] / len(group)
-                owner.E = p[f'E_F{s}'] / len(group_owners)
+        self.firms.m = p['m']
+        self.firms.delta = p['delta']
+        self.firms.theta_y = p['theta_y']
+        self.firms.upsilon_F = p['upsilon_F']
 
 
     def create_banks(self):
         p = self.p
-        banks = ap.AgentList(self, p['N_B'], Bank)
-        households = self.households
-        owners = households.select(households.s_EB == 1)
-        for bank, owner in zip(banks, owners):
-            bank.owner =  owner
-            bank.E = p['E_B'] / len(banks)
-            owner.E = p['E_B'] / len(banks)
-
-        banks.M = p['M_B'] / len(banks)
-        banks.B = p['B_B'] / len(banks)
-
-        banks.T = p['T_B'] / len(banks)
-        banks.iota_A = p['iota_AB'] / len(banks)
-        banks.iota_B = p['iota_BB'] / len(banks)
-        banks.Pi_d = p['Pi_dB'] / len(banks)
-
+        banks = ap.AgentList(self, p['N_B'], ag.Bank) 
         banks.delta = p['delta']
         banks.kappa_E = p['kappa_E']
         banks.kappa_R = p['kappa_R']
         banks.gamma_L = p['gamma_L']
         banks.beta_L = p['beta_L']
+        self.banks = banks   
 
-        banks.r_D = p['r_D']
-        banks.r_L = p['r_L']
-        banks.r_A = p['r_A']
-        banks.r_B = p['r_B']
-        self.banks = banks
-    
 
     def create_public_sector(self):
-        p = self.p
-        government = Government(self)
-        government.M = p['M_G']
-        government.B = p['B_G']
+        self.government = ag.Government(self)
+        self.central_bank = ag.CentralBank(self)
 
-        government.W = p['W_G']
-        government.Z = p['Z_G']
-        government.T = p['T_G']
-        government.iota_B = p['iota_BG']
-        government.Pi = p['Pi_G']
 
-        government.w = p['w_G']
-        government.r_B = p['r_B']
-        self.government = government
-
-        central_bank = CentralBank(self)
-        central_bank.M = p['M_CB']
-        central_bank.B = p['B_CB']
-
-        central_bank.iota_A = p['iota_ACB']
-        central_bank.iota_B = p['iota_BCB']
-        central_bank.Pi = p['Pi_CB']
-
-        central_bank.r_A = p['r_A']
-        central_bank.r_B = p['r_B']
-        self.central_bank = central_bank
+    def create_good_markets(self):
+        firms = self.firms
+        markets = {}
+        for s in self.sectors:
+            sector_firms = firms.select(firms.s_Y == s)
+            market = env.GoodMarket(self)
+            market.add_agents(sector_firms)
+            market.s_Y = s
+            markets[s] = market
+        self.good_markets = markets
 
 
     def create_labor_markets(self):
@@ -409,14 +303,15 @@ class DualEcoModel(ap.Model):
         households = self.households
         firms = self.firms
 
-        # populate formal urban labor market        
+        # populate formal labor market        
         formal_firms = firms.select(firms.s_Y==1)
-        formal_market = ap.Network(self)
-        formal_market.add_agents([government])
-        formal_market.add_agents(formal_firms)
+        formal_market = env.LaborMarket(self)
+        formal_market.n_W = 1
+        formal_market.add_employers([government])
+        formal_market.add_employers(formal_firms)
         formal_market.add_agents(households)
 
-        # create formal labor network for private sector
+        # create formal network for private sector
         j = len(formal_firms)
         private_workers = households.select(households.s_Y==1)
         for i, worker in enumerate(private_workers):
@@ -425,20 +320,21 @@ class DualEcoModel(ap.Model):
             worker_pos = formal_market.positions[worker]
             formal_market.graph.add_edge(employer_pos, worker_pos)
         
-        # create formal labor network for public sector
-        public_workers = households.select(households.s_WG==1)
+        # create formal network for public sector
+        public_workers = households.select(households.s_WG == 1)
         employer_pos = formal_market.positions[government]
         for i, worker in enumerate(public_workers):
             worker_pos = formal_market.positions[worker]
             formal_market.graph.add_edge(employer_pos, worker_pos)
 
-        # populate informal urban labor market
+        # populate informal labor market
         informal_firms = firms.select(firms.s_Y==2)
-        informal_market = ap.Network(self)
-        informal_market.add_agents(informal_firms)
+        informal_market = env.LaborMarket(self)
+        informal_market.n_W = 0
+        informal_market.add_employers(informal_firms)
         informal_market.add_agents(households)
 
-        # create informal urban labor network
+        # create informal labor network
         j = len(informal_firms)
         private_workers = households.select(households.s_Y==2)
         for i, worker in enumerate(private_workers):
@@ -446,62 +342,293 @@ class DualEcoModel(ap.Model):
             employer_pos = informal_market.positions[employer]
             worker_pos = informal_market.positions[worker]
             informal_market.graph.add_edge(employer_pos, worker_pos)
-        self.labor_markets = {1:formal_market, 2:informal_market}
-        
+        self.labor_markets = {1:formal_market, 0:informal_market}
+
 
     def create_deposit_market(self):
+        households = self.households
         banks = self.banks
         firms = self.firms
-        households = self.households
         formal_firms = firms.select(firms.s_Y==1)
-
-        # populate deposit market
-        market = ap.Network(self)
-        market.add_agents(banks)
+        market = env.DepositMarket(self)
         market.add_agents(formal_firms)
+        market.add_agents(banks)
         market.add_agents(households)
-        self.deposit_market = market
-
+        
         # create deposit networks
         j = len(banks)
         graph = market.graph
         for i, client in enumerate(formal_firms + households):
             bank = banks[i % j]
-            bank.D += client.D
-            bank.iota_D += client.iota_D
             bank_pos = market.positions[bank]
             client_pos = market.positions[client]
             graph.add_edge(client_pos, bank_pos)
+            client.bank = bank
+        self.deposit_market = market
 
 
     def create_credit_market(self):
         banks = self.banks
         firms = self.firms
         formal_firms = firms.select(firms.s_Y==1)
-
-        # populate credit market
-        market = ap.Network(self)
-        market.add_agents(banks)
+        market = env.CreditMarket(self)
+        market.add_agents(self.banks)
         market.add_agents(formal_firms)
-        self.credit_market = market
 
         # create credit networks
-        j = len(banks)
         graph = market.graph
+        j = len(banks)
         for i, firm in enumerate(formal_firms):
             bank = banks[i % j]
-            bank.L  += firm.L
-            bank.iota_L += firm.iota_L
             bank_pos = market.positions[bank]
             firm_pos = market.positions[firm]
             graph.add_edge(firm_pos, bank_pos)
+        self.credit_market = market
+
+    
+    def create_bond_market(self):
+        market = env.BondMarket(self)
+        market.add_agents(self.banks)
+        market.add_agents([self.government, self.central_bank])
+        self.bond_market = market
 
 
     def create_economy(self):
+        banks = self.banks
         firms = self.firms
         households = self.households
-        economy = ap.Space(self, (0, 1))
+        economy = env.Economy(self)
         economy.add_agents(firms)
         economy.add_agents(households)
         self.economy = economy
+        
+        # create bank ownerships
+        owners = households.select(households.s_E == 1)
+        bank_owners = owners.select(owners.s_EB == 1)
+        for bank, owner in zip(banks, bank_owners):
+            bank.owner =  owner
+        
+        # create firm ownerships
+        for s in self.sectors:
+            sector_firms = firms.select(firms.s_Y == s)
+            sector_owners = owners.select(owners.s_Y == s)
+            for firm, owner in zip(sector_firms, sector_owners):
+                firm.owner = owner
+    
 
+    def share_initial_equities(self):
+        # for firms
+        p = self.p
+        firms = self.firms
+        for s in self.sectors:
+            sector_firms = firms.select(firms.s_Y == s)
+            E = p[f'E_F{s}'] / len(sector_firms)
+            for firm in sector_firms:
+                firm.E = E
+                firm.owner.E = E
+        
+        # for banks
+        banks = self.banks
+        E = p['E_B'] / len(banks)
+        for bank in banks:
+            bank.E = E
+            bank.owner.E = E
+    
+    
+    def share_initial_credits(self):
+        # for interest rates
+        p = self.p
+        banks = self.banks
+        banks.r_L = p['r_L']
+        firms = self.firms
+        formal_firms = firms.select(firms.s_Y == 1)
+        formal_firms.r_L 
+        
+        # for stocks and flows
+        L = p['L_F1'] / len(formal_firms)
+        iota_L = p['iota_LF1'] / len(formal_firms)
+        for firm in formal_firms:
+            firm.r_L = p['r_L']
+            firm.L = L
+            firm.iota_L = iota_L
+            bank = firm.bank
+            bank.L += L
+            bank.iota_L += iota_L
+    
+    
+    def share_initial_deposits(self):
+        # for interest rates
+        p = self.p 
+        banks = self.banks
+        banks.r_D = p['r_D']
+        
+        # for households stocks and flows
+        households = self.households
+        D = p['D_H'] / len(households)
+        iota_D = p['iota_DH'] / len(households)
+        for household in households:
+            household.D = D
+            household.iota_D = iota_D
+            bank = household.bank
+            bank.D += D
+            bank.iota_D += iota_D
+        
+        # for firms stocks and flows
+        firms = self.firms
+        formal_firms = firms.select(firms.s_Y == 1)
+        D = p['D_F1'] / len(formal_firms)
+        iota_D = p['iota_DF1'] / len(formal_firms)
+        for firm in formal_firms:
+            firm.D = D
+            firm.iota_D = iota_D
+            bank = firm.bank
+            bank.D += D
+            bank.iota_D += iota_D
+
+    
+    def share_initial_bonds(self):
+        p = self.p
+        banks = self.banks
+        banks.B = p['B_B'] / len(banks)
+        banks.iota_B = p['iota_BB'] / len(banks)
+
+        government = self.government
+        government.B = p['B_G']
+        government.iota_B = p['iota_BG']
+        government.r_B = p['r_B']
+
+        central_bank = self.central_bank
+        central_bank.B = p['B_CB']
+        central_bank.iota_B = p['iota_BCB']
+
+    
+    def share_initial_cash(self):
+        # private sector
+        p = self.p
+        households = self.households
+        firms = self.firms
+        banks = self.banks
+        banks.r_A = p['r_A']
+        banks.M = p['M_B'] / len(banks)
+        banks.A = p['A_B'] / len(banks)
+        banks.iota_A = p['iota_AB'] / len(banks)
+        households.M = p['M_H'] / len(households)
+        for s in self.sectors:
+            sector_firms = firms.select(firms.s_Y == s)   
+            sector_firms.M = p[f'M_F{s}'] / len(sector_firms)
+
+        # public sector
+        government = self.government
+        central_bank = self.central_bank
+        central_bank.M = p['M_CB']
+        central_bank.A = p['A_CB']
+        central_bank.iota_A = p['iota_ACB']
+        government.M = p['M_G']
+
+    
+    def share_initial_production(self):
+        p = self.p
+        firms = self.firms
+        for s in self.sectors:
+            sector_firms = firms.select(firms.s_Y == s) 
+            sector_firms.Y_inv = p[f'Y_inv{s}'] / len(sector_firms) 
+            sector_firms.y_inv = p[f'y_inv{s}'] / len(sector_firms) 
+            sector_firms.y = p[f'Q{s}'] / (len(sector_firms) * p[f'p{s}'])
+            sector_firms.q_e = p[f'Q{s}'] / (len(sector_firms) * p[f'p{s}']) 
+            sector_firms.Q = p[f'Q{s}'] / len(sector_firms)
+            sector_firms.p_Y = p[f'p{s}']
+    
+    
+    def share_initial_wages(self):
+        # for households
+        p = self.p
+        households = self.households
+        public_workers = households.select(households.s_WG == 1)
+        public_workers.W = p['W_G'] / len(public_workers)
+        public_workers.w_D = p['w_G']
+        for s in self.sectors:
+            private_workers = households.select(households.s_Y == s)
+            private_workers.W = p[f'W_F{s}'] / len(private_workers)
+            private_workers.w_D = p[f'w{s}']
+        unemployed = households.select(households.s_U == 1)
+        unemployed.w_D = p['w_min']
+
+        # for firms
+        firms = self.firms
+        for s in self.sectors:
+            sector_firms = firms.select(firms.s_Y == s) 
+            sector_firms.W = p[f'W_F{s}'] / len(sector_firms)
+            sector_firms.l = p[f'Q{s}'] / (len(sector_firms) * p[f'w{s}']) 
+            sector_firms.w = p[f'w{s}'] 
+
+        # for government
+        government = self.government
+        government.W = p['W_G']
+        government.w = p['w_G']
+             
+    
+    def share_initial_transfers(self):
+        p = self.p
+        government = self.government
+        households = self.households
+        unemployed = households.select(households.s_U == 1)
+        unemployed.Z = p['Z_H'] / len(unemployed)
+        government.Z = p['Z_G']
+    
+    
+    def share_initial_profits(self):
+        households = self.households
+        owners = households.select(households.s_E == 1)
+
+        # for firms
+        p = self.p
+        firms = self.firms
+        for s in self.sectors:
+            sector_firms = firms.select(firms.s_Y == s) 
+            sector_owners = owners.select(owners.s_Y == s) 
+            sector_owners.Pi_d = p[f'Pi_dF{s}'] / len(sector_owners) 
+            sector_firms.Pi_d = p[f'Pi_dF{s}'] / len(sector_firms) 
+
+        # for banks
+        banks = self.banks
+        bank_owners = owners.select(owners.s_EB == 1)
+        bank_owners.Pi_d = p['Pi_dB'] / len(bank_owners)
+        banks.Pi_d = p['Pi_dB'] / len(banks)
+
+        # for central bank
+        government = self.government
+        central_bank = self.central_bank
+        central_bank.Pi = p['Pi_CB']
+        government.Pi = p['Pi_G']
+
+
+    def share_initial_taxes(self):
+        # for households
+        p = self.p
+        households = self.households
+        Y = households.W + households.Pi_d + households.iota_D
+        households.T = Y * p['T_H'] / sum(Y)
+
+        # for firms
+        firms = self.firms
+        for s in self.sectors:
+            sector_firms = firms.select(firms.s_Y == s)
+            sector_firms.T = p[f'T_F{s}'] / len(sector_firms)
+
+        # for banks and government
+        banks = self.banks
+        banks.T = p['T_B'] / len(banks)
+        self.government.T = p['T_G']
+
+
+    def share_initial_consumption(self):
+        p = self.p
+        households = self.households
+        Y = households.W + households.Pi_d + households.iota_D
+        Y_d = Y - households.T + households.Z
+        households.C1 = Y_d * p['C1'] / sum(Y_d)
+        households.C2 = Y_d * p['C2'] / sum(Y_d)
+
+
+    def share_initial_prices(self):
+        pass

@@ -14,6 +14,40 @@ def market(model):
 
 def test_is_network(market):
     assert isinstance(market, ap.Network)
+    
+def test_default_state(market):
+    assert market.n_W == 0
+    assert market.u == 0
+    assert market.upsilon == 0
+
+
+@pytest.fixture
+def employers(model):
+    employers = ap.AgentList(model, 5)
+    employers.n_W = 0
+    return employers
+
+
+@pytest.mark.parametrize('n_W', [0, 1])
+def test_add_employers(market, employers, n_W):
+    market.n_W = n_W
+    market.add_employers(employers)
+    agents = market.agents.to_list()
+    assert len(employers) == len(market.employers)
+    assert set(employers).issubset(set(agents))
+    assert set(employers.n_W) == {n_W}
+
+@pytest.mark.parametrize('n_W', [0, 1])
+def test_remove_employer(market, employers, n_W):
+    market.n_W = n_W
+    employer = employers[0]
+    market.add_employers(employers)
+    market.remove_employer(employer)
+    agents = market.agents.to_list()
+    assert len(employers) - 1 == len(market.employers)
+    assert employer not in market.employers
+    assert employer not in agents
+    assert employer.n_W == 0
 
 
 @pytest.fixture
@@ -32,20 +66,15 @@ def private_worker(model):
     return worker
 
 
-@pytest.mark.parametrize('s_Y, n_W', [(1, 1), (1, 0), (2, 1), (2, 0)])
-def test_pay_private_wages(market, firm, private_worker, s_Y, n_W):
+def test_pay_private_wages(market, firm, private_worker):
     employee = private_worker
-    employee.s_Y = s_Y
-    employee.n_W = n_W
     employee.W = 0
     employee.M = 0
     employer = firm
-    employer.s_Y = s_Y
-    employer.n_W = n_W
     employer.W = 0
     employer.M = 50
-    market.pay_wages(20, employer, employee)
 
+    market.pay_wages(20, employer, employee)
     assert employer.W == 20
     assert employer.M == 30
     assert employee.W == 20
@@ -55,7 +84,6 @@ def test_pay_private_wages(market, firm, private_worker, s_Y, n_W):
 @pytest.fixture
 def government(model):
     government = ap.Agent(model)
-    government.n_W = 1
     return government
 
 @pytest.fixture
@@ -78,8 +106,8 @@ def test_pay_public_wages(market, government, public_worker):
     employee = public_worker
     employee.W = 0
     employee.M = 0
-    market.pay_wages(20, employer, employee)
 
+    market.pay_wages(20, employer, employee)
     assert employer.W == 20
     assert employer.M == 30
     assert employee.W == 20
@@ -102,10 +130,10 @@ def unemployed(model):
 
 @pytest.mark.parametrize('s_Y, n_W', [(1, 1), (1, 0), (2, 1), (2, 0)])
 def test_accept_private_job(market, firm, unemployed, s_Y, n_W):
+    market.n_W = n_W
     employer = firm
     employer.N_J = 1
     employer.s_Y = s_Y
-    employer.n_W = n_W
     worker = unemployed
     market.add_agents([worker, employer])
 
@@ -121,9 +149,10 @@ def test_accept_private_job(market, firm, unemployed, s_Y, n_W):
 
 
 def test_accept_public_job(market, government, unemployed):
+    worker = unemployed
     employer = government
     employer.N_J = 1
-    worker = unemployed
+    market.n_W = 1
     market.add_agents([worker, employer])
 
     market.accept_job(worker, employer)
@@ -155,10 +184,10 @@ def test_accept_own_job(market, self_employed, s_Y, n_W):
     employer = self_employed.property
     employer.N_J = 1
     employer.s_Y = s_Y
-    employer.n_W = n_W
     worker = self_employed
     worker.s_Y = 0
     worker.n_W = 0
+    market.n_W = n_W
     market.add_agents([worker, employer])
 
     market.accept_job(worker, employer)
@@ -179,8 +208,8 @@ def test_leave_private_job(market, firm, private_worker, s_Y, n_W):
     worker.n_W = n_W
     employer = firm
     employer.s_Y = s_Y
-    employer.n_W = n_W
     employer.N_J = 1
+    market.n_W = n_W
     market.add_agents([worker, employer])
     market.graph.add_edge(worker, employer)
 
@@ -200,6 +229,7 @@ def test_leave_public_job(market, government, public_worker):
     worker = public_worker
     employer = government
     employer.N_J = 1
+    market.n_W = 1
     market.add_agents([worker, employer])
     market.graph.add_edge(worker, employer)
 
@@ -222,8 +252,8 @@ def test_leave_own_job(market, self_employed, s_Y, n_W):
     worker.n_W = n_W
     employer = worker.property
     employer.s_Y = s_Y
-    employer.n_W = n_W
     employer.N_J = 1
+    market.n_W = n_W
     market.add_agents([worker, employer])
     market.graph.add_edge(worker, employer)
 

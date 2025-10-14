@@ -14,6 +14,9 @@ def test_is_space(market):
     assert isinstance(market, ap.Space)
     assert market.shape == (1, 1)
 
+def test_default_state(market):
+    assert market.s_Y == 0
+
 
 def test_consume_goods(market):
     model = market.model

@@ -34,15 +34,24 @@ class Household(ap.Agent):
         self.Pi_d = 0       # dividends
 
         self.r_D = 0        # deposit interest rate
+        self.delta = 0      # adjustment
+        self.upsilon = 0    # ...
         self.bank = None
 
 
-    def withdraw_deposits(self, amount):
-        self.M += amount
-        self.D -= amount
-        self.bank.M -= amount
-        self.bank.D -= amount
-
+    def search_job(self):
+        # reservation wage revision
+        labor_market = self.model.labor_market
+        random = self.model.nprandom
+        U = random.uniform
+        Pr = self.upsilon * np.exp(-labor_market.upsilon * labor_market.u)
+        if self.s_U == 0:
+            print([0, 1], [1-Pr, Pr])
+            if random.choice([0, 1], p=[1-Pr, Pr]):
+                self.w_D = self.w_D * (1 + U(0, self.delta))
+        else:
+            if random.choice([0, 1], p=[Pr, 1-Pr]):
+                self.w_D = self.w_D * (1 - U(0, self.delta))
 
 
 class Firm(ap.Agent):
