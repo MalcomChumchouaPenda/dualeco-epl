@@ -36,15 +36,21 @@ class Household(ap.Agent):
         self.r_D = 0        # deposit interest rate
         self.delta = 0      # adjustment
         self.upsilon = 0    # ...
+        self.chi_J = 0      # ...
+        self.chi_Y = 0      # ...
+
         self.bank = None
 
 
     def search_job(self):
+        labor_markets = self.model.labor_markets
+        informal_market = labor_markets[0]
+        formal_market = labor_markets[1]
+
         # reservation wage revision
-        labor_market = self.model.labor_market
         random = self.model.nprandom
         U = random.uniform
-        Pr = self.upsilon * np.exp(-labor_market.upsilon * labor_market.u)
+        Pr = self.upsilon * np.exp(-formal_market.upsilon * formal_market.u)
         if self.s_U == 0:
             print([0, 1], [1-Pr, Pr])
             if random.choice([0, 1], p=[1-Pr, Pr]):
@@ -52,6 +58,28 @@ class Household(ap.Agent):
         else:
             if random.choice([0, 1], p=[Pr, 1-Pr]):
                 self.w_D = self.w_D * (1 - U(0, self.delta))
+        
+        # search best formal jobs
+        if self.n_W == 0:
+            employers = formal_market.employers.random(self.chi_J)
+            employers = employers.select(employers.w >= self.w_D)
+            employers = employers.select(employers.N_Jc > 0)
+            if len(employers) > 0:
+                if self.s_W == 1 or self.s_E == 1:
+                    old_employer = informal_market.neighbors(self)[0]
+                    informal_market.leave_job(self, old_employer)
+                choice = employers.sort('w', reverse=True)[0]
+                formal_market.accept_job(self, choice)
+                return
+        
+        # search best informal jobs
+        if self.s_U == 1:
+            employers = informal_market.employers.random(self.chi_J)
+            employers = employers.select(employers.w >= self.w_D)
+            employers = employers.select(employers.N_Jc > 0)
+            if len(employers) > 0:
+                choice = employers.sort('w', reverse=True)[0]
+                informal_market.accept_job(self, choice)
 
 
 class Firm(ap.Agent):
