@@ -292,7 +292,7 @@ class DualEcoModel(ap.Model):
         for s in self.sectors:
             sector_firms = firms.select(firms.s_Y == s)
             market = env.GoodMarket(self)
-            market.add_agents(sector_firms)
+            market.add_suppliers(sector_firms)
             market.s_Y = s
             markets[s] = market
         self.good_markets = markets
@@ -309,7 +309,7 @@ class DualEcoModel(ap.Model):
         formal_market.n_W = 1
         formal_market.add_employers([government])
         formal_market.add_employers(formal_firms)
-        formal_market.add_agents(households)
+        formal_market.add_workers(households)
 
         # create formal network for private sector
         j = len(formal_firms)
@@ -332,7 +332,7 @@ class DualEcoModel(ap.Model):
         informal_market = env.LaborMarket(self)
         informal_market.n_W = 0
         informal_market.add_employers(informal_firms)
-        informal_market.add_agents(households)
+        informal_market.add_workers(households)
 
         # create informal labor network
         j = len(informal_firms)

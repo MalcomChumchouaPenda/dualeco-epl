@@ -70,6 +70,16 @@ class GoodMarket(BasicSpace):
 
     def setup(self):
         self.s_Y = 0
+        self.suppliers = ap.AgentDList(self.model)
+
+    def add_suppliers(self, suppliers):
+        self.add_agents(suppliers)
+        self.suppliers.extend(suppliers)
+    
+    def remove_supplier(self, supplier):
+        self.remove_agents([supplier])
+        self.suppliers.remove(supplier)
+    
     
     def consume_goods(self, amount, client, firm):
         client.C += amount
@@ -85,6 +95,8 @@ class LaborMarket(ap.Network):
         self.u = 0
         self.upsilon = 0
         self.employers = ap.AgentDList(self.model)
+        self.workers = ap.AgentDList(self.model)
+
     
     def add_employers(self, employers):
         self.add_agents(employers)
@@ -96,6 +108,16 @@ class LaborMarket(ap.Network):
         employer.n_W = 0
         self.remove_agents([employer])
         self.employers.remove(employer)
+        
+    
+    def add_workers(self, workers):
+        self.add_agents(workers)
+        self.workers.extend(workers)
+    
+    def remove_worker(self, worker):
+        self.remove_agents([worker])
+        self.workers.remove(worker)
+
     
     def pay_wages(self, amount, employer, worker):
         employer.W += amount

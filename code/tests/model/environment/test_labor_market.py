@@ -19,6 +19,8 @@ def test_default_state(market):
     assert market.n_W == 0
     assert market.u == 0
     assert market.upsilon == 0
+    assert len(market.employers) == 0
+    assert len(market.workers) == 0
 
 
 @pytest.fixture
@@ -48,6 +50,35 @@ def test_remove_employer(market, employers, n_W):
     assert employer not in market.employers
     assert employer not in agents
     assert employer.n_W == 0
+
+
+@pytest.fixture
+def workers(model):
+    workers = ap.AgentList(model, 5)
+    workers.n_W = 5  # for tests
+    return workers
+
+
+@pytest.mark.parametrize('n_W', [0, 1])
+def test_add_workers(market, workers, n_W):
+    market.n_W = n_W
+    market.add_workers(workers)
+    agents = market.agents.to_list()
+    assert len(workers) == len(market.workers)
+    assert set(workers).issubset(set(agents))
+    assert set(workers.n_W) == {5}
+
+@pytest.mark.parametrize('n_W', [0, 1])
+def test_remove_worker(market, workers, n_W):
+    market.n_W = n_W
+    worker = workers[0]
+    market.add_workers(workers)
+    market.remove_worker(worker)
+    agents = market.agents.to_list()
+    assert len(workers) - 1 == len(market.workers)
+    assert worker not in market.workers
+    assert worker not in agents
+    assert worker.n_W == 5
 
 
 @pytest.fixture

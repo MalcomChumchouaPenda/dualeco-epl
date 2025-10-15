@@ -264,6 +264,7 @@ def test_create_good_markets(models3):
             assert isinstance(market, env.GoodMarket)
             assert market.s_Y == s
             assert set(group) == set(agents)
+            assert set(group) == set(market.suppliers)
 
 
 def test_create_labor_markets(models3):
@@ -279,6 +280,7 @@ def test_populate_formal_labor_market(models3):
         model.create_labor_markets()
         market = model.labor_markets[1]
         agents = market.agents.to_list()
+        workers = market.workers
         employers = market.employers
         government = model.government
         firms = model.firms
@@ -288,6 +290,7 @@ def test_populate_formal_labor_market(models3):
         assert set(group).issubset(set(employers))
         assert set(households).issubset(set(agents))
         assert not set(households).issubset(set(employers))
+        assert set(households) == set(workers)
         assert government in set(agents)
         assert government in set(employers)
         assert len(agents) == len(households + group) + 1
