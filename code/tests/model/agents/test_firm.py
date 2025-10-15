@@ -77,21 +77,25 @@ def random(model, monkeypatch):
     return f
 
 @pytest.fixture
-def labor_market():
-    market = MagicMock()
-    market.upsilon = 0.5
-    market.u = 0.5
-    return market
+def labor_markets():
+    markets = {}
+    for n_W in (0, 1):
+        market = MagicMock()
+        market.upsilon = 0.5
+        market.u = 0.5
+        markets[n_W] = market
+    return markets
 
 @pytest.fixture
-def firm2(firm1, random, labor_market):
+def firm2(firm1, random, labor_markets):
     firm = firm1
     firm.delta = 0.5
     firm.theta_y = 0.25
     firm.p_Y = 10
     firm.q_e = 10
     firm.phi = 1
-    firm.model.labor_market = labor_market
+    firm.n_W = 1
+    firm.model.labor_markets = labor_markets
     random.uniform.return_value = 0.25
     return firm
 
@@ -272,9 +276,9 @@ def test_apply_for_credit(firm1, D, M, L_D):
 
 
 @pytest.fixture
-def workers(model, labor_market):
+def workers(model, labor_markets):
     workers = ap.AgentList(model, 5)
-    labor_market.neighbors.return_value = workers
+    labor_markets[1].neighbors.return_value = workers
     return workers
 
 @pytest.fixture
@@ -294,7 +298,7 @@ def test_destroy_jobs(firm5, l_D, N_Jd):
     firm = firm5
     firm.l_D = l_D
     firm.destroy_jobs()
-    labor_market = firm.model.labor_market
+    labor_market = firm.model.labor_markets[1]
     assert labor_market.leave_job.call_count == N_Jd
     assert firm.N_Jd == N_Jd
     assert firm.N_Jc == 0

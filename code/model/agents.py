@@ -103,7 +103,7 @@ class Firm(ap.Agent):
     def plan_production(self):
         random = self.model.nprandom
         U, delta = random.uniform, self.delta
-        labor_market = self.model.labor_market
+        labor_market = self.model.labor_markets[self.n_W]
         
         # revision of sales expectation and price markup
         y_tot = self.y + self.y_inv
@@ -135,7 +135,7 @@ class Firm(ap.Agent):
         self.L_D = max(0, self.w * self.l_D - self.D - self.M)
     
     def destroy_jobs(self):
-        labor_market = self.model.labor_market
+        labor_market = self.model.labor_markets[self.n_W]
         workers = labor_market.neighbors(self)
         self.N_Jd = int(np.ceil(max(0, self.l - self.l_D)))
         for worker in workers.random(self.N_Jd):
@@ -146,7 +146,7 @@ class Firm(ap.Agent):
         self.N_Jc = int(np.ceil(max(0, l_max - self.l)))
     
     def produce_goods(self):
-        labor_market = self.model.labor_market
+        labor_market = self.model.labor_markets[self.n_W]
         workers = labor_market.neighbors(self)
         l = min(self.l_D, len(workers))
         workers.l = l / len(workers)
