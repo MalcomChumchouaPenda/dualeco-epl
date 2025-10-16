@@ -82,6 +82,18 @@ class Household(ap.Agent):
                 informal_market.accept_job(self, choice)
 
 
+    def pay_taxes(self):
+        model = self.model
+        economy = model.economy
+        government = model.government
+        Y = self.W + self.iota_D + self.Pi_d
+        T = economy.tau * Y
+        economy.pay_taxes(T, self, government)
+        self.Y = Y
+
+
+
+
 class Firm(ap.Agent):
     
     def setup(self):

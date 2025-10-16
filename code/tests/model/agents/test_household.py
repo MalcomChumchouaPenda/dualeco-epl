@@ -294,7 +294,6 @@ def test_informal_entrepreneur_remain_informal(household5, employers, g1, g0):
     labor_markets[1].leave_job.assert_not_called()
     labor_markets[0].leave_job.assert_not_called()
 
-    
 
 @pytest.fixture
 def household6(household3):
@@ -345,4 +344,38 @@ def test_no_search_from_informal_worker(household6, employers, g1, g0):
     labor_markets[0].accept_job.assert_not_called()
     labor_markets[1].leave_job.assert_not_called()
     labor_markets[0].leave_job.assert_not_called()
+
+
+
+@pytest.fixture
+def economy():
+    economy = MagicMock()
+    economy.tau = 0.1
+    return economy    
+
+@pytest.fixture
+def government(model):
+    return ap.Agent(model)
+
+@pytest.fixture
+def household7(household1, economy, government):
+    household = household1
+    household.W = 100
+    household.Pi_d = 50
+    household.iota_D = 50
+    household.model.economy = economy
+    household.model.government = government
+    return household
+
+
+def test_compute_taxable_income(household7):
+    household = household7
+    household.pay_taxes()
+    assert household.Y == 200
+
+def test_pay_taxes(household7, government):
+    household = household7
+    household.pay_taxes()
+    economy = household.model.economy
+    economy.pay_taxes.assert_called_with(20, household, government)
 
