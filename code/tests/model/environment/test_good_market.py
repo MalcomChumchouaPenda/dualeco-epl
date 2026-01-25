@@ -44,18 +44,40 @@ def test_remove_supplier(market, suppliers):
     assert supplier not in agents
 
 
-def test_consume_goods(market):
-    model = market.model
+@pytest.fixture
+def firm(model):
     firm = ap.Agent(model)
-    firm.Q = 0
-    firm.M = 0
-    client = ap.Agent(model)
-    client.C = 0
-    client.M = 50
+    firm.p_Y = 0.5
+    firm.y_inv = 100.0
+    firm.Q = 0.0
+    firm.M = 0.0
+    return firm
 
-    market.consume_goods(25, client, firm)
-    assert firm.Q == 25
-    assert firm.M == 25
-    assert client.C == 25
-    assert client.M == 25
+@pytest.fixture
+def client(model):
+    client = ap.Agent(model)
+    client.C1 = 0.0
+    client.C2 = 0.0
+    client.M = 50.0
+    return client
+
+def test_consume_goods_of_type1(market, client, firm):
+    market.s_Y = 1
+    market.consume_goods(25.0, client, firm)
+    assert abs(firm.y_inv - 50.0) < 1e-6
+    assert abs(firm.Q - 25.0) < 1e-6
+    assert abs(firm.M - 25.0) < 1e-6
+    assert abs(client.C1 - 25.0) < 1e-6
+    assert abs(client.C2 - 0.0) < 1e-6
+    assert abs(client.M - 25.0) < 1e-6
+
+def test_consume_goods_of_type2(market, client, firm):
+    market.s_Y = 2
+    market.consume_goods(25.0, client, firm)
+    assert abs(firm.y_inv - 50.0) < 1e-6
+    assert abs(firm.Q - 25.0) < 1e-6
+    assert abs(firm.M - 25.0) < 1e-6
+    assert abs(client.C1 - 0.0) < 1e-6
+    assert abs(client.C2 - 25.0) < 1e-6
+    assert abs(client.M - 25.0) < 1e-6
 

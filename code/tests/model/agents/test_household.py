@@ -11,12 +11,12 @@ def model():
     return ap.Model()
 
 @pytest.fixture
-def household1(model):
+def default_household(model):
     return Household(model)
 
 
-def test_default_status(household1):
-    household = household1
+def test_default_status(default_household):
+    household = default_household
     assert household.s_U == 0
     assert household.s_W == 0
     assert household.s_WG == 0
@@ -26,8 +26,8 @@ def test_default_status(household1):
     assert household.n_W == 0
 
 
-def test_default_stocks(household1):
-    household = household1
+def test_default_stocks(default_household):
+    household = default_household
     assert household.E == 0
     assert household.E_star == 0
     assert household.D == 0
@@ -36,11 +36,10 @@ def test_default_stocks(household1):
     assert household.V == 0
 
 
-def test_default_flows(household1):
-    household = household1
+def test_default_flows(default_household):
+    household = default_household
     assert household.Z == 0
     assert household.W == 0
-    assert household.C_star == 0
     assert household.C1_star == 0
     assert household.C2_star == 0
     assert household.C1 == 0
@@ -50,21 +49,20 @@ def test_default_flows(household1):
     assert household.Pi_d == 0
 
 
-def test_default_prices(household1):
-    household = household1
+def test_default_prices(default_household):
+    household = default_household
     assert household.w == 0
 
 
-def test_default_params(household1):
-    household = household1
+def test_default_params(default_household):
+    household = default_household
     assert household.delta == 0
     assert household.upsilon == 0
-    assert household.chi_J == 0
-    assert household.chi_Y == 0
+    assert household.chi_N == 0
 
 
-# def test_default_links(household1):
-#     household = household1
+# def test_default_links(default_household):
+#     household = default_household
 #     assert household.bank is None
 #     assert household.property is None
 
@@ -94,8 +92,8 @@ def labor_markets(model):
     return markets
 
 @pytest.fixture
-def household2(household1, random, exp, labor_markets):
-    household = household1
+def household2(default_household, random, exp, labor_markets):
+    household = default_household
     household.upsilon = 0.25
     household.delta = 0.5
     household.w = 1
@@ -105,26 +103,26 @@ def household2(household1, random, exp, labor_markets):
     return household
 
 
-@pytest.mark.parametrize('Pr, s_U, w', [(0, 0, 1), (1, 0, 1.25)])    
-def test_increase_reservation_wage(household2, random, exp, Pr, s_U, w):
-    random.choice.return_value = Pr
+@pytest.mark.parametrize('choice, expected',  [(0, 1),  (1, 1.25)])
+def test_increase_reservation_wage(household2, random, exp, choice, expected):
+    random.choice.return_value = choice
     household = household2
-    household.s_U = s_U
+    household.s_U = 0
     household.search_job()  
     exp.assert_called_with(-0.25)
     random.choice.assert_called_with([0, 1], p=[0.875, 0.125])
-    assert household.w == w
+    assert household.w == expected
 
 
-@pytest.mark.parametrize('Pr, s_U, w', [(0, 1, 1), (1, 1, 0.75)])   
-def test_decrease_reservation_wage(household2, random, exp, Pr, s_U, w):
-    random.choice.return_value = Pr
+@pytest.mark.parametrize('choice, expected', [(0, 1), (1, 0.75)])   
+def test_decrease_reservation_wage(household2, random, exp, choice, expected):
+    random.choice.return_value = choice
     household = household2
-    household.s_U = s_U
+    household.s_U = 1
     household.search_job()
     exp.assert_called_with(-0.25)
     random.choice.assert_called_with([0, 1], p=[0.125, 0.875])
-    assert household.w == w
+    assert household.w == expected
 
 
 @pytest.fixture
@@ -135,19 +133,25 @@ def household3(household2, random):
     household.s_U = 1
     household.s_E = 0
     household.s_W = 0
-    household.chi_J = 1
+    household.chi_N = 1
     return household
+
 
 @pytest.fixture
 def employers(model):
+    # employers with wages lower than reservation wage
     group_a = ap.AgentList(model, 2)
     for i, employer in enumerate(group_a):
         employer.w = 0.5 * (i + 1)
         employer.N_v = 1
+        
+    # employers with wages higher than reservation wage
     group_b = ap.AgentList(model, 2)
     for i, employer in enumerate(group_b):
         employer.w = i + 1
         employer.N_v = 1
+        
+    # employers with no vacancies
     group_c = ap.AgentList(model, 2)
     for i, employer in enumerate(group_c):
         employer.w = i + 1
@@ -155,45 +159,52 @@ def employers(model):
     return {'a':group_a, 'b':group_b, 'c':group_c}
 
 
-@pytest.mark.parametrize('g1, g0', [('b', 'a'), ('b', 'b'), ('b', 'c')])
-def test_unemployed_prefer_best_formal_job(household3, employers, g1, g0):
+@pytest.mark.parametrize('formal, informal', 
+                         [('b', 'a'),         # high formal wages + low informal wages
+                          ('b', 'b'),         # high formal wages + high informal wages
+                          ('b', 'c')])        # high formal wages + no informal vacancies
+def test_unemployed_prefer_best_formal_job(household3, employers, formal, informal):
     household = household3
     labor_markets = household.model.labor_markets
-    labor_markets[1].employers.random.return_value = employers[g1]
-    labor_markets[0].employers.random.return_value = employers[g0]
-    choice = employers[g1][-1]
+    labor_markets[1].employers.random.return_value = employers[formal]
+    labor_markets[0].employers.random.return_value = employers[informal]
 
     household.search_job()
-    labor_markets[1].employers.random.assert_called_with(household.chi_J)
+    labor_markets[1].employers.random.assert_called_with(household.chi_N)
     labor_markets[0].employers.random.assert_not_called()
-    labor_markets[1].accept_job.assert_called_with(household, choice)
+    labor_markets[1].accept_job.assert_called_with(household, employers[formal][-1])
 
 
-@pytest.mark.parametrize('g1, g0', [('a', 'b'), ('c', 'b')])
-def test_unemployed_prefer_best_informal_job(household3, employers, g1, g0):
+@pytest.mark.parametrize('formal, informal', 
+                         [('a', 'b'),          # low formal wages + high informal wages
+                          ('c', 'b')])         # no formal vacancies + high informal wages
+def test_unemployed_prefer_best_informal_job(household3, employers, formal, informal):
     household = household3
     labor_markets = household.model.labor_markets
-    labor_markets[1].employers.random.return_value = employers[g1]
-    labor_markets[0].employers.random.return_value = employers[g0]
-    choice = employers[g0][-1]
+    labor_markets[1].employers.random.return_value = employers[formal]
+    labor_markets[0].employers.random.return_value = employers[informal]
 
     household.search_job()
-    labor_markets[1].employers.random.assert_called_with(household.chi_J)
-    labor_markets[0].employers.random.assert_called_with(household.chi_J)
+    labor_markets[1].employers.random.assert_called_with(household.chi_N)
+    labor_markets[0].employers.random.assert_called_with(household.chi_N)
     labor_markets[1].accept_job.assert_not_called()
-    labor_markets[0].accept_job.assert_called_with(household, choice)
+    labor_markets[0].accept_job.assert_called_with(household, employers[informal][-1])
 
 
-@pytest.mark.parametrize('g1, g0', [('c', 'c'), ('c', 'a'), ('a', 'c'), ('a', 'a')])
-def test_remain_unemployed(household3, employers, g1, g0):
+@pytest.mark.parametrize('formal, informal', 
+                         [('c', 'c'),          # no formal vacancies + no informal vacancies
+                          ('c', 'a'),          # no formal vacancies + low informal wages
+                          ('a', 'c'),          # low formal wages + no informal vacancies
+                          ('a', 'a')])         # low formal wages + low informal wages
+def test_remain_unemployed(household3, employers, formal, informal):
     household = household3
     labor_markets = household.model.labor_markets
-    labor_markets[1].employers.random.return_value = employers[g1]
-    labor_markets[0].employers.random.return_value = employers[g0]
+    labor_markets[1].employers.random.return_value = employers[formal]
+    labor_markets[0].employers.random.return_value = employers[informal]
 
     household.search_job()
-    labor_markets[1].employers.random.assert_called_with(household.chi_J)
-    labor_markets[0].employers.random.assert_called_with(household.chi_J)
+    labor_markets[1].employers.random.assert_called_with(household.chi_N)
+    labor_markets[0].employers.random.assert_called_with(household.chi_N)
     labor_markets[1].accept_job.assert_not_called()
     labor_markets[0].accept_job.assert_not_called()
 
@@ -211,34 +222,41 @@ def household4(household3):
     return household
 
 
-@pytest.mark.parametrize('g1, g0', [('b', 'a'), ('b', 'b'), ('b', 'c')])
-def test_informal_worker_prefer_formal_job(household4, employers, g1, g0):
+@pytest.mark.parametrize('formal, informal', 
+                         [('b', 'a'),         # high formal wages + low informal wages 
+                          ('b', 'b'),         # high formal wages + high informal wages 
+                          ('b', 'c')])        # high formal wages + no informal vacancies
+def test_informal_worker_prefer_formal_job(household4, employers, formal, informal):
     household = household4
     old_employer = household._old_employer
     labor_markets = household.model.labor_markets
-    labor_markets[1].employers.random.return_value = employers[g1]
-    labor_markets[0].employers.random.return_value = employers[g0]
-    choice = employers[g1][-1]
+    labor_markets[1].employers.random.return_value = employers[formal]
+    labor_markets[0].employers.random.return_value = employers[informal]
 
     household.search_job()
-    labor_markets[1].employers.random.assert_called_with(household.chi_J)
+    labor_markets[1].employers.random.assert_called_with(household.chi_N)
     labor_markets[0].employers.random.assert_not_called()
-    labor_markets[1].accept_job.assert_called_with(household, choice)
+    labor_markets[1].accept_job.assert_called_with(household, employers[formal][-1])
     labor_markets[0].accept_job.assert_not_called()
     labor_markets[1].leave_job.assert_not_called()
     labor_markets[0].leave_job.assert_called_with(household, old_employer)
 
 
-@pytest.mark.parametrize('g1, g0', [('a', 'a'), ('a', 'b'), ('a', 'c'), 
-                                    ('c', 'a'), ('c', 'b'), ('c', 'c')])
-def test_informal_worker_remain_informal(household4, employers, g1, g0):
+@pytest.mark.parametrize('formal, informal', 
+                         [('a', 'a'),         # low formal wages + low informal wages 
+                          ('a', 'b'),         # low formal wages + high informal wages 
+                          ('a', 'c'),         # low formal wages + no informal vacancies 
+                          ('c', 'a'),         # no formal vacancies + low informal wages 
+                          ('c', 'b'),         # no formal vacancies + high informal wages 
+                          ('c', 'c')])        # no formal vacancies + high informal wages
+def test_informal_worker_remain_informal(household4, employers, formal, informal):
     household = household4
     labor_markets = household.model.labor_markets
-    labor_markets[1].employers.random.return_value = employers[g1]
-    labor_markets[0].employers.random.return_value = employers[g0]
+    labor_markets[1].employers.random.return_value = employers[formal]
+    labor_markets[0].employers.random.return_value = employers[informal]
 
     household.search_job()
-    labor_markets[1].employers.random.assert_called_with(household.chi_J)
+    labor_markets[1].employers.random.assert_called_with(household.chi_N)
     labor_markets[0].employers.random.assert_not_called()
     labor_markets[1].accept_job.assert_not_called()
     labor_markets[0].accept_job.assert_not_called()
@@ -259,34 +277,41 @@ def household5(household3):
     return household
 
 
-@pytest.mark.parametrize('g1, g0', [('b', 'a'), ('b', 'b'), ('b', 'c')])
-def test_informal_entrepreneur_prefer_formal_job(household5, employers, g1, g0):
+@pytest.mark.parametrize('formal, informal', 
+                         [('b', 'a'),         # high formal wages + low informal wages 
+                          ('b', 'b'),         # high formal wages + high informal wages 
+                          ('b', 'c')])        # high formal wages + no informal vacancie
+def test_informal_entrepreneur_prefer_formal_job(household5, employers, formal, informal):
     household = household5
     old_employer = household._old_employer
     labor_markets = household.model.labor_markets
-    labor_markets[1].employers.random.return_value = employers[g1]
-    labor_markets[0].employers.random.return_value = employers[g0]
-    choice = employers[g1][-1]
+    labor_markets[1].employers.random.return_value = employers[formal]
+    labor_markets[0].employers.random.return_value = employers[informal]
 
     household.search_job()
-    labor_markets[1].employers.random.assert_called_with(household.chi_J)
+    labor_markets[1].employers.random.assert_called_with(household.chi_N)
     labor_markets[0].employers.random.assert_not_called()
-    labor_markets[1].accept_job.assert_called_with(household, choice)
+    labor_markets[1].accept_job.assert_called_with(household, employers[formal][-1])
     labor_markets[0].accept_job.assert_not_called()
     labor_markets[1].leave_job.assert_not_called()
     labor_markets[0].leave_job.assert_called_with(household, old_employer)
 
 
-@pytest.mark.parametrize('g1, g0', [('a', 'a'), ('a', 'b'), ('a', 'c'), 
-                                    ('c', 'a'), ('c', 'b'), ('c', 'c')])
-def test_informal_entrepreneur_remain_informal(household5, employers, g1, g0):
+@pytest.mark.parametrize('formal, informal', 
+                         [('a', 'a'),         # low formal wages + low informal wages 
+                          ('a', 'b'),         # low formal wages + high informal wages 
+                          ('a', 'c'),         # low formal wages + no informal vacancies 
+                          ('c', 'a'),         # no formal vacancies + low informal wages 
+                          ('c', 'b'),         # no formal vacancies + high informal wages 
+                          ('c', 'c')])         # no formal vacancies + high informal wages
+def test_informal_entrepreneur_remain_informal(household5, employers, formal, informal):
     household = household5
     labor_markets = household.model.labor_markets
-    labor_markets[1].employers.random.return_value = employers[g1]
-    labor_markets[0].employers.random.return_value = employers[g0]
+    labor_markets[1].employers.random.return_value = employers[formal]
+    labor_markets[0].employers.random.return_value = employers[informal]
 
     household.search_job()
-    labor_markets[1].employers.random.assert_called_with(household.chi_J)
+    labor_markets[1].employers.random.assert_called_with(household.chi_N)
     labor_markets[0].employers.random.assert_not_called()
     labor_markets[1].accept_job.assert_not_called()
     labor_markets[0].accept_job.assert_not_called()
@@ -305,16 +330,23 @@ def household6(household3):
     return household
 
 
-@pytest.mark.parametrize('g1, g0', [('a', 'a'), ('a', 'b'), ('a', 'c'), 
-                                    ('b', 'a'), ('b', 'b'), ('b', 'c'), 
-                                    ('c', 'a'), ('c', 'b'), ('c', 'c')])
-def test_no_search_from_informal_entrepreneur(household6, employers, g1, g0):
+@pytest.mark.parametrize('formal, informal', 
+                         [('a', 'a'),         # low formal wages + low informal wages 
+                          ('a', 'b'),         # low formal wages + high informal wages 
+                          ('a', 'c'),         # low formal wages + no informal vacancies 
+                          ('b', 'a'),         # high formal wages + low informal wages 
+                          ('b', 'b'),         # high formal wages + high informal wages 
+                          ('b', 'c'),         # high formal wages + no informal vacancies 
+                          ('c', 'a'),         # no formal vacancies + low informal wages 
+                          ('c', 'b'),         # no formal vacancies + high informal wages 
+                          ('c', 'c')])         # no formal vacancies + high informal wages
+def test_no_search_from_formal_entrepreneur(household6, employers, formal, informal):
     household = household6
     household.s_E = 1
     household.s_W = 0
     labor_markets = household.model.labor_markets
-    labor_markets[1].employers.random.return_value = employers[g1]
-    labor_markets[0].employers.random.return_value = employers[g0]
+    labor_markets[1].employers.random.return_value = employers[formal]
+    labor_markets[0].employers.random.return_value = employers[informal]
 
     household.search_job()
     labor_markets[1].employers.random.assert_not_called()
@@ -325,16 +357,23 @@ def test_no_search_from_informal_entrepreneur(household6, employers, g1, g0):
     labor_markets[0].leave_job.assert_not_called()
 
 
-@pytest.mark.parametrize('g1, g0', [('a', 'a'), ('a', 'b'), ('a', 'c'), 
-                                    ('b', 'a'), ('b', 'b'), ('b', 'c'), 
-                                    ('c', 'a'), ('c', 'b'), ('c', 'c')])
-def test_no_search_from_informal_worker(household6, employers, g1, g0):
+@pytest.mark.parametrize('formal, informal', 
+                         [('a', 'a'),         # low formal wages + low informal wages 
+                          ('a', 'b'),         # low formal wages + high informal wages 
+                          ('a', 'c'),         # low formal wages + no informal vacancies 
+                          ('b', 'a'),         # high formal wages + low informal wages 
+                          ('b', 'b'),         # high formal wages + high informal wages 
+                          ('b', 'c'),         # high formal wages + no informal vacancies 
+                          ('c', 'a'),         # no formal vacancies + low informal wages 
+                          ('c', 'b'),         # no formal vacancies + high informal wages 
+                          ('c', 'c')])        # no formal vacancies + high informal wages
+def test_no_search_from_formal_worker(household6, employers, formal, informal):
     household = household6
     household.s_E = 0
     household.s_W = 1
     labor_markets = household.model.labor_markets
-    labor_markets[1].employers.random.return_value = employers[g1]
-    labor_markets[0].employers.random.return_value = employers[g0]
+    labor_markets[1].employers.random.return_value = employers[formal]
+    labor_markets[0].employers.random.return_value = employers[informal]
 
     household.search_job()
     labor_markets[1].employers.random.assert_not_called()
@@ -357,8 +396,8 @@ def government(model):
     return ap.Agent(model)
 
 @pytest.fixture
-def household7(household1, economy, government):
-    household = household1
+def household7(default_household, economy, government):
+    household = default_household
     household.W = 100
     household.Pi_d = 50
     household.iota_D = 50
@@ -377,4 +416,78 @@ def test_pay_taxes(household7, government):
     household.pay_taxes()
     economy = household.model.economy
     economy.pay_taxes.assert_called_with(20, household, government)
+
+
+@pytest.fixture
+def model_with_good_markets():
+    model = ap.Model()
+    model.goods_markets = {}
+    for sector in (1, 2):
+        market = MagicMock()
+        market.suppliers = ap.AgentList(model, 4)
+        market.suppliers.p_Y = ap.AttrIter([2, 1.5, 1, 0.5])
+        market.suppliers.y_inv = 1000
+        model.goods_markets[sector] = market
+    return model
+
+@pytest.fixture
+def household_with_consumption_params(model_with_good_markets):
+    household = Household(model_with_good_markets)
+    household.alphaY = 0.8
+    household.alphaV = 0.2
+    household.alphaC1 = 0.6
+    household.chiY = 2
+    household.Y = 1000
+    household.Z = 300
+    household.T = 200
+    household.D = 3000
+    household.M = 2000
+    return household
+
+
+def test_desired_consumption(household_with_consumption_params):
+    household = household_with_consumption_params
+    expected_C_star = 0.8 * 1100 + 0.2 * 5000
+    expected_C1_star = 0.6 * expected_C_star
+    expected_C2_star = 0.4 * expected_C_star
+
+    household.consume_goods()
+    C1_star = household.C1_star
+    C2_star = household.C2_star
+    assert abs(C1_star - expected_C1_star) < 1e-6
+    assert abs(C2_star - expected_C2_star) < 1e-6
+
+
+def test_sample_suppliers(household_with_consumption_params):
+    household = household_with_consumption_params  
+    market1 = household.model.goods_markets[1]
+    market2 = household.model.goods_markets[2] 
+
+    household.consume_goods()
+    called_suppliers1 = [call.args[2] for call in market1.consume_goods.call_args_list]
+    called_suppliers2 = [call.args[2] for call in market2.consume_goods.call_args_list]
+    assert len(set(called_suppliers1)) == household.chiY
+    assert len(set(called_suppliers2)) == household.chiY
+
+
+def test_consume_at_desired_level(household_with_consumption_params):
+    household = household_with_consumption_params  
+    market1 = household.model.goods_markets[1]
+    market2 = household.model.goods_markets[2] 
+
+    household.consume_goods()
+    purchased_amount1 = [call.args[0] for call in market1.consume_goods.call_args_list]
+    purchased_amount2 = [call.args[0] for call in market2.consume_goods.call_args_list]
+    assert abs(sum(purchased_amount1) - household.C1_star) < 1e-6
+    assert abs(sum(purchased_amount2) - household.C2_star) < 1e-6
+
+def test_prefer_supplier_with_lower_prices(household_with_consumption_params):
+    household = household_with_consumption_params  
+    market1 = household.model.goods_markets[1]
+    market2 = household.model.goods_markets[2] 
+    
+    household.consume_goods()
+    called_suppliers1 = [call.args[2] for call in market1.consume_goods.call_args_list]
+    called_suppliers2 = [call.args[2] for call in market2.consume_goods.call_args_list]
+    assert set(called_suppliers1) == set(sorted(market1.suppliers))
 

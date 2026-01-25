@@ -80,12 +80,15 @@ class GoodMarket(BasicSpace):
         self.remove_agents([supplier])
         self.suppliers.remove(supplier)
     
-    
     def consume_goods(self, amount, client, firm):
-        client.C += amount
         client.M -= amount
-        firm.Q += amount
+        if self.s_Y == 1:
+            client.C1 += amount
+        else:
+            client.C2 += amount
         firm.M += amount
+        firm.Q += amount
+        firm.y_inv -= amount / firm.p_Y
 
 
 class LaborMarket(ap.Network):

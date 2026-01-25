@@ -24,7 +24,6 @@ class Household(ap.Agent):
         self.l = 0          # labor employed
         self.Z = 0          # public transfers
         self.W = 0          # wages
-        self.C_star = 0     # desired consumption
         self.C1_star = 0    # desired consumption of goods 1
         self.C2_star = 0    # desired consumption of goods 2
         self.C1 = 0         # consumption of goods 1
@@ -39,8 +38,7 @@ class Household(ap.Agent):
         self.r_D = 0        # deposit interest rate
         self.delta = 0      # adjustment
         self.upsilon = 0    # ...
-        self.chi_J = 0      # ...
-        self.chi_Y = 0      # ...
+        self.chi_N = 0      # ...
 
         self.bank = None
 
@@ -64,7 +62,7 @@ class Household(ap.Agent):
         
         # search best formal jobs
         if self.n_W == 0:
-            employers = formal_market.employers.random(self.chi_J)
+            employers = formal_market.employers.random(self.chi_N)
             employers = employers.select(employers.w >= self.w)
             employers = employers.select(employers.N_v > 0)
             if len(employers) > 0:
@@ -77,7 +75,7 @@ class Household(ap.Agent):
         
         # search best informal jobs
         if self.s_U == 1:
-            employers = informal_market.employers.random(self.chi_J)
+            employers = informal_market.employers.random(self.chi_N)
             employers = employers.select(employers.w >= self.w)
             employers = employers.select(employers.N_v > 0)
             if len(employers) > 0:
@@ -94,6 +92,29 @@ class Household(ap.Agent):
         economy.pay_taxes(T, self, government)
         self.Y = Y
 
+
+    def consume_goods(self):
+        Y_d = self.Y - self.T + self.Z
+        V_d = self.D + self.M
+        C_star = self.alphaY * Y_d + self.alphaV * V_d
+        self.C1_star = self.alphaC1 * C_star
+        self.C2_star = (1 - self.alphaC1) * C_star
+
+        C1 = 0
+        market1 = self.model.goods_markets[1]
+        sample = market1.suppliers.random(self.chiY)
+        for supplier in sample:
+            C = min(self.C1_star - C1, supplier.p_Y * supplier.y_inv)
+            market1.consume_goods(C, self, supplier)
+            C1 += C
+
+        C2 = 0
+        market2 = self.model.goods_markets[2]
+        sample = market2.suppliers.random(self.chiY)
+        for supplier in sample:
+            C = min(self.C2_star - C2, supplier.p_Y * supplier.y_inv)
+            market2.consume_goods(C, self, supplier)
+            C2 += C
 
 
 
