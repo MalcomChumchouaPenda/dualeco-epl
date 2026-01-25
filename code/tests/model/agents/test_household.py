@@ -26,33 +26,33 @@ def test_default_status(household1):
     assert household.n_W == 0
 
 
-def test_default_real_stocks_and_flows(household1):
-    household = household1
-    assert household.l == 0
-    assert household.l_S == 1
-
-
-def test_default_nominal_stocks_and_flows(household1):
+def test_default_stocks(household1):
     household = household1
     assert household.E == 0
-    assert household.E_D == 0
+    assert household.E_star == 0
     assert household.D == 0
-    assert household.D_D == 0
+    assert household.D_star == 0
     assert household.M == 0
     assert household.V == 0
+
+
+def test_default_flows(household1):
+    household = household1
     assert household.Z == 0
     assert household.W == 0
-    assert household.C_D == 0
+    assert household.C_star == 0
+    assert household.C1_star == 0
+    assert household.C2_star == 0
     assert household.C1 == 0
     assert household.C2 == 0
+    assert household.T == 0
     assert household.iota_D == 0
     assert household.Pi_d == 0
-    assert household.T == 0
 
 
 def test_default_prices(household1):
     household = household1
-    assert household.w_D == 0
+    assert household.w == 0
 
 
 def test_default_params(household1):
@@ -98,41 +98,40 @@ def household2(household1, random, exp, labor_markets):
     household = household1
     household.upsilon = 0.25
     household.delta = 0.5
-    household.w_D = 1
-    household.l_S = 1
+    household.w = 1
     household.model.labor_markets = labor_markets
     random.uniform.return_value = 0.25
     exp.return_value = 0.5
     return household
 
 
-@pytest.mark.parametrize('Pr, s_U, w_D', [(0, 0, 1), (1, 0, 1.25)])    
-def test_increase_reservation_wage(household2, random, exp, Pr, s_U, w_D):
+@pytest.mark.parametrize('Pr, s_U, w', [(0, 0, 1), (1, 0, 1.25)])    
+def test_increase_reservation_wage(household2, random, exp, Pr, s_U, w):
     random.choice.return_value = Pr
     household = household2
     household.s_U = s_U
     household.search_job()  
     exp.assert_called_with(-0.25)
     random.choice.assert_called_with([0, 1], p=[0.875, 0.125])
-    assert household.w_D == w_D
+    assert household.w == w
 
 
-@pytest.mark.parametrize('Pr, s_U, w_D', [(0, 1, 1), (1, 1, 0.75)])   
-def test_decrease_reservation_wage(household2, random, exp, Pr, s_U, w_D):
+@pytest.mark.parametrize('Pr, s_U, w', [(0, 1, 1), (1, 1, 0.75)])   
+def test_decrease_reservation_wage(household2, random, exp, Pr, s_U, w):
     random.choice.return_value = Pr
     household = household2
     household.s_U = s_U
     household.search_job()
     exp.assert_called_with(-0.25)
     random.choice.assert_called_with([0, 1], p=[0.125, 0.875])
-    assert household.w_D == w_D
+    assert household.w == w
 
 
 @pytest.fixture
 def household3(household2, random):
     random.choice.return_value = 0
     household = household2
-    household.w_D = 1.5
+    household.w = 1.5
     household.s_U = 1
     household.s_E = 0
     household.s_W = 0
@@ -144,15 +143,15 @@ def employers(model):
     group_a = ap.AgentList(model, 2)
     for i, employer in enumerate(group_a):
         employer.w = 0.5 * (i + 1)
-        employer.N_Jc = 1
+        employer.N_v = 1
     group_b = ap.AgentList(model, 2)
     for i, employer in enumerate(group_b):
         employer.w = i + 1
-        employer.N_Jc = 1
+        employer.N_v = 1
     group_c = ap.AgentList(model, 2)
     for i, employer in enumerate(group_c):
         employer.w = i + 1
-        employer.N_Jc = 0
+        employer.N_v = 0
     return {'a':group_a, 'b':group_b, 'c':group_c}
 
 

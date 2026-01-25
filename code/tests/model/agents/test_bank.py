@@ -16,7 +16,7 @@ def bank1(model):
     return Bank(model)
 
 
-def test_default_state(bank1):
+def test_default_stocks(bank1):
     bank = bank1
     assert bank.E == 0
     assert bank.L == 0
@@ -26,6 +26,9 @@ def test_default_state(bank1):
     assert bank.B == 0
     assert bank.A == 0
     assert bank.V == 0
+    
+def test_default_flows(bank1):
+    bank = bank1
     assert bank.iota_D == 0
     assert bank.iota_L == 0
     assert bank.iota_B == 0
@@ -108,25 +111,25 @@ def exp(monkeypatch):
     return f
 
 
-@pytest.mark.parametrize('L_D', [25, 50])   
-def test_grant_loans_to_ranked_borrower(bank2, firms1, L_D, random, exp):
+@pytest.mark.parametrize('L_d', [25, 50])   
+def test_grant_loans_to_ranked_borrower(bank2, firms1, L_d, random, exp):
     random.choice.return_value = 1
     exp.return_value = 0.75
-    firms1.L_D = L_D
+    firms1.L_d = L_d
     bank = bank2
     bank.grant_loans()
 
-    exp.assert_called_with(-0.005 * L_D)
+    exp.assert_called_with(-0.005 * L_d)
     random.choice.assert_called_with([0, 1], p=[0.25, 0.75])
     give_loans = bank.model.credit_market.give_loans
     for firm in firms1:
-        give_loans.assert_any_call(L_D, bank, firm)
+        give_loans.assert_any_call(L_d, bank, firm)
 
 
-@pytest.mark.parametrize('L_D, r_L', [(25, 0.225), (50, 0.35)])   
-def test_grant_loans_with_differents_rates(bank2, firms1, L_D, r_L, random):
+@pytest.mark.parametrize('L_d, r_L', [(25, 0.225), (50, 0.35)])   
+def test_grant_loans_with_differents_rates(bank2, firms1, L_d, r_L, random):
     random.choice.return_value = 1
-    firms1.L_D = L_D
+    firms1.L_d = L_d
     bank2.grant_loans()    
     for firm in firms1:
         assert firm.r_L == r_L
@@ -134,7 +137,7 @@ def test_grant_loans_with_differents_rates(bank2, firms1, L_D, r_L, random):
 
 def test_grant_loans_with_maximum_loan(bank2, firms1, random):
     random.choice.return_value = 1
-    firms1.L_D = 100
+    firms1.L_d = 100
     bank = bank2
     bank.grant_loans()
 
@@ -144,10 +147,10 @@ def test_grant_loans_with_maximum_loan(bank2, firms1, random):
     assert loans <= bank.kappa_E * bank.E
 
 
-@pytest.mark.parametrize('L_D', [25, 50])
-def test_do_not_grant_loans_to_ranked_borrower(bank2, firms1, L_D, random):
+@pytest.mark.parametrize('L_d', [25, 50])
+def test_do_not_grant_loans_to_ranked_borrower(bank2, firms1, L_d, random):
     random.choice.return_value = 0
-    firms1.L_D = L_D
+    firms1.L_d = L_d
     bank = bank2
     bank.grant_loans()
 
@@ -157,7 +160,7 @@ def test_do_not_grant_loans_to_ranked_borrower(bank2, firms1, L_D, random):
 
 def test_do_not_grant_loans_if_no_demand(bank2, firms1, random):
     random.choice.return_value = 1
-    firms1.L_D = 0
+    firms1.L_d = 0
     bank = bank2
     bank.grant_loans()
     
@@ -218,7 +221,7 @@ def government1(model):
 
 def test_buy_bonds_if_sufficient_reserves(bank3, government1, bond_market):
     government = government1
-    government.B_S = 200
+    government.B_s = 200
     bank = bank3
     bank.R = 150
     bank.buy_bonds()
@@ -227,7 +230,7 @@ def test_buy_bonds_if_sufficient_reserves(bank3, government1, bond_market):
 
 def test_buy_available_bonds(bank3, government1, bond_market):
     government = government1
-    government.B_S = 50
+    government.B_s = 50
     bank = bank3
     bank.R = 150
     bank.buy_bonds()
@@ -236,7 +239,7 @@ def test_buy_available_bonds(bank3, government1, bond_market):
 
 def test_do_not_buy_bonds_if_no_reserves(bank3, government1, bond_market):
     government = government1
-    government.B_S = 50
+    government.B_s = 50
     bank = bank3
     bank.R = 25
     bank.buy_bonds()

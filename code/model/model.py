@@ -545,13 +545,13 @@ class DualEcoModel(ap.Model):
         households = self.households
         public_workers = households.select(households.s_WG == 1)
         public_workers.W = p['W_G'] / len(public_workers)
-        public_workers.w_D = p['w_G']
+        public_workers.w = p['w_G']
         for s in self.sectors:
             private_workers = households.select(households.s_Y == s)
             private_workers.W = p[f'W_F{s}'] / len(private_workers)
-            private_workers.w_D = p[f'w{s}']
+            private_workers.w = p[f'w{s}']
         unemployed = households.select(households.s_U == 1)
-        unemployed.w_D = p['w_min']
+        unemployed.w = p['w_min']
 
         # for firms
         firms = self.firms

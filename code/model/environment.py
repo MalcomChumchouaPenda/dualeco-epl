@@ -127,7 +127,7 @@ class LaborMarket(ap.Network):
     
     def accept_job(self, worker, employer):
         self.graph.add_edge(worker, employer)
-        employer.N_J -= 1
+        employer.N_v -= 1
         worker.n_W = self.n_W
 
         if worker.property is employer:

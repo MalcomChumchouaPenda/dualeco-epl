@@ -163,14 +163,14 @@ def unemployed(model):
 def test_accept_private_job(market, firm, unemployed, s_Y, n_W):
     market.n_W = n_W
     employer = firm
-    employer.N_J = 1
+    employer.N_v = 1
     employer.s_Y = s_Y
     worker = unemployed
     market.add_agents([worker, employer])
 
     market.accept_job(worker, employer)
     assert market.graph.has_edge(worker, employer)
-    assert employer.N_J == 0
+    assert employer.N_v == 0
     assert worker.s_WG == 0
     assert worker.s_W == 1
     assert worker.s_E == 0
@@ -182,13 +182,13 @@ def test_accept_private_job(market, firm, unemployed, s_Y, n_W):
 def test_accept_public_job(market, government, unemployed):
     worker = unemployed
     employer = government
-    employer.N_J = 1
+    employer.N_v = 1
     market.n_W = 1
     market.add_agents([worker, employer])
 
     market.accept_job(worker, employer)
     assert market.graph.has_edge(worker, employer)
-    assert employer.N_J == 0
+    assert employer.N_v == 0
     assert worker.s_WG == 1
     assert worker.s_W == 1
     assert worker.s_E == 0
@@ -213,7 +213,7 @@ def self_employed(model):
 @pytest.mark.parametrize('s_Y, n_W', [(1, 1), (1, 0), (2, 1), (2, 0)])
 def test_accept_own_job(market, self_employed, s_Y, n_W):
     employer = self_employed.property
-    employer.N_J = 1
+    employer.N_v = 1
     employer.s_Y = s_Y
     worker = self_employed
     worker.s_Y = 0
@@ -223,7 +223,7 @@ def test_accept_own_job(market, self_employed, s_Y, n_W):
 
     market.accept_job(worker, employer)
     assert market.graph.has_edge(worker, employer)
-    assert employer.N_J == 0
+    assert employer.N_v == 0
     assert worker.s_WG == 0
     assert worker.s_W == 0
     assert worker.s_E == 1
@@ -239,14 +239,14 @@ def test_leave_private_job(market, firm, private_worker, s_Y, n_W):
     worker.n_W = n_W
     employer = firm
     employer.s_Y = s_Y
-    employer.N_J = 1
+    employer.N_v = 1
     market.n_W = n_W
     market.add_agents([worker, employer])
     market.graph.add_edge(worker, employer)
 
     market.leave_job(worker, employer)
     assert not market.graph.has_edge(worker, employer)
-    assert employer.N_J == 1
+    assert employer.N_v == 1
     assert worker.s_WG == 0
     assert worker.s_W == 0
     assert worker.s_U == 1
@@ -259,14 +259,14 @@ def test_leave_private_job(market, firm, private_worker, s_Y, n_W):
 def test_leave_public_job(market, government, public_worker):
     worker = public_worker
     employer = government
-    employer.N_J = 1
+    employer.N_v = 1
     market.n_W = 1
     market.add_agents([worker, employer])
     market.graph.add_edge(worker, employer)
 
     market.leave_job(worker, employer)
     assert not market.graph.has_edge(worker, employer)
-    assert employer.N_J == 1
+    assert employer.N_v == 1
     assert worker.s_WG == 0
     assert worker.s_W == 0
     assert worker.s_U == 1
@@ -283,14 +283,14 @@ def test_leave_own_job(market, self_employed, s_Y, n_W):
     worker.n_W = n_W
     employer = worker.property
     employer.s_Y = s_Y
-    employer.N_J = 1
+    employer.N_v = 1
     market.n_W = n_W
     market.add_agents([worker, employer])
     market.graph.add_edge(worker, employer)
 
     market.leave_job(worker, employer)
     assert not market.graph.has_edge(worker, employer)
-    assert employer.N_J == 1
+    assert employer.N_v == 1
     assert worker.s_WG == 0
     assert worker.s_W == 0
     assert worker.s_U == 1

@@ -635,7 +635,7 @@ def test_share_initial_production(models4):
         firms = model.firms
         for s in model.sectors:
             group = firms.select(firms.s_Y==s)
-            assert round(sum(group.y_D), 2) == 0
+            assert round(sum(group.y_star), 2) == 0
             assert round(sum(group.Y_inv), 2) == round(p[f'Y_inv{s}'], 2) 
             assert round(sum(group.y_inv), 2) == round(p[f'y_inv{s}'], 2) 
             assert round(sum(group.y), 2) == round(p[f'Q{s}'] / p[f'p{s}'], 2)
@@ -668,11 +668,11 @@ def test_share_initial_household_wages(models5):
         for s in model.sectors:
             sector_workers = households.select(households.s_Y == s)
             assert round(sum(sector_workers.W), 2) == round(p[f'W_F{s}'], 2)
-            assert set(sector_workers.w_D) == {p[f'w{s}']} 
+            assert set(sector_workers.w) == {p[f'w{s}']} 
         assert round(sum(public_workers.W), 2) == round(p['W_G'], 2) 
         assert round(sum(households.W), 2) == round(p['W_H'], 2)   
-        assert set(public_workers.w_D) == {p['w_G']}
-        assert set(unemployed.w_D) == {p['w_min']}
+        assert set(public_workers.w) == {p['w_G']}
+        assert set(unemployed.w) == {p['w_min']}
 
 
 def test_share_initial_firm_wages(models5):
@@ -682,9 +682,8 @@ def test_share_initial_firm_wages(models5):
         firms = model.firms
         for s in model.sectors:
             group = firms.select(firms.s_Y==s)
-            assert round(sum(group.N_Jc), 2) == 0
-            assert round(sum(group.N_Jd), 2) == 0
-            assert round(sum(group.l_D), 2) == 0
+            assert round(sum(group.N_v), 2) == 0
+            assert round(sum(group.N_star), 2) == 0
             assert round(sum(group.W), 2) == round(p[f'W_F{s}'], 2)  
             assert round(sum(group.l), 2) == round(p[f'Q{s}'] / p[f'w{s}'], 2)
             assert set(group.w) == {p[f'w{s}']}
