@@ -1,7 +1,6 @@
-
 import pytest
 import agentpy as ap
-from model.environment import DepositMarket 
+from model.environment import DepositMarket
 
 
 @pytest.fixture
@@ -83,4 +82,3 @@ def test_choose_bank(market):
     assert client.bank is bank2
     assert not market.graph.has_edge(client, bank1)
     assert market.graph.has_edge(client, bank2)
-

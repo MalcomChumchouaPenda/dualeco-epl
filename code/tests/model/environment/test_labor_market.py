@@ -1,11 +1,12 @@
 import pytest
 import agentpy as ap
-from model.environment import LaborMarket 
+from model.environment import LaborMarket
 
 
 @pytest.fixture
 def model():
     return ap.Model({})
+
 
 @pytest.fixture
 def market(model):
@@ -14,7 +15,8 @@ def market(model):
 
 def test_is_network(market):
     assert isinstance(market, ap.Network)
-    
+
+
 def test_default_state(market):
     assert market.n_W == 0
     assert market.u == 0
@@ -30,7 +32,7 @@ def employers(model):
     return employers
 
 
-@pytest.mark.parametrize('n_W', [0, 1])
+@pytest.mark.parametrize("n_W", [0, 1])
 def test_add_employers(market, employers, n_W):
     market.n_W = n_W
     market.add_employers(employers)
@@ -39,7 +41,8 @@ def test_add_employers(market, employers, n_W):
     assert set(employers).issubset(set(agents))
     assert set(employers.n_W) == {n_W}
 
-@pytest.mark.parametrize('n_W', [0, 1])
+
+@pytest.mark.parametrize("n_W", [0, 1])
 def test_remove_employer(market, employers, n_W):
     market.n_W = n_W
     employer = employers[0]
@@ -59,7 +62,7 @@ def workers(model):
     return workers
 
 
-@pytest.mark.parametrize('n_W', [0, 1])
+@pytest.mark.parametrize("n_W", [0, 1])
 def test_add_workers(market, workers, n_W):
     market.n_W = n_W
     market.add_workers(workers)
@@ -68,7 +71,8 @@ def test_add_workers(market, workers, n_W):
     assert set(workers).issubset(set(agents))
     assert set(workers.n_W) == {5}
 
-@pytest.mark.parametrize('n_W', [0, 1])
+
+@pytest.mark.parametrize("n_W", [0, 1])
 def test_remove_worker(market, workers, n_W):
     market.n_W = n_W
     worker = workers[0]
@@ -84,6 +88,7 @@ def test_remove_worker(market, workers, n_W):
 @pytest.fixture
 def firm(model):
     return ap.Agent(model)
+
 
 @pytest.fixture
 def private_worker(model):
@@ -116,6 +121,7 @@ def test_pay_private_wages(market, firm, private_worker):
 def government(model):
     government = ap.Agent(model)
     return government
+
 
 @pytest.fixture
 def public_worker(model):
@@ -159,7 +165,7 @@ def unemployed(model):
     return unemployed
 
 
-@pytest.mark.parametrize('s_Y, n_W', [(1, 1), (1, 0), (2, 1), (2, 0)])
+@pytest.mark.parametrize("s_Y, n_W", [(1, 1), (1, 0), (2, 1), (2, 0)])
 def test_accept_private_job(market, firm, unemployed, s_Y, n_W):
     market.n_W = n_W
     employer = firm
@@ -210,7 +216,7 @@ def self_employed(model):
     return self_employed
 
 
-@pytest.mark.parametrize('s_Y, n_W', [(1, 1), (1, 0), (2, 1), (2, 0)])
+@pytest.mark.parametrize("s_Y, n_W", [(1, 1), (1, 0), (2, 1), (2, 0)])
 def test_accept_own_job(market, self_employed, s_Y, n_W):
     employer = self_employed.property
     employer.N_v = 1
@@ -232,7 +238,7 @@ def test_accept_own_job(market, self_employed, s_Y, n_W):
     assert worker.n_W == n_W
 
 
-@pytest.mark.parametrize('s_Y, n_W', [(1, 1), (1, 0), (2, 1), (2, 0)])
+@pytest.mark.parametrize("s_Y, n_W", [(1, 1), (1, 0), (2, 1), (2, 0)])
 def test_leave_private_job(market, firm, private_worker, s_Y, n_W):
     worker = private_worker
     worker.s_Y = s_Y
@@ -276,7 +282,7 @@ def test_leave_public_job(market, government, public_worker):
     assert worker.n_W == 0
 
 
-@pytest.mark.parametrize('s_Y, n_W', [(1, 1), (1, 0), (2, 1), (2, 0)])
+@pytest.mark.parametrize("s_Y, n_W", [(1, 1), (1, 0), (2, 1), (2, 0)])
 def test_leave_own_job(market, self_employed, s_Y, n_W):
     worker = self_employed
     worker.s_Y = s_Y
@@ -298,4 +304,3 @@ def test_leave_own_job(market, self_employed, s_Y, n_W):
     assert worker.s_EB == 0
     assert worker.s_Y == 0
     assert worker.n_W == 0
-

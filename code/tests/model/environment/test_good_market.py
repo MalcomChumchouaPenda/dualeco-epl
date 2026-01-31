@@ -1,12 +1,12 @@
-
 import pytest
 import agentpy as ap
-from model.environment import GoodMarket 
+from model.environment import GoodMarket
 
 
 @pytest.fixture
 def model():
     return ap.Model({})
+
 
 @pytest.fixture
 def market(model):
@@ -16,6 +16,7 @@ def market(model):
 def test_is_space(market):
     assert isinstance(market, ap.Space)
     assert market.shape == (1, 1)
+
 
 def test_default_state(market):
     assert market.s_Y == 0
@@ -33,6 +34,7 @@ def test_add_suppliers(market, suppliers):
     agents = market.agents.to_list()
     assert len(suppliers) == len(market.suppliers)
     assert set(suppliers).issubset(set(agents))
+
 
 def test_remove_supplier(market, suppliers):
     supplier = suppliers[0]
@@ -53,6 +55,7 @@ def firm(model):
     firm.M = 0.0
     return firm
 
+
 @pytest.fixture
 def client(model):
     client = ap.Agent(model)
@@ -60,6 +63,7 @@ def client(model):
     client.C2 = 0.0
     client.M = 50.0
     return client
+
 
 def test_consume_goods_of_type1(market, client, firm):
     market.s_Y = 1
@@ -71,6 +75,7 @@ def test_consume_goods_of_type1(market, client, firm):
     assert abs(client.C2 - 0.0) < 1e-6
     assert abs(client.M - 25.0) < 1e-6
 
+
 def test_consume_goods_of_type2(market, client, firm):
     market.s_Y = 2
     market.consume_goods(25.0, client, firm)
@@ -80,4 +85,3 @@ def test_consume_goods_of_type2(market, client, firm):
     assert abs(client.C1 - 0.0) < 1e-6
     assert abs(client.C2 - 25.0) < 1e-6
     assert abs(client.M - 25.0) < 1e-6
-

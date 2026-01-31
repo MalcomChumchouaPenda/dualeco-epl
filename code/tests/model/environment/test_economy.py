@@ -1,7 +1,6 @@
-
 import pytest
 import agentpy as ap
-from model.environment import Economy 
+from model.environment import Economy
 
 
 @pytest.fixture
@@ -141,7 +140,7 @@ def test_reimburse_equities(economy):
     target.Pi_d = 0
     target.M = 50
     target.E = 100
-    
+
     economy.reimburse_equities(target, owner)
     assert target.Pi_d == -50
     assert target.M == 0

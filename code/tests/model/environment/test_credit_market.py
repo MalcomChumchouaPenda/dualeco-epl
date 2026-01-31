@@ -1,7 +1,6 @@
-
 import pytest
 import agentpy as ap
-from model.environment import CreditMarket 
+from model.environment import CreditMarket
 
 
 @pytest.fixture
@@ -64,6 +63,3 @@ def test_make_defaults(market):
     assert firm.L_def == 10
     assert bank.L == 0
     assert bank.L_def == 10
-
-
-

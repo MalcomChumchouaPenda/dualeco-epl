@@ -1,4 +1,3 @@
-
 import pytest
 import numpy as np
 import agentpy as ap
@@ -8,8 +7,9 @@ from model.agents import Bank
 
 @pytest.fixture
 def model():
-    model = ap.Model({'seed':0})
+    model = ap.Model({"seed": 0})
     return model
+
 
 @pytest.fixture
 def bank1(model):
@@ -26,7 +26,8 @@ def test_default_stocks(bank1):
     assert bank.B == 0
     assert bank.A == 0
     assert bank.V == 0
-    
+
+
 def test_default_flows(bank1):
     bank = bank1
     assert bank.iota_D == 0
@@ -36,7 +37,7 @@ def test_default_flows(bank1):
     assert bank.Pi == 0
     assert bank.Pi_d == 0
     assert bank.T == 0
-    
+
 
 def test_default_params(bank1):
     bank = bank1
@@ -53,6 +54,7 @@ def deposit_market(model):
     market.r_D = 0.2
     model.deposit_market = market
     return market
+
 
 @pytest.fixture
 def clients1(model, deposit_market):
@@ -81,6 +83,7 @@ def credit_market(model):
     model.credit_market = market
     return market
 
+
 @pytest.fixture
 def firms1(model, credit_market):
     firms = ap.AgentList(model, 3)
@@ -89,29 +92,32 @@ def firms1(model, credit_market):
     credit_market.neighbors.return_value = firms
     return firms
 
+
 @pytest.fixture
 def bank2(bank1):
     bank = bank1
     bank.kappa_E = 0.5  # ratio reglementaire de capital
-    bank.beta_L = 0.5      # elastticite du taux d'interet
-    bank.gamma_L = 0.5     # probabilite de pret
+    bank.beta_L = 0.5  # elastticite du taux d'interet
+    bank.gamma_L = 0.5  # probabilite de pret
     bank.E = 300
     return bank
+
 
 @pytest.fixture
 def random(model, monkeypatch):
     f = MagicMock()
-    monkeypatch.setattr(model, 'nprandom', f)
+    monkeypatch.setattr(model, "nprandom", f)
     return f
+
 
 @pytest.fixture
 def exp(monkeypatch):
     f = MagicMock()
-    monkeypatch.setattr(np, 'exp', f)
+    monkeypatch.setattr(np, "exp", f)
     return f
 
 
-@pytest.mark.parametrize('L_d', [25, 50])   
+@pytest.mark.parametrize("L_d", [25, 50])
 def test_grant_loans_to_ranked_borrower(bank2, firms1, L_d, random, exp):
     random.choice.return_value = 1
     exp.return_value = 0.75
@@ -126,11 +132,11 @@ def test_grant_loans_to_ranked_borrower(bank2, firms1, L_d, random, exp):
         give_loans.assert_any_call(L_d, bank, firm)
 
 
-@pytest.mark.parametrize('L_d, r_L', [(25, 0.225), (50, 0.35)])   
+@pytest.mark.parametrize("L_d, r_L", [(25, 0.225), (50, 0.35)])
 def test_grant_loans_with_differents_rates(bank2, firms1, L_d, r_L, random):
     random.choice.return_value = 1
     firms1.L_d = L_d
-    bank2.grant_loans()    
+    bank2.grant_loans()
     for firm in firms1:
         assert firm.r_L == r_L
 
@@ -147,7 +153,7 @@ def test_grant_loans_with_maximum_loan(bank2, firms1, random):
     assert loans <= bank.kappa_E * bank.E
 
 
-@pytest.mark.parametrize('L_d', [25, 50])
+@pytest.mark.parametrize("L_d", [25, 50])
 def test_do_not_grant_loans_to_ranked_borrower(bank2, firms1, L_d, random):
     random.choice.return_value = 0
     firms1.L_d = L_d
@@ -163,7 +169,7 @@ def test_do_not_grant_loans_if_no_demand(bank2, firms1, random):
     firms1.L_d = 0
     bank = bank2
     bank.grant_loans()
-    
+
     market = bank.model.credit_market
     market.neighbors.assert_called_once_with(bank)
     market.give_loans.assert_not_called()
@@ -182,6 +188,7 @@ def central_bank1(model):
     central_bank = ap.Agent(model)
     model.central_bank = central_bank
     return central_bank
+
 
 @pytest.fixture
 def bank3(bank1):
@@ -211,6 +218,7 @@ def bond_market(model):
     market = MagicMock()
     model.bond_market = market
     return market
+
 
 @pytest.fixture
 def government1(model):
@@ -257,7 +265,7 @@ def test_compute_profits(bank1):
     assert round(bank.Pi, 2) == 50.0
 
 
-@pytest.mark.parametrize('Pi, T', [(25, 2.5), (50, 5.0)])
+@pytest.mark.parametrize("Pi, T", [(25, 2.5), (50, 5.0)])
 def test_pay_taxes_if_profits(bank1, government1, economy, Pi, T):
     bank = bank1
     bank.Pi = Pi
@@ -265,7 +273,7 @@ def test_pay_taxes_if_profits(bank1, government1, economy, Pi, T):
     economy.pay_taxes.assert_called_with(T, bank, government1)
 
 
-@pytest.mark.parametrize('Pi', [0, -25, -50])
+@pytest.mark.parametrize("Pi", [0, -25, -50])
 def test_do_not_pay_taxes_if_losses(bank1, economy, Pi):
     bank = bank1
     bank.Pi = Pi
@@ -273,7 +281,7 @@ def test_do_not_pay_taxes_if_losses(bank1, economy, Pi):
     economy.pay_taxes.assert_not_called()
 
 
-@pytest.mark.parametrize('Pi, T, Pi_d', [(25, 5, 10.0), (50, 10.0, 20.0)])
+@pytest.mark.parametrize("Pi, T, Pi_d", [(25, 5, 10.0), (50, 10.0, 20.0)])
 def test_pay_dividends_if_profits(bank1, economy, Pi, T, Pi_d):
     bank = bank1
     bank.rho = 0.5
@@ -283,7 +291,7 @@ def test_pay_dividends_if_profits(bank1, economy, Pi, T, Pi_d):
     economy.pay_dividends.assert_called_with(Pi_d, bank, bank.owner)
 
 
-@pytest.mark.parametrize('Pi', [0, -25, -50])
+@pytest.mark.parametrize("Pi", [0, -25, -50])
 def test_do_not_pay_dividends_if_losses(bank1, economy, Pi):
     bank = bank1
     bank.Pi = Pi
@@ -301,4 +309,3 @@ def test_update_net_worth(bank1):
     bank.update_net_worth()
     assert round(bank.E, 2) == round(60 + 40 - 15 - 10, 2)
     assert round(bank.E, 2) == round(bank.owner.E, 2)
-

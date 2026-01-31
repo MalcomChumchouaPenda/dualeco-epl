@@ -1,7 +1,6 @@
-
 import pytest
 import agentpy as ap
-from model.environment import BondMarket 
+from model.environment import BondMarket
 
 
 @pytest.fixture
@@ -32,7 +31,7 @@ def test_bank_buy_bonds(market):
     assert government.B == 50
     assert government.M == 50
 
-    
+
 def test_central_bank_buy_bonds(market):
     model = market.model
     central_bank = market.central_bank
@@ -48,7 +47,6 @@ def test_central_bank_buy_bonds(market):
     assert government.B == 50
     assert government.M == 50
 
-    
 
 def test_repay_bonds_to_bank(market):
     model = market.model
@@ -69,7 +67,7 @@ def test_repay_bonds_to_bank(market):
     assert bank.B == 0
     assert bank.M == 110
 
-    
+
 def test_repay_bonds_to_central_bank(market):
     model = market.model
     central_bank = market.central_bank
@@ -104,4 +102,3 @@ def test_bank_transfer_bonds_to_central_bank(market):
     assert bank.M == 100
     assert central_bank.B == 100
     assert central_bank.M == 100
-    
