@@ -92,29 +92,33 @@ class Household(ap.Agent):
         economy.pay_taxes(T, self, government)
         self.Y = Y
 
-
+    def plan_consumption(self):
+        self.C_star = self.alphaY * self.Y_d + self.alphaW * self.W
+        self.C1_star = self.alpha1 * self.C_star
+        self.C2_star = (1 - self.alpha1) * self.C_star
+    
+    def buy_goods(self, C_star, market):
+        M = self.M
+        suppliers = market.suppliers.random(self.chiY)
+        for supplier in suppliers:
+            C = min(C_star, supplier.pY * supplier.inv)
+            print(C, supplier)
+            market.buy_goods(C, self, supplier)
+            C_star -= C
+            M -= C
+            if C_star <= 0 or M <= 0:
+                break
+    
     def consume_goods(self):
-        Y_d = self.Y - self.T + self.Z
-        V_d = self.D + self.M
-        C_star = self.alphaY * Y_d + self.alphaV * V_d
-        self.C1_star = self.alphaC1 * C_star
-        self.C2_star = (1 - self.alphaC1) * C_star
+        self.plan_consumption()
+        cash_need = max(0, self.C_star - self.M)
+        funds = min(cash_need, self.D)
+        self.withdraw_deposits(funds)
+        
+        markets = self.model.goods_markets
+        self.buy_goods(self.C1_star, markets[1])
+        self.buy_goods(self.C2_star, markets[2])
 
-        C1 = 0
-        market1 = self.model.goods_markets[1]
-        sample = market1.suppliers.random(self.chiY)
-        for supplier in sample:
-            C = min(self.C1_star - C1, supplier.p_Y * supplier.y_inv)
-            market1.consume_goods(C, self, supplier)
-            C1 += C
-
-        C2 = 0
-        market2 = self.model.goods_markets[2]
-        sample = market2.suppliers.random(self.chiY)
-        for supplier in sample:
-            C = min(self.C2_star - C2, supplier.p_Y * supplier.y_inv)
-            market2.consume_goods(C, self, supplier)
-            C2 += C
 
 
 
