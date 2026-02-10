@@ -94,9 +94,9 @@ class Household(ap.Agent):
 
 
     def plan_consumption(self):
-        self.C_star = self.alphaY * self.Y_d + self.alphaW * self.W
-        self.C1_star = self.alpha1 * self.C_star
-        self.C2_star = (1 - self.alpha1) * self.C_star
+        C_star = self.alphaY * self.Y_d + self.alphaW * self.W
+        self.C1_star = self.alpha1 * C_star
+        self.C2_star = (1 - self.alpha1) * C_star
     
     def buy_goods(self, C_star, market):
         M = self.M
@@ -112,15 +112,15 @@ class Household(ap.Agent):
                 break
     
     def consume_goods(self):
-        self.plan_consumption()
-        cash_need = max(0, self.C_star - self.M)
-        funds = min(cash_need, self.D)
-        self.withdraw_deposits(funds)
-        
+        needs = max(0, self.C1_star + self.C2_star - self.M)        
         markets = self.region.goods_markets
+        self.plan_consumption()
+        self.withdraw_deposits(needs)
         self.buy_goods(self.C1_star, markets[1])
         self.buy_goods(self.C2_star, markets[2])
 
+    def withdraw_deposits(self, amount):
+        pass
 
 
 
