@@ -1,34 +1,31 @@
-
-
 import agentpy as ap
 
 
 class BasicSpace(ap.Space):
     def __init__(self, model, **kwargs):
-        super().__init__(model, shape=(1, 1), 
-                         torus=False, **kwargs)
+        super().__init__(model, shape=(1, 1), torus=False, **kwargs)
 
 
 class Economy(BasicSpace):
-    
+
     def pay_doles(self, amount, government, household):
         government.Z += amount
         government.M -= amount
         household.Z += amount
         household.M += amount
-    
+
     def pay_taxes(self, amount, payer, government):
         payer.T += amount
         payer.M -= amount
         government.T += amount
         government.M += amount
-    
+
     def pay_dividends(self, amount, source, owner):
         source.Pi_d += amount
         source.M -= amount
         owner.Pi_d += amount
         owner.M += amount
-    
+
     def transfer_profits(self, amount, source, target):
         source.Pi += amount
         source.M += amount
@@ -40,21 +37,21 @@ class Economy(BasicSpace):
         central_bank.M += amount
         bank.A += amount
         bank.M += amount
-    
+
     def repay_advances(self, capital, interests, bank, central_bank):
         bank.iota_A += interests
         bank.A -= capital
         bank.M -= capital + interests
         central_bank.iota_A += interests
         central_bank.A -= capital
-        central_bank.M -= capital +  interests
-    
+        central_bank.M -= capital + interests
+
     def invest_equities(self, amount, owner, target):
         owner.E += amount
         owner.M -= amount
         target.E += amount
         target.M += amount
-    
+
     def reimburse_equities(self, target, owner):
         cash = target.M
         amount = target.E
@@ -64,7 +61,7 @@ class Economy(BasicSpace):
         owner.Pi_d -= amount - cash
         owner.E -= amount
         owner.M += cash
-        
+
 
 class GoodMarket(BasicSpace):
 
@@ -75,11 +72,11 @@ class GoodMarket(BasicSpace):
     def add_suppliers(self, suppliers):
         self.add_agents(suppliers)
         self.suppliers.extend(suppliers)
-    
+
     def remove_supplier(self, supplier):
         self.remove_agents([supplier])
         self.suppliers.remove(supplier)
-    
+
     def consume_goods(self, amount, client, firm):
         client.M -= amount
         if self.s_Y == 1:
@@ -100,34 +97,31 @@ class LaborMarket(ap.Network):
         self.employers = ap.AgentDList(self.model)
         self.workers = ap.AgentDList(self.model)
 
-    
     def add_employers(self, employers):
         self.add_agents(employers)
         self.employers.extend(employers)
         for employer in employers:
             employer.n_W = self.n_W
-    
+
     def remove_employer(self, employer):
         employer.n_W = 0
         self.remove_agents([employer])
         self.employers.remove(employer)
-        
-    
+
     def add_workers(self, workers):
         self.add_agents(workers)
         self.workers.extend(workers)
-    
+
     def remove_worker(self, worker):
         self.remove_agents([worker])
         self.workers.remove(worker)
 
-    
     def pay_wages(self, amount, employer, worker):
         employer.W += amount
         employer.M -= amount
         worker.W += amount
         worker.M += amount
-    
+
     def accept_job(self, worker, employer):
         self.graph.add_edge(worker, employer)
         employer.N_v -= 1
@@ -142,13 +136,13 @@ class LaborMarket(ap.Network):
             worker.s_E = 0
             worker.s_U = 0
 
-        if hasattr(employer, 's_Y'):
+        if hasattr(employer, "s_Y"):
             worker.s_Y = employer.s_Y
             worker.s_WG = 0
         else:
             worker.s_Y = 0
             worker.s_WG = 1
-    
+
     def leave_job(self, worker, employer):
         self.graph.remove_edge(worker, employer)
         worker.s_WG = 0
@@ -168,7 +162,7 @@ class DepositMarket(ap.Network):
             graph.remove_edge(client, old_bank)
         graph.add_edge(client, bank)
         client.bank = bank
-    
+
     def make_deposits(self, amount, client, bank):
         client.D += amount
         client.M -= amount
@@ -180,7 +174,7 @@ class DepositMarket(ap.Network):
         bank.M -= amount
         client.D -= amount
         client.M += amount
-    
+
     def pay_interests(self, amount, bank, client):
         bank.iota_D += amount
         bank.D += amount
@@ -189,21 +183,21 @@ class DepositMarket(ap.Network):
 
 
 class CreditMarket(ap.Network):
-    
+
     def give_loans(self, amount, bank, firm):
         bank.L += amount
         bank.D += amount
         firm.L += amount
         firm.D += amount
-    
+
     def repay_loans(self, capital, interests, firm, bank):
         firm.iota_L += interests
-        firm.L -=  capital
+        firm.L -= capital
         firm.D -= capital + interests
         bank.iota_L += interests
         bank.L -= capital
         bank.D -= capital + interests
-    
+
     def make_defaults(self, value, firm, bank):
         firm.L -= value
         firm.L_def += value
@@ -214,8 +208,8 @@ class CreditMarket(ap.Network):
 class BondMarket(BasicSpace):
 
     def setup(self, **kwargs):
-        self.central_bank =  None
-    
+        self.central_bank = None
+
     def buy_bonds(self, amount, buyer, government):
         government.B += amount
         government.M += amount
@@ -225,7 +219,7 @@ class BondMarket(BasicSpace):
         else:
             buyer.B += amount
             buyer.M -= amount
-    
+
     def repay_bonds(self, capital, interests, government, buyer):
         government.iota_B += interests
         government.B -= capital
@@ -238,10 +232,9 @@ class BondMarket(BasicSpace):
             buyer.iota_B += interests
             buyer.B -= capital
             buyer.M += capital + interests
-    
+
     def transfer_bonds(self, amount, bank, central_bank):
         bank.B -= amount
         bank.M += amount
         central_bank.B += amount
         central_bank.M += amount
-
