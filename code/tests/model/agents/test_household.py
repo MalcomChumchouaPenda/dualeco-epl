@@ -83,12 +83,13 @@ def consumer2(consumer1):
     h.plan_consumption = MagicMock()
     h.withdraw_deposits = MagicMock()
     h.buy_goods = MagicMock()
+    h.region = MagicMock()
     return h
 
 @pytest.fixture
 def goods_markets(consumer2):
     markets = {i:MagicMock() for i in range(1,3)}
-    consumer2.model.goods_markets = markets
+    consumer2.region.goods_markets = markets
     return markets
 
 

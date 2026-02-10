@@ -92,6 +92,7 @@ class Household(ap.Agent):
         economy.pay_taxes(T, self, government)
         self.Y = Y
 
+
     def plan_consumption(self):
         self.C_star = self.alphaY * self.Y_d + self.alphaW * self.W
         self.C1_star = self.alpha1 * self.C_star
@@ -100,6 +101,7 @@ class Household(ap.Agent):
     def buy_goods(self, C_star, market):
         M = self.M
         suppliers = market.suppliers.random(self.chiY)
+        # for supplier in suppliers.to_list().sort('pY'):
         for supplier in suppliers:
             C = min(C_star, supplier.pY * supplier.inv)
             print(C, supplier)
@@ -115,7 +117,7 @@ class Household(ap.Agent):
         funds = min(cash_need, self.D)
         self.withdraw_deposits(funds)
         
-        markets = self.model.goods_markets
+        markets = self.region.goods_markets
         self.buy_goods(self.C1_star, markets[1])
         self.buy_goods(self.C2_star, markets[2])
 
